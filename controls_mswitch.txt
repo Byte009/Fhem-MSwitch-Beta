@@ -1,0 +1,3 @@
+UPD 2020-03-31_18:30:00 422621 FHEM/98_MSwitch.pm
+UPD 2020-03-31_18:30:00 39661 www/pgm2/MSwitch_Wizard.js
+UPD 2020-03-31_18:30:00 39661 www/pgm2/MSwitch_Web.js
