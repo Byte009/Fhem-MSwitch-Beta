@@ -1,1 +1,212 @@
-test
+<- eventmonitor-
+Zeigt eingehende Events nach der Anwendung des Filters "Auslösebedingung" .
+Angezeigte und markierte Events können mit "Event manuell eintragen" in das Feld "Event manuell eintragen" übernommen, bearbeitet und von deort mit
+"Event einfügen" zur spateren Verwendung gespeichert werden. 
+-> 
+#################################################################################################
+<- repeats-
+Eingabe von Befehlswiederholungen.
+Bei Belegung der Felder wird ein Befehl um die Angabe "Repeats" mit der jeweiligen Verzögerung "Repeatdelay in sec" wiederholt.
+In dem Feld "Repeats" ist eine Angabe im "setmagic"-Format möglich.
+->
+#################################################################################################
+<- timer-
+Hier kann entweder eine direkte Angabe einer Verzögerungszeit (delay with Cond_check) angegeben werden, oder es kann eine Ausführungszeit (at with Cond-check) für den Befehl angegeben werden
+Bei der Angabe einer Ausführungszeit wird der Schaltbefehl beim nächsten erreichen der angegebenen Zeit ausgeführt. Ist die Zeit am aktuellen Tag bereits überschritten , wird der angegebene Zeitpunkt am Folgetag gesetzt.
+Die Auswahl "with Conf-check" oder "without Conf-check" legt fest, ob unmittelbar vor Befehlsausführung nochmals die Condition für den Befehl geprüft wird oder nicht.
+
+[NAME:reading] des Devices ->z.B. [dummy.state] - der Inhalt muss eine Zahl (sekunden) oder ein eine Zeitangabe enthalten
+hh:mm:ss -> Zeitangabe Formatiert
+ss -> Angabe in Sekunden
+[random] -> siehe Fhemwiki {perl} -> perlcode - der Rückgabewert muss eine Zahl (sekunden) oder ein eine Zeitangabe hh:mm:ss enthalten
+->
+#################################################################################################
+<- execcmd-
+In diesem Feld wird das Event bestimmt, welches zur Ausführung des cmd Zweiges 1 oder 2 führt.
+Hier stehen entweder gespeicherte Events zur Verfügung ( wenn "Save incomming events" aktiviert ist ) , oder es können mit "Add event manually" Events hinzugefügt werden. 
+->
+#################################################################################################
+<- saveevent-
+
+Bei Anwahl dieser Option werden alle eingehenden Events des ausgewählten Triggerdevices gespeichert und sind in den Auswahlfeldern "execute cmd1" und "execute cmd2" sowie in allen "Test-Condition" zur Auswahl verfügbar.
+Diese Auswahl sollte zur Resourcenschonung nach der Einrichtung des MSwitchdevices abgewählt werden , da hier je nach Trigger erhebliche Datenmengen anfallen können und gespeichert werden.
+->
+#################################################################################################
+<- addevent-
+
+Hier können manuell Events zugefügt werden , die in den Auswahllisten verfügbar sein sollen und auf die das Modul reagiert.
+Grundsätzlich ist zu unterscheiden , ob das Device im Normal-, oder Globalmode betrieben wird
+Im Normalmode bestehen die Events aus 2 Teilen , dem Reading und dem Wert "state:on"
+Wenn sich das Device im GLOBAL Mode befindet müssen die Events aus 3 Teilen bestehen , dem Devicename, dem Reading und dem Wert "device:state:on".
+Wird hier nur ein "*" angegeben , reagiert der entsprechende Zweig auf alle eingehenden Events.
+Weitherhin sind folgende Syntaxmöglichkeiten vorgesehen :
+device:state:*, device:*:*, *:state:* , etc.
+Der Wert kann mehrere Auswahlmöglichkeiten haben , durch folgende Syntax: "device:state:(on/off)". In diesem Fal reagiert der Zweig sowohl auf den Wert on, als auch auf off.
+
+Es können mehrere Evebts gleichzeitig angelegt werden . Diese sind durch Komma zu trennen .
+
+Seit V1.7 kann hier die gängige RegEx-Formulierung erfolgen.
+->
+#################################################################################################
+<- priority-
+
+priority - Auswahl der Reihenfolge der Befehlsabarbeitung. Ein Befehl mit der Nr. 1 wird als erstes ausgeführt , die höchste Nummer zuletzt.
+Sollte mehrere Befehle die gleiche Nummer haben , so werden diese Befehle in dargestellter Reihenfolge ausgeführt.
+
+ID - Devices denen eine ID zugewiesen ist , werden in der normalen abarbeitung der Befehle nicht mehr berücksichtigt und somit nicht ausgeführt.
+Wenn eine ID-Zuweisung erfolgt ist, kann dieser Befehlszweig nur noch über das cmd set DEVICE ID NR on/off erfolgen. Diese Option wird nur in Ausnahmefällen benötigt , wenn die Pipes nicht ausrechend sind um verschiedene Aktionen unter verschiedenen Bedingungen auszuführen. 
+->
+
+<- timer
+
+Hier kann entweder eine direkte Angabe einer Verzögerungszeit (delay with Cond_check) angegeben werden, oder es kann eine Ausführungszeit (at with Cond-check) für den Befehl angegeben werden
+Bei der Angabe einer Ausführungszeit wird der Schaltbefehl beim nächsten erreichen der angegebenen Zeit ausgeführt. Ist die Zeit am aktuellen Tag bereits überschritten , wird der angegebene Zeitpunkt am Folgetag gesetzt.
+Die Auswahl "with Conf-check" oder "without Conf-check" legt fest, ob unmittelbar vor Befehlsausführung nochmals die Condition für den Befehl geprüft wird oder nicht.
+
+[NAME:reading] des Devices ->z.B. [dummy.state] - der Inhalt muss eine Zahl (sekunden) oder ein eine Zeitangabe enthalten
+hh:mm:ss -> Zeitangabe Formatiert
+ss -> Angabe in Sekunden
+[random] -> siehe Fhemwiki {perl} -> perlcode - der Rückgabewert muss eine Zahl (sekunden) oder ein eine Zeitangabe hh:mm:ss enthalten
+->
+#################################################################################################
+<- condition-
+
+Hier kann die Angabe von Bedingungen erfolgen, die erfüllt sein müssen um den Schaltbefehl auszuführen.
+Diese Bedingunge sind eng an DOIF- Bedingungen angelehnt.
+
+Zeitabhängiges schalten: [19.10-23:00] - Schaltbefehl erfolgt nur in angegebenem Zeitraum
+Readingabhängiges schalten [Devicename:Reading] =/>/< X oder [Devicename:Reading] eq "x" - Schaltbefehl erfolgt nur bei erfüllter Bedingung.
+Um nur den numerischen Wert eine Readings zu erhalten muss dem Ausdruck ein ":d" angehangen werden -> [Devicename:Reading:d]
+Achtung! Bei der Abfrage von Readings nach Strings ( on,off,etc. ) ist statt "=" "eq" zu nutzen und der String muss in "x" gesetzt werden!
+Die Kombination mehrerer Bedingungen und Zeiten ist durch AND oder OR möglich:
+[19.10-23:00] AND [Devicename:Reading] = 10 - beide Bedingungen müssen erfüllt sein
+[19.10-23:00] OR [Devicename:Reading] = 10 - eine der Bedingungen muss erfüllt sein.
+Es ist auf korrekte Eingabe der Leerzeichen zu achten.
+
+sunset - Bedingungen werden mit zusätzlichen {} eingefügt z.B. : [{ sunset() }-23:00].
+
+Variable $we:
+Die globlae Variable $we ist nutzbar und muss {} gesetzt werden .
+{ !$we } löst den Schaltvorgang nur Werktagen aus
+{ $we } löst den Schaltvorgang nur Wochenenden, Feiertagen aus
+
+Soll nur an bestimmten Wochentagen geschaltet werden, muss eine Zeitangsbe gemacht werden und durch z.B. |135 ergänzt werden.
+[10:00-11:00|13] würde den Schaltvorgang z.B nur Montag und Mitwoch zwischen 10 uhr und 11 uhr auslösen. Hierbei zählen die Wochentage von 1-7 für Montag-Sonntag.
+Achtung: Bei Anwendung der geschweiften Klammern zur einletung eines Perlasdrucks ist unbedingt auf die Leerzeichen hinter und vor der Klammer zu achten !
+Überschreitet die Zeitangabe die Tagesgrenze (24.00 Uhr ), so gelten die angegebenen Tage noch bis zum ende der angegebenen Schaltzeit , d.H. es würde auch am Mitwoch noch der schaltvorgang erfolgen, obwohl als Tagesvorgabe Dienstag gesetzt wurde.
+
+$EVENT Variable: Die Variable EVENT enthält den auslösenden Trigger, d.H. es kann eine Reaktion in direkter Abhängigkeit zum auslösenden Trigger erfolgen.
+[$EVENT] eq "state:on" würde den Kommandozweig nur dann ausführen, wenn der auslösende Trigger "state:on" war.
+Wichtig ist dieses, wenn bei den Triggerdetails nicht schon auf ein bestimmtes Event getriggert wird, sondern hier durch die Nutzung eines wildcards (*) auf alle Events getriggert wird, oder auf alle Events eines Readings z.B. (state:*)
+
+Bei eingestellter Delayfunktion werden die Bedingungen je nach Einstellung sofort,verzögert oder sowohl-als-auch überprüft, d.H hiermit sind verzögerte Ein-, und Ausschaltbefehle möglich die z.B Nachlauffunktionen oder verzögerte Einschaltfunktionen ermöglichen, die sich selbst überprüfen. z.B. [wenn Licht im Bad an -> schalte Lüfter 2 Min später an -> nur wenn Licht im Bad noch an ist]
+
+Anstatt einer Verzögerung kann hier auch eine festgelegte Schaltzeit erfolgen.
+
+Sonderfunktionen:
+
+Tendenz: Beschreibung im Wiki
+Differenz: Beschreibung im Wiki
+Average Beschreibung im Wiki
+Increase Beschreibung im Wiki
+->
+#################################################################################################
+<- onoff-
+
+Einstellung des auzuführenden Kommandos bei entsprechendem getriggerten Event.
+Bei angebotenen Zusatzfeldern kann ein Verweis auf ein Reading eines anderen Devices gesetzt werden mit [Device:Reading].
+Hier sind zwei Möglichkeiten gegeben:
+[Device:Reading:i] - ersetzt wird mit dem Inhalt zum Zeitpunkt des abarbeitens des befehls (:i = imidiality)
+[Device:Reading] - ersetzt wird mit dem Inhalt zum Zeitpunkt der Ausführung des Befehls
+Relavant ist dieses bei zeitverzögerten Befehlen
+
+$NAME wird ersetzt durch den Namen des triggernden Devices.
+
+Bei Nutzung von FreeCmd kann hier entweder reiner FhemCode, oder reiner Perlcode verwendet werden. Perlcode muss mit geschweiften Klammern beginnen und enden. Das Mischen beider Codes ist nicht zulässig.
+->
+#################################################################################################
+<- affected-
+
+Einstellung der Geräte, die auf ein Event oder zu einer bestimmten Zeit reagieren sollen.
+Die Auswahl von FreeCmd ermöglicht eine deviceungebundene Befehlseingabe oder die Eingabe von reinem Perlcode.
+
+->
+#################################################################################################
+<- triggercondition-
+
+Hier kann die Angabe von Bedingungen erfolgen, die zusätzlich zu dem triggernden Device erfuellt sein müssen.
+Diese Bedingunge sind eng an DOIF- Bedingungen angelehnt .
+Zeitabhängigkeit: [19:10-23:00] - Trigger des Devices erfolgt nur in angegebenem Zeitraum
+Readingabhängige Trigger [Devicename:Reading] =/>/< X oder [Devicename:Reading] eq "x" - Trigger des Devicec erfolgt nur bei erfüllter Bedingung.
+Achtung ! Bei der Abfrage von Readings nach Strings ( on,off,etc. ) ist statt "=" "eq" zu nutzen und der String muss in "" gesetzt werden!
+Die Kombination mehrerer Bedingungen und Zeiten ist durch AND oder OR möglich.
+[19.10-23:00] AND [Devicename:Reading] = 10 - beide Bedingungen müssen erfüllt sein
+[19.10-23:00] OR [Devicename:Reading] = 10 - eine der Bedingungen muss erfüllt sein.
+Es ist auf korrekte Eingabe der Leerzeichen zu achten.
+
+sunset - Bedingungen werden mit zusätzlichen {} eingefügt z.B. : [{ sunset() }-23:00].
+
+Variable $we:
+Die globlae Variable $we ist nutzbar und muss in {} gesetzt werden .
+{ !$we } löst den Schaltvorgang nur Werktagen an aus
+{ $we } löst den Schaltvorgang nur an Wochenenden, Feiertagen aus
+
+Soll nur an bestimmten Wochentagen geschaltet werden, muss eine Zeitangsbe gemacht werden und durch z.B. |135 ergänzt werden.
+[10:00-11:00|13] würde den Schaltvorgang z.B nur Montag und Mitwoch zwischen 10 uhr und 11 uhr auslösen. Hierbei zählen die Wochentage von 1-7 für Montag-Sonntag.
+Achtung: Bei Anwendung der geschweiften Klammern zur einletung eines Perlasdrucks ist unbedingt auf die Leerzeichen hinter und vor der Klammer zu achten !
+Überschreitet die Zeitangabe die Tagesgrenze (24.00 Uhr ), so gelten die angegebenen Tage noch bis zum ende der angegebenen Schaltzeit,
+d.H. es würde auch am Mitwoch noch der schaltvorgang erfolgen, obwohl als Tagesvorgabe Dienstag gesetzt wurde.
+
+Wird in diesem Feld keine Angabe gemacht , so erfolgt der Schaltvorgang nur durch das triggernde Device ohne weitere Bedingungen.
+
+Achtung: Conditions gelten nur für auslösende Trigger eines Devices und habe keinen Einfluss auf zeitgesteuerte Auslöser. Um Zeitgesteuerte Auslösr ebenfalls an Bedingungen zu Knüpfen muss dieses in den Attributen aktiviert werden.
+->
+#################################################################################################
+<- trigger-
+
+Trigger ist das Gerät, oder die Zeit, auf die das Modul reagiert, um andere Devices anzusprechen.
+Das Gerät kann aus der angebotenen Liste ausgewählt werden, sobald dieses ausgewählt ist werden weitere Optionen angeboten.
+Soll auf mehrereGerät gleichzeitig getriggert werden , so ist dieses ebenfalls möglich. Hierzu muss das Attribut "MSwitch_Expert" auf 1 gesetzt sein und als Auswahl "GLOBAL" erfolgen.
+
+Zeitangaben können ebenso als Trigger genutzt werden, das Format muss wie folgt lauten:
+Hierfür stehen folgende Optionen zur Verfügung:
+
+1. switch MSwitch on + execute 'cmd1' at
+das komplette Device wird auf "on" geschaltet. Der Zweig "cmd1" wird in allen "device actions" ausgeführt.
+
+2. switch MSwitch off + execute 'cmd2' at
+das komplette Device wird auf "off" geschaltet. Der Zweig "cmd2" wird in allen "device actions" ausgeführt.
+
+3. execute 'cmd1' only at
+es werden alle "cmd1" Zweige aller "device actions" ausgeführt
+
+4. execute 'cmd2' only at
+es werden alle "cmd2" Zweige aller "device actions" ausgeführt
+
+5. execute 'cmd1+cmd2' only at
+es werden alle "cmd1" und "cmd2" Zweige aller "device actions" ausgeführt
+
+Die Syntax muss wie folgt lauten:
+[STUNDEN:MINUTEN|TAGE|IDx,y]
+Tage werden von 1-7 gezählt, wobei 1 für Montag steht, 7 für Sonntag.
+Die Angabe der ID ist optional. Wenn eine ID angegeben ist , werden nur 'cmds' ausgeführt, denen eine ID zugewiesen ist. Ist keine ID angegeben , werden nur alle 'cmds' ausgeführt , denen keine ID zugewiesen ist .
+Diese Option ist nur in den Feldern "execute cmd1 only at :" , "execute cmd2 only at :" und "execute 'cmd1+cmd2' only at:" möglich.
+
+Die Variable $we ist anstatt der Tagesangabe verwendbar
+[STUNDEN:MINUTEN|$we] - Schaltvorgang nur an Wochenenden.
+[STUNDEN:MINUTEN|!$we] - Schaltvorgang nur an Werktagen.
+
+Mehrere Zeitvorgaben können aneinandergereiht werden.
+[17:00|1][18:30|23] würde den Trigger Montags um 17 Uhr auslösen und Dienstags,Mittwochs um 18 Uhr 30.
+
+Sunset - Zeitangaben können mit folgender Sytax eingebunden werden: z.B:
+ [{sunset()}] , [{sunrise(+1800)}].
+
+Es ist eine gleichzeitige Nutzung für Trigger durch Zeitangaben und Trigger durch Deviceevents möglich.
+
+Sonderformate:
+[?20:00-21:00|5] - Zufälliger Schaltvorgang zwischen 20 Uhr und 21 Uhr am Freitag
+[00:02*04:10-06:30] - Schaltvorgang alle 2 Minuten zwischen 4.10 Uhr und 6.30 Uhr
+
+->
+#################################################################################################
