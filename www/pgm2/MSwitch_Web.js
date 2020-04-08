@@ -970,7 +970,7 @@ function showtextfield(newValue,copytofield,target)
 function checkevent(event){	
 if (debug == 'on'){ alert('checkevent') };
 	event = event.replace(/ /g,'~');
-	cmd ='get " . $Name . " checkevent '+event;
+	cmd ='get '+devicename+' checkevent '+event;
 	FW_cmd(FW_root+'?cmd='+encodeURIComponent(cmd)+'&XHR=1');
 	}
 	
