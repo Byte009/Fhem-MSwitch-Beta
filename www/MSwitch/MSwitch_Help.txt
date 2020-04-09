@@ -616,12 +616,62 @@ Version 2
  - status:[TYPE=dummy]
  erzeugt in der Dropdownliste den Eintrag status mit allen ddummys als Auswahloption verfügbar.  
  hier muss zusätzlich das Attribut 'readinglist' mit 'status' belegt werden, andernfalls wird der state mit der Auswahl belegt.
-
- 
 <hr>
 ->
 #################################################################################################
+Help Get
+#################################################################################################
+<- get-
 
+Angebotene Get-Befehle sind unter Umständen von der Grundkonfiguration abhängig,
+d.H nicht in jedem Mode werden alle Befehle angeboten.
+<hr>
+<strong>get DEVICE active_timer show,delete</strong>
+
+ - Show
+Zeigt alle anstehenden (gesetzten) Timer des Devices, die aus zeitabhängigen oder verzögerten Schaltbefehlen resultieren.
+
+ - Delete
+Löscht alle anstehenden (gesetzten) Timer des Devices, die aus zeitabhängigen oder verzögerten Schaltbefehlen resultieren.
+Schaltbefehle basierend auf rein zeitabhängigen Angaben werden neu berechnet und gesetzt.
+
+<strong>get DEVICE get_config</strong>
+
+Zeigt die Konfigurationsdatei des MSwitchdevices an; diese kann in dem Fenster editiert werden.
+Das sollte nur von erfahrenen Usern getan werden!
+Im Normalfall sollte das Device nur über die Weboberfläche konfiguriert werden und eine falsche Konfiguration kann hier zu einem FHEM Absturz führen. 
+
+
+<strong>get DEVICE get_support_info</strong>
+
+Öffnet ein Fenster mit einer formatierten Ansicht aller Einstellungen des Devices.
+Bei Supportanfragen sollte dieses immer mit geposted werden. 
+
+<strong>get restore_MSwitch_data this_device|all_devices</strong>
+
+ - this_device
+Stellt die Daten des Devices aus der Backupdatei wieder her, sofern diese in der Backupdatei gefunden werden (gesucht wird hier nach dem Namen des Devices).
+
+ - all_devices
+Stellt die Daten aller MSwitch Devices wieder her, sofern diese in der Backupdatei vorhanden sind. Diese Aktion kann einige Zeit in Anspruch nehmen und wird daher im Hintergrund (nonblocking) ausgeführt.
+Nach Beendigung erfolgt eine Benachrichtigung.
+
+Die Devices sind nach einem Restore funktionsfähig.
+Empfohlen wird ein Neustart von FHEM.. 
+
+<strong>get DEVICE Eventlog sequenzformated,timeline,clear</strong>
+
+ - timeline
+Zeigt alle (historischen) eingegangenen Events (abhängig von enzsprechender Attributeinstellung) in eingegangener Reihenfolge
+
+ - sequenzformated
+Zeigt alle eingegangenen Events vorformatiert für eine Sequenzabfrage
+
+ - clear
+Löscht die Liste der eingegangenen Events
+
+<hr>
+->
 
 
 
