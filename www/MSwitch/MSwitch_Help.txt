@@ -622,7 +622,6 @@ Version 2
 Help Get
 #################################################################################################
 <- get-
-
 Angebotene Get-Befehle sind unter Umständen von der Grundkonfiguration abhängig,
 d.H nicht in jedem Mode werden alle Befehle angeboten.
 <hr>
@@ -669,10 +668,69 @@ Zeigt alle eingegangenen Events vorformatiert für eine Sequenzabfrage
 
  - clear
 Löscht die Liste der eingegangenen Events
-
 <hr>
 ->
 
+#################################################################################################
+Help Set
+#################################################################################################
+<- set-
+Angebotene Set-Befehle sind unter Umständen von der Grundkonfiguration abhängig,
+d.H nicht in jedem Mode werden alle Befehle angeboten.
+<hr>
+<strong>set DEVICE wizard</strong>
+Schaltet das Device in den Wizardmode.
+In diesem Mode können at's, notifys undvorkonfigurierte Devices importiert werden.
+Weiterhinh können Devices mithilfe eines Wizards angelegt werden.
+Dieser Set steht nur bei neu angelegten und unveränderten Devices zur Verfügung. 
 
+<strong>set DEVICE reset_device</strong>
+Löscht alle Daten eines MSwitch-devices und versetzt diesen in den Zustand, als wäre es neu angelegt.
+Achtung: diese Aktion ist nicht rückgängig zu machen.
 
+<strong>set DEVICE reload_timer</strong>
+Alle anstehenden Timer (aus zeitgesteuerter Schaltung) werden gelöscht und im Anschluss neu berechnet.
 
+<strong>set DEVICE del_delays</strong>
+Löscht alle anstehenden Befehle, die aus zeitverzögertem Schalten resultieren
+
+<strong>set DEVICE set on|off [parameter]</strong>
+Setzt das Device in den Status 'on' oder 'off'. Alle Befehle der 'on/off-Zweige' werden ausgeführt.
+Optional kann den Befehlen 'on' und 'off' ein weiterer Parameter mit übergeben werden.
+Dieser wird im Reading 'Parameter' hinterlegt und es kann sofort in 'Freecmds' oder 'Conditions' darauf zugegriffen werden. 
+
+<strong>set DEVICE active</strong>
+Setzt das MSwitch-Device in den Status 'active'. 
+
+<strong>set DEVICE inactive</strong>
+Setzt das Device in den Status 'inactive'. Es werden keine Befehle mehr ausgeführt.
+Dieser Status entspricht dem Attribut 'disable', ist aber nicht mit dem roten Fragezeichen (fhem save) verbunden.
+
+<strong>set DEVICE set change_renamed oldname newname</strong>
+Sollten sich Devicenamen im ausführenden Teil geändert habe (affected Devices, Conditions, etc.),
+kann das MSwitch mit diesem Befehl angepasst werden, ohne alle Einstellungen manuell anpassen zu müssen.
+
+<strong>set DEVICE exec_cmd1 | set exec_cmd1 ID [ID]</strong>
+Bewirkt das sofortige Ausführen des entsprechenden Befehlszweiges.
+Bei Angabe einer ID werden nur die Befehle mit der entsprechenden ID ausgeführt. 
+
+<strong>set DEVICE MSwitch_backup</strong>
+Erstellt eine Backup-Datei aller MSwitch Devices unter ./fhem/MSwitch_backup.cfg.
+Daten dieser Datei können im Bedarfsfall für einzelne oder gleichzeitig alle MSwitch Devices wieder zurückgespielt (hergestellt) werden. 
+
+<strong>set DEVICE set reset_cmd_count: 1|2</strong>
+Löscht das entsprechende EVT_CMD_COUNT - Reading; entspricht damit einer Rückstellung auf '0'. 
+
+<strong>set DEVICE set fakeevent [device]:reading:arg</strong>
+Beispiel:fakeevent state:on
+
+Das MSwitch Device reagiert so, als wäre statt des internen "fakes-Befehls" ohne dieses Event tatsächlich vom triggernden Gerät generiert worden.
+
+<strong>set DEVICE del_repeats</strong>
+Löscht ale Befehlswiederholungen , die aus Befehlszweigen resultieren und dort definiert wurden.
+
+<strong>set DEVICE wait ss</strong>
+Veranlasst das Mswitch für den angegebenen Zeitraum in Sekunden (ss) auf keine Events zu regieren
+
+<hr>
+->
