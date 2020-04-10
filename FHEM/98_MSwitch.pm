@@ -28,7 +28,7 @@
 #                                [auszuführender Befehl]:[Inhalt reading]:[Name des readings]
 #
 #################################################################
-# Todo's:
+# Todo's:  CommandSet() statt fhem()
 #---------------------------------------------------------------
 #
 # info sonderreadings
@@ -63,6 +63,7 @@ use LWP::Simple;
 my $preconffile =
 "https://raw.githubusercontent.com/Byte009/MSwitch_Addons/master/MSwitch_Preconf.conf";
 my $helpfile = "www/MSwitch/MSwitch_Help.txt";
+my $helpfileeng = "www/MSwitch/MSwitch_Help_eng.txt";
 my $support =
 "Support Whatsapp: https://chat.whatsapp.com/IOr3APAd6eh6tVYsHpbDqd Mail: Byte009\@web.de";
 my $autoupdate   = 'off';    #off/on
@@ -712,7 +713,7 @@ sub MSwitch_Define($$) {
     $hash->{Version_Modul}                 = $version;
     $hash->{Version_Datenstruktur}         = $vupdate;
     $hash->{Version_autoupdate}            = $autoupdate;
-    $hash->{MODEL}                         = $startmode;
+    $hash->{MODEL}                         = $startmode." ".$version;
     $hash->{Support}                       = $support;
 
     if ( $defstring ne "" and $defstring =~ m/(\(.+?\))/ ) {
@@ -1503,7 +1504,7 @@ sub MSwitch_Set($@) {
             $hash->{Version_Modul}         = $version;
             $hash->{Version_Datenstruktur} = $vupdate;
             $hash->{Version_autoupdate}    = $autoupdate;
-            $hash->{MODEL}                 = $startmode;
+            $hash->{MODEL}                 = $startmode." ".$version;
             $hash->{Support_Fhemforum} =
               "https://forum.fhem.de/index.php/topic,86199.0.html";
 
@@ -1512,7 +1513,7 @@ sub MSwitch_Set($@) {
             readingsBulkUpdate( $hash, ".Trigger_cmd_off", "no_trigger", 1 );
             readingsBulkUpdate( $hash, ".Trigger_cmd_on",  "no_trigger", 1 );
             readingsBulkUpdate( $hash, ".Trigger_off",     "no_trigger", 1 );
-            readingsBulkUpdate( $hash, ".Trigger_on",      "no_trigger", 1 );
+            readingsBulkUpdate( $hash, ".Trigger_on",      "notrigger", 1 );
             readingsBulkUpdate( $hash, "Trigger_device",   "no_trigger", 1 );
             readingsBulkUpdate( $hash, "Trigger_log",      "off",        1 );
             readingsBulkUpdate( $hash, "state",            "active",     1 );
@@ -2996,8 +2997,8 @@ sub MSwitch_Attr(@) {
         delete( $hash->{helper}{config} );
         my $cs = "setstate $name ???";
         my $errors = AnalyzeCommandChain( undef, $cs );
-        $hash->{MODEL} = 'Full'   if $aVal eq 'Full';
-        $hash->{MODEL} = 'Toggle' if $aVal eq 'Toggle';
+        $hash->{MODEL} = 'Full'." ".$version   if $aVal eq 'Full';
+        $hash->{MODEL} = 'Toggle'." ".$version if $aVal eq 'Toggle';
         setDevAttrList( $name, $attrlist );
     }
 
@@ -3007,7 +3008,7 @@ sub MSwitch_Attr(@) {
         MSwitch_Delete_Delay( $hash, 'all' );
         MSwitch_Clear_timer($hash);
         $hash->{NOTIFYDEV} = 'no_trigger';
-        $hash->{MODEL}     = 'Dummy';
+        $hash->{MODEL}     = 'Dummy'." ".$version;
 
         fhem("deleteattr $name MSwitch_Include_Webcmds");
         fhem("deleteattr $name MSwitch_Include_MSwitchcmds");
@@ -3058,7 +3059,7 @@ sub MSwitch_Attr(@) {
     }
 
     if ( $aName eq 'MSwitch_Mode' && $aVal eq 'Notify' ) {
-        $hash->{MODEL} = 'Notify';
+        $hash->{MODEL} = 'Notify'." ".$version;
         my $cs = "setstate $name active";
         my $errors = AnalyzeCommandChain( undef, $cs );
         if ( defined($errors) ) {
@@ -3169,6 +3170,16 @@ sub MSwitch_Notify($$) {
 
         return;
     }
+	
+########## jede aktion füe eigenes debug abbrechen
+	
+	if (  $devName eq $ownName
+         && grep( m/.*Debug|clearlog.*/, @{$events} ) )
+		 {
+		 return;
+		 }
+	
+	
 ############################
 
     if ( ReadingsVal( $ownName, '.First_init', 'undef' ) ne 'done' ) {
@@ -5308,16 +5319,7 @@ MS-HELPdelay
 			</td></tr></table>
 			";
 
-        if ( AttrVal( $Name, 'MSwitch_Help', "0" ) eq '1' ) {
-            $modify .=
-"<br><table width = '100%' border='0' class='block wide' id='MSwitchDetails' cellpadding='4' style='border-spacing:0px;' nm='MSwitch'>
-			<tr class='even'><td>
-			<input type='button' id='' value='Help set' onclick=\"hilfe('set')\">
-			<input type='button' id='' value='Help get' onclick=\"hilfe('get')\">
-			<input type='button' id='' value='Help attr'onclick=\"hilfe('attr')\" >
-			</td></tr></table>
-			";
-        }
+
 
 ##########################
         # $detailhtml .= $sortierung;
@@ -7232,8 +7234,19 @@ end:textersetzung:eng
 
     my $Help = '';
     if ( AttrVal( $Name, 'MSwitch_Help', '0' ) eq '1' ) {
-        open( HELP, "<./$helpfile" ) || return "no Helpfile found";
-        while (<HELP>) {
+	
+	
+	
+	if ($language eq "EN"){
+       open( HELP, "<./$helpfileeng" ) || return "no Helpfile found";
+       }
+     else{
+	 open( HELP, "<./$helpfile" ) || return "no Helpfile found";
+	 }
+
+
+
+	   while (<HELP>) {
             $Help = $Help . $_;
         }
         close(BACKUPDATEI);
@@ -7337,7 +7350,24 @@ end:textersetzung:eng
 	";
     $j1 .= "}</script>";
 
-    return "$ret<br>$detailhtml<br>$j1";
+
+
+my $helpfile="";
+
+        if ( AttrVal( $Name, 'MSwitch_Help', "0" ) eq '1' ) {
+            $helpfile =
+"<br><table width = '100%' border='0' class='block wide' id='MSwitchDetails' cellpadding='4' style='border-spacing:0px;' nm='MSwitch'>
+			<tr class='even'><td>
+			<input type='button' id='' value='Help set' onclick=\"hilfe('set')\">
+			<input type='button' id='' value='Help get' onclick=\"hilfe('get')\">
+			<input type='button' id='' value='Help attr'onclick=\"hilfe('attr')\" >
+			</td></tr></table>
+			";
+        }
+
+
+
+    return "$ret<br>$detailhtml$helpfile<br>$j1";
 }
 
 ####################
@@ -10560,7 +10590,7 @@ sub MSwitch_Getsupport($) {
     # $out .=$answer;
 
     asyncOutput( $hash->{CL},
-"<html><center>Supportanfragen bitte im Forum stellen:<a href=\"https://forum.fhem.de/index.php/topic,86199.0.html\">Fhem-Forum</a><br>Bei Devicespezifischen Fragen bitte untenstehene Datei anhängen, das erleichtert Anfragen erheblich.<br>&nbsp;<br><textarea name=\"edit1\" id=\"edit1\" rows=\""
+"<html><center>Bei Supportanfragen bitte untenstehene Datei anhängen, das erleichtert Anfragen erheblich.<br>&nbsp;<br><textarea name=\"edit1\" id=\"edit1\" rows=\""
           . "40\" cols=\"180\" STYLE=\"font-family:Arial;font-size:9pt;\">"
           . $out
           . "</textarea><br></html>" );
