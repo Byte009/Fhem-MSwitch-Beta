@@ -438,7 +438,7 @@ sub MSwitch_summary($) {
     }
 
     $ret .= " <input disabled name='Text1' size='10' type='text' value='Mode: "
-      . $hash->{MODEL} . "'> ";
+      . AttrVal( $name, 'MSwitch_Mode', 'Notify' ) . "'> ";
 
     if ( $trigger eq 'no_trigger' || $trigger eq 'undef' || $trigger eq '' ) {
         $triggerc = 0;
