@@ -2,9 +2,15 @@
 // Autor:Byte09
 // #########################
 
-
-
-	var version = 'V1.2';
+  
+	var version = 'V1.5-Testversion';
+	
+	
+	var result= 0; // wird für waittimer in templates gebraucht
+    var template;
+	var nosave =0;
+	
+	
 	var info = '';
 	var logging ='off';
 	var observer;
@@ -20,7 +26,7 @@
 	
 	var configstart = [
 	'#V Version',
-	'#VS V2.00',
+	'#VS V2.01',
 	'#S .First_init -> done',
 	'#S .Trigger_off -> no_trigger',
 	'#S .Trigger_cmd_off -> no_trigger',
@@ -29,7 +35,7 @@
 	'#S .Trigger_on -> no_trigger',
 	'#S .Trigger_cmd_on -> no_trigger',
 	'#S .Trigger_condition -> ',
-	'#S .V_Check -> V2.00',
+	'#S .V_Check -> V2.01',
 	'#S .Device_Events -> no_trigger',
 	'#S .Device_Affected -> no_device',
 	'#S .Trigger_time -> ',
@@ -47,6 +53,27 @@
 	'#A MSwitch_Mode -> Notify',
 	'#A MSwitch_Expert -> 0',
 	'#A MSwitch_Include_Devicecmds -> 1'];
+
+
+
+
+	var configtemplate = [
+	'#V Version',
+	'#VS V2.01',
+	'#S .First_init -> done',
+	'#S .Trigger_off -> no_trigger',
+	'#S .Trigger_cmd_off -> no_trigger',
+	'#S Trigger_device -> no_trigger',
+	'#S Trigger_log -> off',
+	'#S .Trigger_on -> no_trigger',
+	'#S .Trigger_cmd_on -> no_trigger',
+	'#S .Trigger_condition -> ',
+	'#S .V_Check -> V2.01',
+	'#S .Device_Events -> no_trigger',
+	'#S .Device_Affected -> no_device',
+	'#S .Trigger_time -> '];
+
+
 
 // starte Hauptfenster
 conf('importWIZARD','wizard');
@@ -281,12 +308,14 @@ function conf(typ,but){
 	document.getElementById('importCONFIG').style.display='none';
 	document.getElementById('importWIZARD').style.display='none';
 	document.getElementById('importPRECONF').style.display='none';
+	document.getElementById('importTemplate').style.display='none';
 	
 	document.getElementById('wizard').style.backgroundColor='';
 	document.getElementById('config').style.backgroundColor='';
 	document.getElementById('importat').style.backgroundColor='';
 	document.getElementById('importnotify').style.backgroundColor='';
 	document.getElementById('importpreconf').style.backgroundColor='';
+	document.getElementById('importTEMPLATE').style.backgroundColor='';
 	
 	document.getElementById(typ).style.display='block';
 	document.getElementById(but).style.backgroundColor='#ffb900';
@@ -350,6 +379,7 @@ setTimeout(function() {
 	//document.getElementById('config').disabled = true;
 	document.getElementById('importat').disabled = true;
 	document.getElementById('importnotify').disabled = true;
+	//document.getElementById('importTemplate').disabled = true;
 
 	//document.getElementById('importpreconf').disabled = true;
     // conf('importPRECONF','importpreconf');
@@ -439,6 +469,8 @@ function startwizardtrigger(){
 	}
 	
 function makeconfig(){
+	
+	alert('makeconfig');
 	// configstart[0] = '#V '+mVersion;
 	if (document.getElementById('first').value == 'time'){
 		// ändere config für timeevent
@@ -492,7 +524,7 @@ function makeconfig(){
 	fillconfig('rawconfig')
 	
 	return;
-}
+} 
 
 function fillconfig(name){
 	var showconf='';
@@ -512,10 +544,17 @@ function saveconfig(name,mode){
 	makeconfig();
 	}
 	conf = document.getElementById(name).value;
+	
 	conf = conf.replace(/\n/g,'#[EOL]');
+	conf = conf.replace(/#\[REGEXN\]/g,'\\n');
 	conf = conf.replace(/:/g,'#c[dp]');
 	conf = conf.replace(/;/g,'#c[se]');
 	conf = conf.replace(/ /g,'#c[sp]');
+	
+	//alert(conf);
+	//return;
+	
+	
 	
 	var nm = devicename;
 	var def = nm+' saveconfig '+encodeURIComponent(conf);
@@ -681,9 +720,16 @@ function createpart2(){
 }
 
 function devicelist(id,name,script,flag){
+	ret="";
 	
+	if (script == "no_script"){
+		ret = '<select id =\"'+id+'\" name=\"'+name+'\" >';
+	}
+	else{
+		ret = '<select id =\"'+id+'\" name=\"'+name+'\" onchange=\"javascript: '+script+'(this.value,id,name)\">';
+	}
 	// erstelle geräteliste'+id+'+name+'
-	ret = '<select id =\"'+id+'\" name=\"'+name+'\" onchange=\"javascript: '+script+'(this.value,id,name)\">';
+	
 	count =0;
 	
 	ret +='<option value=\"select\">bitte wählen:</option>';
@@ -691,9 +737,12 @@ function devicelist(id,name,script,flag){
 		ret +='<option value=\"free\">freie Befehlseingabe</option>';
 	}
 	
+	if (flag == '2'){
+		ret +='<option value=\'all_events\'>GLOBAL</option>';
+	}
+	
 	for (i=count; i<len; i++)
 		{
-			
 		if (flag == '1'){
 			ret +='<option value='+i+'>'+devices[i]+'</option>';
 			}
@@ -702,11 +751,42 @@ function devicelist(id,name,script,flag){
 			ret +='<option value='+devices[i]+'>'+devices[i]+'</option>';
 			}
 		}
-		
 	ret +='</select>';
 	return ret;
 		
 }
+
+function attrlist(id,name,attr){
+ret="";
+
+attrset = (ownattr[attr]).split(",");
+
+if (attrset == "textField-long"){
+
+ret += '<textarea id =\"'+id+'\" name=\"'+name+'\" cols="40" rows="4"></textarea>';
+
+}else if(attrset == ""){
+	
+ret += '<input id =\"'+id+'\" name=\"'+name+'\" value=\"\">';
+}else{
+
+//alert (attrset);
+ret += '<select id =\"'+id+'\" name=\"'+name+'\" >';
+	var anzahl = attrset.length;
+	for (i=0; i<anzahl; i++)
+		{
+		ret +='<option value='+attrset[i]+'>'+attrset[i]+'</option>';
+		}
+
+ret +='</select>';
+}
+
+
+
+//alert(attr);
+return ret;
+}
+
 
 function setaffected(inhalt,id,name){
 	
@@ -1102,16 +1182,28 @@ function startimportpreconf(){
 	preconfparts = preconf.split("#-NEXT-");
 	var anzahl = preconfparts.length;
 	var count =0;
+	
+	
 	for (i=count; i<anzahl; i++)
 		{
 		treffer = preconfparts[i].match(/#NAME.(.*?)(#\[NEWL\])/);
 		help = preconfparts[i].match(/#HELP.(.*?)(#\[NEWL\])/);
 		preconfparts[i] = (preconfparts[i].split(treffer[0]).join(''));
 		preconfparts[i] = (preconfparts[i].split(help[0]).join(''));
+		
+		
+		
+		preconfparts[i] = preconfparts[i].replace(/\n/g,'#[REGEXN]');
 		preconfparts[i] = preconfparts[i].replace(/#\[NEWL\]/gi,"\n");
+		
+		
+		
+		
 		preconfpartsname.push(treffer[1]);
 		preconfpartshelp.push(help[1]); 
 		}
+		
+		
 	script = 'setpreconf';
 	ret = '<select id =\"\" name=\"\" onchange=\"javascript: '+script+'(this.value)\">';
 	ret +='<option value=\"empty\">bitte Device wählen</option>';
@@ -1168,7 +1260,7 @@ function startimportpreconf(){
 	document.getElementById('importPRECONF').innerHTML = html;
 	document.getElementById('prec').style.backgroundColor='#ff0000';
 	return;
-}
+} 
 
 function setpreconf(name){
 	if (name == "empty"){
@@ -1178,6 +1270,38 @@ function setpreconf(name){
 		document.getElementById('prec').style.backgroundColor='#ff0000';
 		return;
 	}
+	
+	// teste auf version
+		
+		
+		
+		
+		var testversion = preconfparts[name];
+		var myRegEx = new RegExp('#VS.(V.*)');  
+		treffer = testversion.match(myRegEx);
+		//alert(treffer[1]+" "+MSDATAVERSION);
+		
+		
+		if (treffer[1] != MSDATAVERSION)
+		{
+			var wrongversion =' <strong><u>Versionskonflikt:</u><br>Diese Version ist nciht für die aktuelle Datenstruktur vorgesehen \
+			und kann nicht importiert werden.\
+			<br>Bitte den Support kontaktieren.\
+			<br>geforderte/benoetigte Version: '+MSDATAVERSION+'\
+			<br>Deviceversion: '+treffer[1]+'\
+			</strong><br><br>';
+			document.getElementById('rawconfig4').innerHTML = "";
+			document.getElementById('prec').disabled = true;
+			document.getElementById('prec').style.backgroundColor='#ff0000';
+			document.getElementById('rawconfig4').innerHTML = preconfparts[name];
+			document.getElementById('infotext1').innerHTML = wrongversion+preconfpartshelp[name];
+			
+			return;
+		}
+		
+		
+	// ende
+	
 	document.getElementById('rawconfig4').innerHTML = preconfparts[name];
 	document.getElementById('infotext1').innerHTML = preconfpartshelp[name];
 	document.getElementById('prec').disabled = false;
@@ -1189,3 +1313,588 @@ function savepreconf(name){
 	saveconfig('rawconfig4',mode);
 	return;
 }
+
+//templatesteuerung
+
+function loadtemplate(){
+	document.getElementById('help').innerHTML = '';	
+	document.getElementById('importAT').style.display='none';
+	document.getElementById('importNOTIFY').style.display='none';
+	document.getElementById('importCONFIG').style.display='none';
+	document.getElementById('importWIZARD').style.display='none';
+	document.getElementById('importPRECONF').style.display='none';
+	document.getElementById('importTemplate').style.display='block';
+	
+	document.getElementById('wizard').style.backgroundColor='';
+	document.getElementById('config').style.backgroundColor='';
+	document.getElementById('importat').style.backgroundColor='';
+	document.getElementById('importnotify').style.backgroundColor='';
+	document.getElementById('importpreconf').style.backgroundColor='';
+	//document.getElementById(typ).style.display='block';
+	document.getElementById('importTEMPLATE').style.backgroundColor='#ffb900';
+	
+	
+	var html = '<table width="100%">';
+	html += '<tr>'
+	html += '<td width ="100%" id="importTemplate1"></td>';
+	html += '<td id="importTemplate2">';
+	html+='Configfile:<br><textarea disabled id=\"rawconfig10\" style=\"width: 400px; height: 400px\"></textarea>';
+	html += '</td>';
+	html += '</tr>';
+	html += '</table>';
+	document.getElementById('importTemplate').innerHTML = html;
+	
+	
+	
+	
+	
+	
+	var file = document.getElementById('templatefile').value;
+	
+	if (file == "empty_template"){
+	document.getElementById('empty').style.display='block';
+	nosave=1;
+	return;
+	}
+	
+	
+	
+	file+=".txt";
+	FW_cmd(FW_root+'?cmd=set '+devicename+' template '+file+'&XHR=1', function(data){starttemplate(data)})
+	
+	
+	//alert (configstart);
+	
+	return;
+}
+
+// mainloop aller lines
+
+// configstart
+
+
+
+function execempty(){
+	//alert('test');
+	data = document.getElementById('emptyarea').value;
+	
+	
+	starttemplate(data);
+	return;
+}
+
+function starttemplate(template){
+	
+	//alert(document.getElementById('rawconfig10').value);
+	
+	if (document.getElementById('rawconfig10').value ==""){
+	document.getElementById('rawconfig10').value = configtemplate.join("\n");
+	}
+	//alert("nach templestart ok");
+	
+	
+	
+	
+	var tmplsatz = template.split("\n");
+	var len= tmplsatz.length;
+	//alert(len);
+	var newtmp = "";
+	for (lines=0; lines<len; lines++){
+		if (tmplsatz[lines].match(/^#/)){
+			continue;
+		}
+	//alert(aktline);
+	var aktline = tmplsatz[lines];
+	tmplsatz[lines]="# abgearbeitet";
+	
+	newtemplate = tmplsatz.join("\n");
+	
+	//alert("break");
+    var check = testline(aktline,newtemplate);
+	
+	if ( check == "stop" ){
+		break;
+	}
+
+	tmplsatz[lines]="# abgearbeitet";
+	execcmd(aktline); // durchreichung von set befehlen
+	}
+	
+	//alert(len+" - aktuell:"+lines);
+	
+	
+	if (len == lines)
+	{
+		
+		
+		if (nosave =="0"){
+		var out ="Configfile wurde erstellt !  .... wird gespeichert .....";
+		}
+		else{
+		var out ="Configfile wurde erstellt!<br>Zum Testen die generierte Config bitte in ein seperates Device einspielen.";
+		}
+		
+		document.getElementById('importTemplate1').innerHTML = out;
+		
+		
+	conf = document.getElementById('rawconfig10').value;
+	
+	conf = conf.replace(/\n/g,'#[EOL]');
+	conf = conf.replace(/#\[REGEXN\]/g,'\\n');
+	conf = conf.replace(/:/g,'#c[dp]');
+	conf = conf.replace(/;/g,'#c[se]');
+	conf = conf.replace(/ /g,'#c[sp]');
+	
+	//alert(conf);
+	//return;
+	
+	
+	if (nosave =="0"){
+	var nm = devicename;
+	var def = nm+' saveconfig '+encodeURIComponent(conf);
+	location = location.pathname+'?detail='+devicename+'&cmd=set '+addcsrf(def);
+	}
+	
+	}
+	
+	return;	
+}
+
+// teste jede line
+function testline(line,newtemplate){
+	
+var cmdsatz = line.split(">>");
+
+if (cmdsatz[0] == "" || cmdsatz[0] == " " ){return;}
+
+if (cmdsatz[0] != "ASK" && cmdsatz[0] != "OPT" && cmdsatz[0] != "ATTR" && cmdsatz[0] != "SET" && cmdsatz[0] != "SELECT" && cmdsatz[0] != "INQ" ){
+	//alert ("optionale Zeile gefunden -"+cmdsatz[0]);
+	//alert (INQ[cmdsatz[0]]);
+	if (INQ[cmdsatz[0]]== "1")
+	{
+	cmdsatz.shift(); 	
+	}
+	else{
+	return;
+	}
+}
+
+if (cmdsatz[0] == "INQ"){
+	 //alert("INQ gefunden: "+cmdsatz[1]);
+	 //INQ[cmdsatz[1]]  = '1'; 
+	 text = cmdsatz[4];
+	 benenner = cmdsatz[3];
+	 setINQ(text,cmdsatz[1],cmdsatz[2],benenner,newtemplate);
+	 return "stop";
+		
+		
+}
+
+
+// aufbau - ASK : TRIGGERTIME : Zu welcher Zeit soll dea MSwitch ausgelöst werden ? : <HELP>
+// 0 -setting
+// 1 -befehl
+// 2 -text
+// aufbau - OPT : TRIGGERTIME :d3,d2,d3: Zu welcher Zeit soll dea MSwitch ausgelöst werden ? : <HELP>
+// 0 -setting
+// 1 -befehl
+// 2 -text
+var typ=""
+if (cmdsatz[0] == "ATTR"){
+	typ="A";
+	//alert(line);
+	cmdsatz.shift(); 
+}
+else{
+
+typ="S";
+}
+		var befehl = cmdsatz[0];
+
+
+		if (befehl == "ASK"){
+			var toset = cmdsatz[1];
+			var text = cmdsatz[2];
+			freeinput(text,toset,newtemplate,typ);
+			return "stop";
+		}
+
+		if (befehl == "OPT"){
+			var toset = cmdsatz[1];
+			var options = cmdsatz[2];
+			var text = cmdsatz[3];
+			optioninput(text,toset,options,newtemplate,typ);
+			return "stop";
+		}
+
+		if (befehl == "SELECT"){
+			var toset = cmdsatz[1];
+			//var options = cmdsatz[2];
+			var text = cmdsatz[2];
+			selectinput(text,toset,newtemplate,typ);
+			return "stop";
+		}
+	
+
+
+return "go";;
+}
+
+
+
+
+// setINQ 
+function setINQ(text,inq,inq1,benenner,newtemplate){
+	
+	
+	var names = benenner.split(",");
+	
+	
+var out ="";
+out+=text;
+out+="<br>&nbsp;<br>";
+
+out+="<fieldset>";
+
+out+="<input type=\"radio\" id=\"INQ1\" name=\"radio\" value=\"0\">";
+out+="<label for=\"INQ1\"> "+names[0]+"</label><br> ";
+out+="<input type=\"radio\" id=\"INQ2\" name=\"radio\" value=\"1\">";
+out+="<label for=\"INQ2\"> "+names[1]+"</label><br> ";	
+out+="</fieldset>";		
+out+="<br><input type='button' value='ok' onclick='javascript: setINQok(\""+inq+"\",\""+inq1+"\")'>";
+out+="<br>&nbsp;<br>&nbsp;<br>";
+out+="<input id='newtemplate' type='text' value='"+newtemplate+"'>";
+document.getElementById('importTemplate1').innerHTML = out;
+return;
+	
+}
+function setINQok(toset1,toset2)
+{
+
+var radios = document.getElementsByName('radio');
+var value;
+for (var i = 0; i < radios.length; i++) {
+    if (radios[i].type === 'radio' && radios[i].checked) {
+        // get value, set checked flag or do whatever you need to
+        value = radios[i].value;   
+		
+    }
+}
+
+var template = document.getElementById('newtemplate').value;
+
+//alert(toset1+"-"+toset2+" "+value);
+
+if (value =="0"){
+	//alert("setze "+toset1);
+	INQ[toset1]  = "1";
+}
+
+if (value =="1"){
+	//alert("setze "+toset2);
+	INQ[toset2]  = "1";
+}
+
+
+
+
+
+//execcmd(befehl);
+starttemplate(newtemplate);
+return;
+}
+
+
+
+
+
+
+// freeinput 
+function freeinput(text,toset,newtemplate,typ){
+var out ="";
+out+=text;
+out+="<br>&nbsp;<br>";
+out+="<input id='input' type='text' value=''><br>&nbsp;<br>";
+out+=" <input type='button' value='ok' onclick='javascript: freeinputok(\""+toset+"\",\""+typ+"\")'>";
+out+="<br>&nbsp;<br>&nbsp;<br>";
+out+="Test<input id='newtemplate' type='text' value='"+newtemplate+"'>";
+document.getElementById('importTemplate1').innerHTML = out;
+return;
+}
+function freeinputok(toset,typ)
+{
+
+var befehl = "SET>>"+toset+">>"+document.getElementById('input').value;
+
+if (typ =="A"){
+	befehl="ATTR>>"+befehl;
+}
+
+
+var template = document.getElementById('newtemplate').value;
+execcmd(befehl);
+starttemplate(newtemplate);
+return;
+}
+// freeinputende
+
+
+// optioninput 
+function optioninput(text,toset,options,newtemplate,typ){
+	
+var out ="";
+out+=text;
+out+="<br>&nbsp;<br>";
+out+="<fieldset>";
+
+
+var mapp = options.match(/(.*)\{(.*)\}/);
+
+if (mapp!=null && mapp.length!=0)
+{
+// mapping vorhanden
+	
+var optionssatz = mapp[1].split(",");
+var mapsatz= mapp[2].split(",");
+}
+else{
+	
+	var optionssatz = options.split(",");
+	var mapsatz = optionssatz;
+	
+}
+
+	var len= optionssatz.length;
+	//alert(len);
+
+	for (i=0; i<len; i++){
+	out+="<input type=\"radio\" id=\"ID"+i+"\" name=\"radio\" value=\""+optionssatz[i]+"\">";
+	out+="<label for=\"ID"+i+"\"> "+mapsatz[i]+"</label><br> ";
+	}
+out+="</fieldset>";		
+out+="<br><input type='button' value='ok' onclick='javascript: optioninputok(\""+toset+"\",\""+typ+"\")'>";
+out+="<br>&nbsp;<br>&nbsp;<br>";
+out+="<input id='newtemplate' type='text' value='"+newtemplate+"'>";
+document.getElementById('importTemplate1').innerHTML = out;
+return;
+	
+}
+function optioninputok(toset,typ)
+{
+
+var radios = document.getElementsByName('radio');
+var value;
+for (var i = 0; i < radios.length; i++) {
+    if (radios[i].type === 'radio' && radios[i].checked) {
+        // get value, set checked flag or do whatever you need to
+        value = radios[i].value;   
+		
+    }
+}
+var befehl = "SET>>"+toset+">>"+value;
+
+if (typ =="A"){
+	befehl="ATTR>>"+befehl;
+}
+
+var template = document.getElementById('newtemplate').value;
+execcmd(befehl);
+
+starttemplate(newtemplate);
+return;
+}
+// optioninputende 
+
+
+
+
+
+
+// selectinput
+function selectinput(text,toset,newtemplate,typ){
+var out ="";
+out+=text;
+out+="<br>&nbsp;<br>";
+
+
+
+if (typ =="S"){
+	selectlist = devicelist('selectlist','name','no_script',2)
+	}
+	else
+	{
+		
+	selectlist = attrlist('selectlist','name',toset)	
+	}
+
+
+
+
+
+
+
+
+// alert(selectlist);
+//return;
+out+=selectlist;
+
+out+="<br>&nbsp;<br><input type='button' value='ok' onclick='javascript: selectinputok(\""+toset+"\",\""+typ+"\")'>";
+out+="<br>&nbsp;<br>&nbsp;<br>";
+out+="<input id='newtemplate' type='text' value='"+newtemplate+"'>";
+document.getElementById('importTemplate1').innerHTML = out;
+return;
+	
+}
+function selectinputok(toset,typ)
+{
+var befehl = "SET>>"+toset+">>"+document.getElementById('selectlist').value;
+if (typ =="A"){
+	befehl="ATTR>>"+befehl;
+}
+
+var template = document.getElementById('newtemplate').value;
+execcmd(befehl);
+starttemplate(newtemplate);
+return;
+}
+
+// selectinput ende
+
+
+// endgültige befehlsausführung
+function execcmd(befehl)
+{
+
+
+var cmdsatz = befehl.split(">>");
+
+
+
+
+if (cmdsatz[0] == "ATTR"){
+	typa="A";
+	//alert(line);
+	cmdsatz.shift(); 
+}
+else{
+
+typa="S";
+}
+
+
+
+	var befehl = cmdsatz[1];
+	var typ = cmdsatz[0];
+	var inhalt = cmdsatz[2];
+	
+	
+	//alert ("befehl-"+befehl+" typa-"+typa+" "+cmdsatz);
+	
+	
+// #S Trigger_device -> All_Off_Dev - Trigger
+// # TRIGGERTIME - zeitgesteuerter Auslöser
+// # TRIGGERCONDITION - bedingungen für triggerauslösung
+// # ACTIONDEVICE - zu schaltende geräte
+
+// hole config
+
+
+    
+	
+	if (befehl == "INFO"){
+	document.getElementById('help').innerHTML = inhalt;
+	return;
+	}
+	
+	// #A MSwitch_Expert -> 1
+	
+	
+	
+	
+	
+var configuration=document.getElementById('rawconfig10').value;
+configuration = configuration.split("\n");
+
+
+if (typa == "A" ){
+	
+	newattr = "#A "+befehl+" -> "+inhalt;
+	var newconfig =configuration.join("\n");
+	
+	
+	if (inhalt != ""){
+	newconfig=newconfig+"\n"+newattr;
+	}
+	
+	
+	document.getElementById('rawconfig10').value = newconfig;
+	
+	return;
+	}
+
+//timerfelder vorbereiten
+var fields = configuration[13].split("->");
+	//alert(fields[0]+'-'+fields[1]+'-');
+
+	if (fields[1] ==" "){
+		fields[1]="on~off~ononly~offonly~onoffonly";
+	}
+	var satz = fields[1].split("~");
+	//alert(fields[0]+'-'+fields[1]);
+	
+
+	//trigger device
+	if (befehl == "Trigger_device"){
+	configuration[5] = "#S Trigger_device -> "+inhalt;
+	}
+	
+	//time_on
+	// #S .Trigger_time -> on[20#[dp]00]~off~ononly~offonly~onoffonly
+	// feld 13
+	
+
+	
+	
+	if (befehl == "Time_on"){
+	inhalt = inhalt.replace(/:/gi,"#[dp]");
+	satz[0]= satz[0]+inhalt;
+	var newsatz = satz.join("~");
+	configuration[13] = "#S .Trigger_time -> "+newsatz;
+	}
+	//time_off
+	if (befehl == "Time_off"){
+	inhalt = inhalt.replace(/:/gi,"#[dp]");
+	satz[1]= satz[1]+inhalt;
+	var newsatz = satz.join("~");
+	configuration[13] = "#S .Trigger_time -> "+newsatz;
+	}
+	// Time_cmd1
+	if (befehl == "Time_cmd1"){
+	inhalt = inhalt.replace(/:/gi,"#[dp]");
+	satz[2]= satz[2]+inhalt;
+	var newsatz = satz.join("~");
+	configuration[13] = "#S .Trigger_time -> "+newsatz;
+	}
+	// Time_cmd2
+	if (befehl == "Time_cmd2"){
+	inhalt = inhalt.replace(/:/gi,"#[dp]");
+	satz[3]= satz[3]+inhalt;
+	var newsatz = satz.join("~");
+	configuration[13] = "#S .Trigger_time -> "+newsatz;
+	}
+	
+	
+	// Trigger_condition
+ 	if (befehl == "Trigger_condition"){
+	configuration[9] = "#S .Trigger_condition -> "+inhalt;
+	} 
+	
+	
+	
+	var newconfig =configuration.join("\n");
+	document.getElementById('rawconfig10').value = newconfig;
+	
+	
+	return;
+}
+
