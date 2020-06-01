@@ -1,5 +1,5 @@
 UPD 2020-6-01_06:00:00 408638 FHEM/98_MSwitch.pm
-UPD 2020-6-01_06:00:00 39660 www/pgm2/MSwitch_Wizard.js
+UPD 2020-6-01_06:00:00 45323 www/pgm2/MSwitch_Wizard.js
 UPD 2020-6-01_06:00:00 45380 www/pgm2/MSwitch_Web.js
 UPD 2020-6-01_06:00:00 41603 www/MSwitch/MSwitch_Help.txt
 UPD 2020-6-01_06:00:00 34760 www/MSwitch/MSwitch_Help_eng.txt
