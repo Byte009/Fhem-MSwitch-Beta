@@ -69,7 +69,7 @@ my $helpfileeng = "www/MSwitch/MSwitch_Help_eng.txt";
 my $support =
 "Support Whatsapp: https://chat.whatsapp.com/IOr3APAd6eh6tVYsHpbDqd Mail: Byte009\@web.de";
 my $autoupdate   = 'on';     #off/on
-my $version      = '3.25-Testversion';
+my $version      = '3.26';
 my $wizard       = 'on';     # on/off
 my $importnotify = 'on';     # on/off
 my $importat     = 'on';     # on/off
@@ -92,7 +92,7 @@ my $deletesavedcmdsstandart = "automatic"
 my @doignore =
   qw(notify allowed at watchdog doif fhem2fhem telnet FileLog readingsGroup FHEMWEB autocreate eventtypes readingsproxy svg cul);
 my $startmode = "Notify";    # Startmodus des Devices nach Define
-
+my $wizardreset =3600; #Timeout für Wizzard
 # degug
 #my $ip = qx(hostname -I);
 #chop($ip);
@@ -1761,6 +1761,7 @@ sub MSwitch_Set($@) {
               . "  MSwitch_setList:textField-long "
               . "  setList:textField-long "
               . "  readingList:textField-long "
+			  . "  MSwitch_Device_Groups:textField-long"
               . "  MSwitch_Eventhistory:0,1,2,3,4,5,10,20,30,40,50,60,70,80,90,100,150,200"
               . "  textField-long "
               . $readingFnAttributes;
@@ -3238,7 +3239,7 @@ sub MSwitch_Notify($$) {
          and $own_hash->{helper}{mode} eq "absorb" )
     {
         if (
-            time > $own_hash->{helper}{modesince} + 600 ) # time bis wizardreset
+            time > $own_hash->{helper}{modesince} + $wizardreset ) # time bis wizardreset
         {
             delete( $own_hash->{helper}{mode} );
             delete( $own_hash->{helper}{modesince} );
@@ -4179,31 +4180,27 @@ sub MSwitch_fhemwebconf($$$$) {
 	
 	$preconf =~ s/</&lt;/g;
     $preconf =~ s/>/&gt;/g;
-	
-	
-	
-	
-	
-	
-	
-	#$preconf =~ s/"/XXX/g;
 
-    # devicelist to objeckt
-	
-	
-	
-	
-	
-	#Log3("test",0,"$ownattr");
-	
     my $devstring;
     my $cmds;
+	
+	
+	$cmds      .= "' del_repeats reset_device active del_function_data inactive on off del_delays backup_MSwitch fakeevent exec_cmd_1 exec_cmd_2 wait del_repeats reload_timer change_renamed reset_cmd_count ',";
+    $devstring .= "'MSwitch_Self',";
+	
+	
+	
+	
     @found_devices = devspec2array("TYPE=.*");
     for (@found_devices) {
         my $test = getAllSets($_);
         $cmds      .= "'" . $test . "',";
         $devstring .= "'" . $_ . "',";
     }
+	
+	
+	
+	
     chop $devstring;
     chop $cmds;
 
@@ -4322,6 +4319,8 @@ closedir(DIR) or die $!;
 		
 	}
 	
+
+	
 	
 	
 	$return .= "<input name=\"template\" id=\"importTEMPLATE\" type=\"button\" value=\"import Template\" onclick=\"javascript: loadtemplate()\"\">";
@@ -4334,41 +4333,58 @@ closedir(DIR) or die $!;
 	
 	
 		# <--
-	# <div id='speicherbank'>
-	# Speicherbank1 bank 1-4: 
-	# <input id='bank1' type='text' value=''>
-	# <input id='bank2' type='text' value=''>
-	# <input id='bank3' type='text' value=''>
-	# <input id='bank4' type='text' value=''>
-	# </div>
-	
-	# <div id='speicherbank1'>
-	# Speicherbank2 bank 5-8: 
-	# <textarea id='bank5'></textarea>
-	# <textarea id='bank5'></textarea>
-	# <textarea id='bank5'></textarea>
-	# <textarea id='bank5'></textarea>
-	# <br>&nbsp;<br>
-	# </div>
-	# -->
+
 	
 	
 	$return .= "
 	</div>
 	<br><br>
 
+
+
+	<div id='speicherbank' style='display: none;'>
+	<hr>Hilfselder ( werden unsichtbar )<br>
+	 Speicherbank1 bank 1-4: 
+	 <input id='bank1' type='text' value=''>
+	 <input id='bank2' type='text' value=''>
+	 <input id='bank3' type='text' value=''>
+	 <input id='bank4' type='text' value=''>
+	 </div>
+
+
+
+	 <div id='speicherbank1' style='display: none;'>
+	 Speicherbank2 bank 5-8: 
+	 <textarea id='bank5'></textarea>
+	 <textarea id='bank6'></textarea>
+	 <textarea id='bank7'></textarea>
+	 <textarea id='bank8'></textarea>
+	 <br>&nbsp;<hr>
+	 </div>
+	
+	
 	
 	<table border='0'>
 	<tr>
 	<td id='help'>Hilfetext</td>
 	<td id='help1'></td>
 	</tr>
-	</table>
+	</table>";
 	
 	
-	 <div id='empty' style=\"display:none\">
-	 <textarea id='emptyarea' style='width: 100%; height: 300px'>### insert template ###</textarea><br>
-	 <input type=\"button\" value=\"execute template\" onclick=\"javascript: execempty()\">
+		
+	
+	
+	
+	
+	
+	
+	$return .= "<div id='empty' style=\"display:none\">";
+	$return .= "Template: ";
+	$return .= "<input type=\"text\" id = \"templatename\" value=\"\"  style=\"background-color:transparent\"><br>&nbsp;<br>";
+	 
+	 $return .= "<textarea id='emptyarea' style='width: 100%; height: 300px'>### insert template ###</textarea><br>
+	 <input type=\"button\" id = \"execbutton\" value=\"Template ausführen\" onclick=\"javascript: execempty()\">
 	 <br>
 	 </div>
 	
@@ -4455,7 +4471,7 @@ my @owna = split( / /, $ownattr );
 	 foreach my $akt (@owna) 
 	 {
 		 next if $akt eq "";
-	Log3("test",0,$akt);
+	#Log3("test",0,$akt);
 	 my @test = split( /:/, $akt );
 		
 	 $j1 .="ownattr['$test[0]']  = '$test[1]';\n";	
