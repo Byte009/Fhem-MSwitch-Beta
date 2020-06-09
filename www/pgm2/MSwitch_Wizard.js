@@ -3,13 +3,13 @@
 // #########################
 
   
-	var version = 'V1.5-Testversion';
+	var version = 'V1.7-Testversion';
 	
-	
+	const Devices = [];
 	var result= 0; // wird für waittimer in templates gebraucht
     var template;
 	var nosave =0;
-	
+	var monitorid = "eventcontrol";
 	
 	var info = '';
 	var logging ='off';
@@ -19,10 +19,14 @@
 	var show = 'off';
 	var offtime =50;
 	var sets = new Object();
-	
 	var preconfparts = new Array;
 	var preconfpartsname = new Array;
 	var preconfpartshelp = new Array;
+	
+	var style ="style='display:none'";
+	// debugger
+	// style ="";
+	
 	
 	var configstart = [
 	'#V Version',
@@ -71,9 +75,31 @@
 	'#S .V_Check -> V2.01',
 	'#S .Device_Events -> no_trigger',
 	'#S .Device_Affected -> no_device',
-	'#S .Trigger_time -> '];
+	'#S .Trigger_time -> ',
+	'#S .Device_Affected_Details -> '];
 
 
+	var emptydevice = [
+	'',
+	'#[NF]no_action',
+	'#[NF]no_action',
+	'#[NF]',
+	'#[NF]',
+	'#[NF]delay1',
+	'#[NF]delay1',
+	'#[NF]00:00:00',
+	'#[NF]00:00:00',
+	'#[NF]',
+	'#[NF]',
+	'#[NF]undefined',
+	'#[NF]undefined',
+	'#[NF]1',
+	'#[NF]0',
+	'#[NF]',
+	'#[NF]0',
+	'#[NF]0',
+	'#[NF]1',
+	'#[NF]0'];
 
 // starte Hauptfenster
 conf('importWIZARD','wizard');
@@ -94,12 +120,21 @@ conf('importWIZARD','wizard');
 	var test = $( "div[informId='"+devicename+"-EVENTCONF']" ).text();
 	test = test.replace(/ /gi,"");
 
+
+//alert(test);
+
+document.getElementById('bank6').value=test;
+
+
 	if(o[test]){return;}
 
 	var event = test.split(':');
 	var newevent =  event[1]+':'+event[2]
-	if (event[0] != document.getElementById('3').value)
+	if (event[0] != document.getElementById('3').value && event[0] != document.getElementById('bank1').value  )
 		{
+			document.getElementById('bank3').value=document.getElementById('3').value;
+			document.getElementById('bank4').value=document.getElementById('bank1').value;
+			document.getElementById('bank2').value=event[0];
 			return;
 		}
 	if (logging == 'off')
@@ -117,14 +152,14 @@ conf('importWIZARD','wizard');
 	var a3 = Object.keys(o).map(function (k) { return o[k];})
 	// array umdrehen
 	a3.reverse();
-	$( '#eventcontrol' ).text( '' );
+	$( '#'+monitorid ).text( '' );
 	var i;
 	for (i = 0; i < 30; i++) 
 		{
 		if (a3[i])
 			{
 			var newselect = $('<option value=\"'+a3[i]+'\">'+a3[i]+'</option>');
-			$(newselect).appendTo('#eventcontrol'); 
+			$(newselect).appendTo('#'+monitorid ); 
 			}
 		}  
   });    
@@ -150,7 +185,7 @@ function eventmonitorstart(){
 }
  
 function closeall(){
-	
+	//alert("close all");
 		logging ='off';
 		o = new Object();
 		eventmonitorstop()
@@ -316,7 +351,7 @@ function conf(typ,but){
 	document.getElementById('importnotify').style.backgroundColor='';
 	document.getElementById('importpreconf').style.backgroundColor='';
 	document.getElementById('importTEMPLATE').style.backgroundColor='';
-	
+	document.getElementById('empty').style.display='none';
 	document.getElementById(typ).style.display='block';
 	document.getElementById(but).style.backgroundColor='#ffb900';
 
@@ -367,9 +402,38 @@ function start1(name){
 
 		document.getElementById('mode').innerHTML += '<br>Wizard Version:'+version+'<br>Info:'+info;
 		// fülle configfenster
-		fillconfig('rawconfig');
-		startwizardtrigger();
-			
+		
+		// --------------------------
+		//fillconfig('rawconfig');
+		//startwizardtrigger();
+		
+	document.getElementById('importAT').style.display='none';
+	document.getElementById('importNOTIFY').style.display='none';
+	document.getElementById('importCONFIG').style.display='none';
+	document.getElementById('importWIZARD').style.display='none';
+	document.getElementById('importPRECONF').style.display='none';
+	document.getElementById('importTemplate').style.display='none';
+	document.getElementById('empty').style.display='none';
+	document.getElementById('help').innerHTML ="";
+	
+	document.getElementById('wizard').style.backgroundColor='';
+	document.getElementById('config').style.backgroundColor='';
+	document.getElementById('importat').style.backgroundColor='';
+	document.getElementById('importnotify').style.backgroundColor='';
+	document.getElementById('importpreconf').style.backgroundColor='';
+	document.getElementById('importTEMPLATE').style.backgroundColor='';
+	
+	
+	
+	
+	document.getElementById('speicherbank').style.display='none';
+	document.getElementById('speicherbank1').style.display='none';
+	
+		// --------------------------
+
+
+
+		
 setTimeout(function() {
 	//document.getElementById('wizard').value+=' N/A';
 	//document.getElementById('config').value+=' N/A';
@@ -470,7 +534,7 @@ function startwizardtrigger(){
 	
 function makeconfig(){
 	
-	alert('makeconfig');
+	//alert('makeconfig');
 	// configstart[0] = '#V '+mVersion;
 	if (document.getElementById('first').value == 'time'){
 		// ändere config für timeevent
@@ -494,8 +558,15 @@ function makeconfig(){
 	// nur für freie befehlseingabe
 	// alert('zweig nicht definiert');
 	var cmdstring = document.getElementById('tra23end').value;
+	
+	
+	
 	configstart[12] ='#S .Device_Affected -> '+ document.getElementById('a11').value +'-AbsCmd1';
     var newcmdline = '#S .Device_Affected_Details -> '+ document.getElementById('a11').value +'-AbsCmd1'+'#[NF]undefined#[NF]cmd#[NF]'+cmdstring+'#[NF]#[NF]delay1#[NF]delay1#[NF]00:00:00#[NF]00:00:00#[NF]#[NF]#[NF]undefined#[NF]undefined#[NF]1#[NF]0#[NF]#[NF]0#[NF]0#[NF]1#[NF]0';
+	
+	
+	
+	
 	configstart[29]=newcmdline;
 	}
 	else{
@@ -551,7 +622,7 @@ function saveconfig(name,mode){
 	conf = conf.replace(/;/g,'#c[se]');
 	conf = conf.replace(/ /g,'#c[sp]');
 	
-	//alert(conf);
+	//lert(conf);
 	//return;
 	
 	
@@ -733,7 +804,7 @@ function devicelist(id,name,script,flag){
 	count =0;
 	
 	ret +='<option value=\"select\">bitte wählen:</option>';
-	if (flag == '1'){
+	if (flag == '1' || flag =="3"){
 		ret +='<option value=\"free\">freie Befehlseingabe</option>';
 	}
 	
@@ -1314,9 +1385,12 @@ function savepreconf(name){
 	return;
 }
 
+// TEMPLATE BELOW
 //templatesteuerung
+// #################
 
 function loadtemplate(){
+
 	document.getElementById('help').innerHTML = '';	
 	document.getElementById('importAT').style.display='none';
 	document.getElementById('importNOTIFY').style.display='none';
@@ -1330,165 +1404,250 @@ function loadtemplate(){
 	document.getElementById('importat').style.backgroundColor='';
 	document.getElementById('importnotify').style.backgroundColor='';
 	document.getElementById('importpreconf').style.backgroundColor='';
-	//document.getElementById(typ).style.display='block';
 	document.getElementById('importTEMPLATE').style.backgroundColor='#ffb900';
 	
 	
+	
+	
+	//document.getElementById('newtemplate').style.display='none';
+	
+	
+	
+	
+	
+
+	for (elem in INQ) {
+		delete INQ[elem];
+		}
 	var html = '<table width="100%">';
 	html += '<tr>'
-	html += '<td width ="100%" id="importTemplate1"></td>';
+	html += '<td width ="100%" id="importTemplate1" valign=top ></td>';
 	html += '<td id="importTemplate2">';
 	html+='Configfile:<br><textarea disabled id=\"rawconfig10\" style=\"width: 400px; height: 400px\"></textarea>';
 	html += '</td>';
 	html += '</tr>';
 	html += '</table>';
 	document.getElementById('importTemplate').innerHTML = html;
-	
-	
-	
-	
-	
-	
 	var file = document.getElementById('templatefile').value;
 	
+	document.getElementById('bank5').value='';
+	document.getElementById('templatename').value=file;
+	
+	
+	nosave=0;
 	if (file == "empty_template"){
+		document.getElementById('empty').style.display='block';
+		
+		// cookie einlesen
+		if (document.cookie) {
+			  var Wert = "";
+			  if (document.cookie) {
+				var Wertstart = document.cookie.indexOf("=") + 1;
+				var Wertende = document.cookie.indexOf(";");
+				if (Wertende == -1) {
+				  Wertende = document.cookie.length;
+				}
+				Wert = document.cookie.substring(Wertstart, Wertende);
+			  }
+			  
+			  Wert=Wert.split("[TRENNER]");
+			  Wert=Wert.join("\n");
+			  document.getElementById('emptyarea').value=Wert;
+			  FW_okDialog("Templatedaten wurden aus letztem bearbeitetem Template wieder hergestellt");
+		}
+
+
+		document.getElementById('execbutton').value="Template ausführen";
+		nosave=1;
+		return;
+		}
 	document.getElementById('empty').style.display='block';
-	nosave=1;
-	return;
-	}
-	
-	
-	
 	file+=".txt";
-	FW_cmd(FW_root+'?cmd=set '+devicename+' template '+file+'&XHR=1', function(data){starttemplate(data)})
 	
 	
-	//alert (configstart);
+	//FW_cmd(FW_root+'?cmd=set '+devicename+' template '+file+'&XHR=1', function(data){starttemplate(data)})
+	//return;
+	
+	FW_cmd(FW_root+'?cmd=set '+devicename+' template '+file+'&XHR=1', function(data){filltemplate(data)})
+	
+	
 	
 	return;
+	
 }
+
+// #################
+function filltemplate(data){
+
+document.getElementById('emptyarea').value=data;
+document.getElementById('execbutton').value="Template neu starten";
+	starttemplate(data);
+}
+
+
 
 // mainloop aller lines
+// #################
 
-// configstart
-
-
-
-function execempty(){
-	//alert('test');
-	data = document.getElementById('emptyarea').value;
-	
-	
-	starttemplate(data);
+function schreibespeicher(aktline){
+	if (aktline.length == "0"){
+	return;
+	}
+	var inhalt = document.getElementById('bank5').value;
+	inhalt = aktline+"\n"+inhalt;
+	document.getElementById('bank5').value=inhalt;
 	return;
 }
 
-function starttemplate(template){
-	
-	//alert(document.getElementById('rawconfig10').value);
-	
-	if (document.getElementById('rawconfig10').value ==""){
-	document.getElementById('rawconfig10').value = configtemplate.join("\n");
-	}
-	//alert("nach templestart ok");
-	
-	
-	
-	
-	var tmplsatz = template.split("\n");
-	var len= tmplsatz.length;
-	//alert(len);
-	var newtmp = "";
-	for (lines=0; lines<len; lines++){
-		if (tmplsatz[lines].match(/^#/)){
-			continue;
-		}
-	//alert(aktline);
-	var aktline = tmplsatz[lines];
-	tmplsatz[lines]="# abgearbeitet";
-	
-	newtemplate = tmplsatz.join("\n");
-	
-	//alert("break");
-    var check = testline(aktline,newtemplate);
-	
-	if ( check == "stop" ){
-		break;
-	}
+// #################
 
-	tmplsatz[lines]="# abgearbeitet";
-	execcmd(aktline); // durchreichung von set befehlen
-	}
-	
-	//alert(len+" - aktuell:"+lines);
-	
-	
-	if (len == lines)
-	{
-		
-		
-		if (nosave =="0"){
-		var out ="Configfile wurde erstellt !  .... wird gespeichert .....";
-		}
-		else{
-		var out ="Configfile wurde erstellt!<br>Zum Testen die generierte Config bitte in ein seperates Device einspielen.";
-		}
-		
-		document.getElementById('importTemplate1').innerHTML = out;
-		
-		
+function saveempty(){
+//alert("safeempty");
+//document.getElementById('importTemplate1').innerHTML = out;
 	conf = document.getElementById('rawconfig10').value;
-	
 	conf = conf.replace(/\n/g,'#[EOL]');
 	conf = conf.replace(/#\[REGEXN\]/g,'\\n');
 	conf = conf.replace(/:/g,'#c[dp]');
 	conf = conf.replace(/;/g,'#c[se]');
 	conf = conf.replace(/ /g,'#c[sp]');
 	
+	
 	//alert(conf);
 	//return;
 	
 	
-	if (nosave =="0"){
 	var nm = devicename;
 	var def = nm+' saveconfig '+encodeURIComponent(conf);
 	location = location.pathname+'?detail='+devicename+'&cmd=set '+addcsrf(def);
+	return;
+}
+
+// #################
+
+function execempty(){
+	if (nosave =="1"){
+	var jetzt = new Date();
+	var Verfall = 1000 * 60 * 60 *12;
+	var Auszeit = new Date(jetzt.getTime() + Verfall);
+	var Wert = document.getElementById('emptyarea').value.split("\n");;
+	Wert=Wert.join("[TRENNER]");
+	document.cookie = "template" + "=" + Wert + "; expires=" + Auszeit.toGMTString() + ";";
+	}
+	data = document.getElementById('emptyarea').value;
+	for (elem in INQ) {
+		delete INQ[elem];
+}
+	document.getElementById('rawconfig10').value = configtemplate.join("\n");
+	document.getElementById('bank5').value='';
+	starttemplate(data);
+	return;
+}
+
+// #################
+
+function starttemplate(template){
+	
+	closeall();
+	if (document.getElementById('rawconfig10').value ==""){
+	document.getElementById('rawconfig10').value = configtemplate.join("\n");
+	}
+	var tmplsatz = template.split("\n");
+	var len= tmplsatz.length;
+	var newtmp = "";
+	
+	
+	for (lines=0; lines<len; lines++){
+		if (tmplsatz[lines].match(/^#/)){
+			continue;
+		}
+	var aktline = tmplsatz[lines];
+	schreibespeicher(aktline);
+	tmplsatz[lines]="# abgearbeitet";
+	newtemplate = tmplsatz.join("\n");
+    var check = testline(aktline,newtemplate);
+	if ( check == "stop" ){
+		break;
 	}
 	
+	tmplsatz[lines]="# abgearbeitet";
+	execcmd(aktline); // durchreichung von set befehlen
 	}
 	
+	
+	
+	if (len == lines)
+	{
+		if (nosave =="0"){
+		var out ="Configfile wurde erstellt !  .... wird gespeichert .....";
+		}
+		else{
+		var out ="Configfile wurde erstellt.<br><input type='button' value='MSwitch erstellen' onclick='javascript: saveempty()'>";
+		}
+	document.getElementById('importTemplate1').innerHTML = out;
+	conf = document.getElementById('rawconfig10').value;
+	conf = conf.replace(/\n/g,'#[EOL]');
+	conf = conf.replace(/#\[REGEXN\]/g,'\\n');
+	conf = conf.replace(/:/g,'#c[dp]');
+	conf = conf.replace(/;/g,'#c[se]');
+	conf = conf.replace(/ /g,'#c[sp]');
+	
+	//  doppelt - auch im execute vorhanden
+	if (nosave =="1"){
+	// cookie setzen
+	var jetzt = new Date();
+	//var Verfall = 1000 * 60 * 60 * 24 * 365;
+	var Verfall = 1000 * 60 * 60 *12;
+	var Auszeit = new Date(jetzt.getTime() + Verfall);
+	var Wert = document.getElementById('emptyarea').value.split("\n");;
+	Wert=Wert.join("[TRENNER]");
+	document.cookie = "template" + "=" + Wert + "; expires=" + Auszeit.toGMTString() + ";";
+	//
+	}
+
+	if (nosave =="0"){
+		var nm = devicename;
+		var def = nm+' saveconfig '+encodeURIComponent(conf);
+		location = location.pathname+'?detail='+devicename+'&cmd=set '+addcsrf(def);
+		}
+	}
 	return;	
 }
 
-// teste jede line
+// #################
+
 function testline(line,newtemplate){
-	
 var cmdsatz = line.split(">>");
-
 if (cmdsatz[0] == "" || cmdsatz[0] == " " ){return;}
-
-if (cmdsatz[0] != "ASK" && cmdsatz[0] != "OPT" && cmdsatz[0] != "ATTR" && cmdsatz[0] != "SET" && cmdsatz[0] != "SELECT" && cmdsatz[0] != "INQ" ){
-	//alert ("optionale Zeile gefunden -"+cmdsatz[0]);
-	//alert (INQ[cmdsatz[0]]);
+if (cmdsatz[0] != "REPEAT" && cmdsatz[0] != "EVENT" && cmdsatz[0] != "ASK" && cmdsatz[0] != "OPT" && cmdsatz[0] != "ATTR" && cmdsatz[0] != "SET" && cmdsatz[0] != "SELECT" && cmdsatz[0] != "INQ" ){
+	
+	//alert(cmdsatz[0]);
+	
 	if (INQ[cmdsatz[0]]== "1")
 	{
 	cmdsatz.shift(); 	
 	}
 	else{
+		//alert("returned");
 	return;
 	}
 }
 
 if (cmdsatz[0] == "INQ"){
-	 //alert("INQ gefunden: "+cmdsatz[1]);
-	 //INQ[cmdsatz[1]]  = '1'; 
 	 text = cmdsatz[4];
 	 benenner = cmdsatz[3];
 	 setINQ(text,cmdsatz[1],cmdsatz[2],benenner,newtemplate);
 	 return "stop";
-		
-		
 }
+
+
+if (cmdsatz[0] == "REPEAT"){
+	 text = cmdsatz[2];
+	 anzahl = cmdsatz[1];
+	 //alert("found REPEAT:"+cmdsatz[1]);
+	 setREPEAT(text,anzahl,newtemplate);
+	 return "stop";
+}
+
 
 
 // aufbau - ASK : TRIGGERTIME : Zu welcher Zeit soll dea MSwitch ausgelöst werden ? : <HELP>
@@ -1499,16 +1658,15 @@ if (cmdsatz[0] == "INQ"){
 // 0 -setting
 // 1 -befehl
 // 2 -text
-var typ=""
+
+var typ="";
 if (cmdsatz[0] == "ATTR"){
 	typ="A";
-	//alert(line);
 	cmdsatz.shift(); 
-}
-else{
-
-typ="S";
-}
+	}
+	else{
+	typ="S";
+	}
 		var befehl = cmdsatz[0];
 
 
@@ -1518,7 +1676,14 @@ typ="S";
 			freeinput(text,toset,newtemplate,typ);
 			return "stop";
 		}
-
+		
+		if (befehl == "EVENT"){
+			var toset = cmdsatz[1];
+			var text = cmdsatz[2];
+			eventinput(text,toset,newtemplate,typ);
+			return "stop";
+		}
+		
 		if (befehl == "OPT"){
 			var toset = cmdsatz[1];
 			var options = cmdsatz[2];
@@ -1535,42 +1700,93 @@ typ="S";
 			return "stop";
 		}
 	
-
-
-return "go";;
+		if (befehl == "SET"){
+		var befehl =cmdsatz.join(">>");
+		if (typ =="A"){
+			befehl="ATTR>>"+befehl;
+			}
+		execcmd(befehl);
+		starttemplate(newtemplate);
+		return "stop";
+		}
+return "go";
 }
 
 
 
 
-// setINQ 
-function setINQ(text,inq,inq1,benenner,newtemplate){
-	
-	
-	var names = benenner.split(",");
-	
-	
+
+// #################
+
+
+function setREPEAT(text,anzahl,newtemplate){
 var out ="";
 out+=text;
 out+="<br>&nbsp;<br>";
-
 out+="<fieldset>";
 
+out+="<input type=\"radio\" id=\"REPEAT1\" name=\"radio\" value=\"0\">";
+out+="<label for=\"REPEAT1\"> ja</label><br> ";
+
+out+="<input type=\"radio\" id=\"REPEAT2\" name=\"radio\" value=\"1\">";
+out+="<label for=\"REPEAT2\"> nein</label><br> ";	
+out+="</fieldset>";		
+out+="<br><input type='button' value='weiter' onclick='javascript: setREPEATok(\""+anzahl+"\")'>";
+out+="<br>&nbsp;<br>&nbsp;<br>";
+out+="<input id='newtemplate' type='text' value='"+newtemplate+"' "+style+">";
+document.getElementById('importTemplate1').innerHTML = out;
+return;
+}
+
+
+
+// #################
+function setREPEATok(anzahl)
+{
+var radios = document.getElementsByName('radio');
+var value;
+for (var i = 0; i < radios.length; i++) {
+    if (radios[i].type === 'radio' && radios[i].checked) {
+        // get value, set checked flag or do whatever you need to
+        value = radios[i].value;   
+    }
+}
+var template = document.getElementById('newtemplate').value;
+if (value =="0"){
+	var alllastlines = document.getElementById('bank5').value.split("\n");
+	for (var i = 0; i < anzahl; i++) {
+		newtemplate=alllastlines[i]+"\n"+newtemplate;
+	}
+}
+starttemplate(newtemplate);
+return;
+}
+
+// #################
+
+
+function setINQ(text,inq,inq1,benenner,newtemplate){
+var names = benenner.split(",");
+var out ="";
+out+=text;
+out+="<br>&nbsp;<br>";
+out+="<fieldset>";
 out+="<input type=\"radio\" id=\"INQ1\" name=\"radio\" value=\"0\">";
 out+="<label for=\"INQ1\"> "+names[0]+"</label><br> ";
 out+="<input type=\"radio\" id=\"INQ2\" name=\"radio\" value=\"1\">";
 out+="<label for=\"INQ2\"> "+names[1]+"</label><br> ";	
 out+="</fieldset>";		
-out+="<br><input type='button' value='ok' onclick='javascript: setINQok(\""+inq+"\",\""+inq1+"\")'>";
+out+="<br><input type='button' value='weiter' onclick='javascript: setINQok(\""+inq+"\",\""+inq1+"\")'>";
 out+="<br>&nbsp;<br>&nbsp;<br>";
-out+="<input id='newtemplate' type='text' value='"+newtemplate+"'>";
+out+="<input id='newtemplate' type='text' value='"+newtemplate+"' "+style+">";
 document.getElementById('importTemplate1').innerHTML = out;
 return;
-	
 }
+
+// #################
+
 function setINQok(toset1,toset2)
 {
-
 var radios = document.getElementsByName('radio');
 var value;
 for (var i = 0; i < radios.length; i++) {
@@ -1580,280 +1796,266 @@ for (var i = 0; i < radios.length; i++) {
 		
     }
 }
-
 var template = document.getElementById('newtemplate').value;
-
-//alert(toset1+"-"+toset2+" "+value);
-
 if (value =="0"){
-	//alert("setze "+toset1);
 	INQ[toset1]  = "1";
 }
-
 if (value =="1"){
-	//alert("setze "+toset2);
 	INQ[toset2]  = "1";
 }
-
-
-
-
-
-//execcmd(befehl);
 starttemplate(newtemplate);
 return;
 }
 
+// #################
 
-
-
-
-
-// freeinput 
-function freeinput(text,toset,newtemplate,typ){
+function eventinput(text,toset,newtemplate,typ){
+monitorid ="eventcontrol1";
+logging="on";
+observer.observe(target, config);
 var out ="";
 out+=text;
 out+="<br>&nbsp;<br>";
-out+="<input id='input' type='text' value=''><br>&nbsp;<br>";
-out+=" <input type='button' value='ok' onclick='javascript: freeinputok(\""+toset+"\",\""+typ+"\")'>";
+out+="<select style=\"width: 30em;\" size=\"5\" id =\"eventcontrol1\" ></select><br>&nbsp;<br>";
+//out+="<input id='input' type='text' value=''><br>&nbsp;<br>";
+out+=" <input type='button' value='weiter' onclick='javascript: eventinputok(\""+toset+"\",\""+typ+"\")'>";
 out+="<br>&nbsp;<br>&nbsp;<br>";
-out+="Test<input id='newtemplate' type='text' value='"+newtemplate+"'>";
+out+="Test<input id='newtemplate' type='text' value='"+newtemplate+"' "+style+">";
 document.getElementById('importTemplate1').innerHTML = out;
 return;
 }
-function freeinputok(toset,typ)
+// #################
+
+function eventinputok(toset,typ)
 {
-
-var befehl = "SET>>"+toset+">>"+document.getElementById('input').value;
-
-if (typ =="A"){
-	befehl="ATTR>>"+befehl;
-}
-
-
-var template = document.getElementById('newtemplate').value;
+monitorid ="eventcontrol";
+logging="off";
+eventmonitorstop();
+var event = document.getElementById('eventcontrol1').value.split(":");
+event.shift();
+var befehl = "SET>>"+toset+">>"+event.join(":");
+//alert (befehl);
 execcmd(befehl);
 starttemplate(newtemplate);
 return;
 }
-// freeinputende
 
+// #################
 
-// optioninput 
-function optioninput(text,toset,options,newtemplate,typ){
+function freeinput(text,toset,newtemplate,typ){
 	
+	
+	var ret = "<input id='input' type='text' value='' size='60'><br>&nbsp;<br>";
+	if( document.getElementById('bank1').value == "FreeCmd" && (toset =="comand_cmd1" || toset =="comand_cmd1"))
+	{
+		//alert ("toset: "+toset);
+		
+		ret = '<textarea id ="input" cols="40" rows="4"></textarea><br>&nbsp;<br>';
+	}
+	
+var out ="";
+out+=text;
+out+="<br>&nbsp;<br>";
+out+=ret;
+out+=" <input type='button' value='weiter' onclick='javascript: freeinputok(\""+toset+"\",\""+typ+"\")'>";
+out+="<br>&nbsp;<br>&nbsp;<br>";
+out+="Test<input id='newtemplate' type='text' value='"+newtemplate+"' "+style+">";
+document.getElementById('importTemplate1').innerHTML = out;
+return;
+}
+
+// #################
+
+function freeinputok(toset,typ)
+{
+var befehl = "SET>>"+toset+">>"+document.getElementById('input').value;
+	if (typ =="A"){
+		befehl="ATTR>>"+befehl;
+	}
+execcmd(befehl);
+starttemplate(newtemplate);
+return;
+}
+// #################
+function optioninput(text,toset,options,newtemplate,typ){
 var out ="";
 out+=text;
 out+="<br>&nbsp;<br>";
 out+="<fieldset>";
-
-
 var mapp = options.match(/(.*)\{(.*)\}/);
-
 if (mapp!=null && mapp.length!=0)
-{
-// mapping vorhanden
-	
-var optionssatz = mapp[1].split(",");
-var mapsatz= mapp[2].split(",");
-}
+	{	
+	var optionssatz = mapp[1].split(",");
+	var mapsatz= mapp[2].split(",");
+	}
 else{
-	
 	var optionssatz = options.split(",");
 	var mapsatz = optionssatz;
-	
-}
-
+	}
 	var len= optionssatz.length;
-	//alert(len);
-
 	for (i=0; i<len; i++){
 	out+="<input type=\"radio\" id=\"ID"+i+"\" name=\"radio\" value=\""+optionssatz[i]+"\">";
 	out+="<label for=\"ID"+i+"\"> "+mapsatz[i]+"</label><br> ";
 	}
-out+="</fieldset>";		
-out+="<br><input type='button' value='ok' onclick='javascript: optioninputok(\""+toset+"\",\""+typ+"\")'>";
-out+="<br>&nbsp;<br>&nbsp;<br>";
-out+="<input id='newtemplate' type='text' value='"+newtemplate+"'>";
-document.getElementById('importTemplate1').innerHTML = out;
-return;
-	
+	out+="</fieldset>";		
+	out+="<br><input type='button' value='weiter' onclick='javascript: optioninputok(\""+toset+"\",\""+typ+"\")'>";
+	out+="<br>&nbsp;<br>&nbsp;<br>";
+	out+="<input id='newtemplate' type='text' value='"+newtemplate+"' "+style+">";
+	document.getElementById('importTemplate1').innerHTML = out;
+	return;
 }
+
+// #################
+
 function optioninputok(toset,typ)
 {
-
 var radios = document.getElementsByName('radio');
 var value;
 for (var i = 0; i < radios.length; i++) {
     if (radios[i].type === 'radio' && radios[i].checked) {
-        // get value, set checked flag or do whatever you need to
         value = radios[i].value;   
-		
     }
 }
 var befehl = "SET>>"+toset+">>"+value;
-
 if (typ =="A"){
 	befehl="ATTR>>"+befehl;
 }
-
 var template = document.getElementById('newtemplate').value;
 execcmd(befehl);
-
 starttemplate(newtemplate);
 return;
 }
-// optioninputende 
 
+// #################
 
+function cmdselect(text,toset,newtemplate,typ){
+var devicetocmd = document.getElementById('bank1').value
+var number = devices.indexOf(devicetocmd);
+seloptions = makecmdhashtemp(cmds[number]);
+return seloptions+"<span id=\"setcmd1temp\"></span>";
 
+}
+// #################
 
+function cmdselectok(toset,typ)
+{
+	var befehlfirst = "";
+	var befehlsecond = "";
+	befehlfirst = document.getElementById('comand').value;
+	if( $("#comand1").length > 0 ) {
+	befehlsecond = document.getElementById('comand1').value;
+	}
+var befehl = "SET>>"+toset+">>"+befehlfirst+" "+befehlsecond;
+var template = document.getElementById('newtemplate').value;
+execcmd(befehl);
+starttemplate(newtemplate);
+return;
+}
 
+// #################
 
-// selectinput
 function selectinput(text,toset,newtemplate,typ){
 var out ="";
 out+=text;
 out+="<br>&nbsp;<br>";
-
-
-
-if (typ =="S"){
-	selectlist = devicelist('selectlist','name','no_script',2)
-	}
-	else
+	if (typ =="S")
 	{
-		
+		if(toset == "Device_to_switch")
+		{
+			selectlist = devicelist('selectlist','name','no_script',3)
+		}
+		else if(toset == "comand_cmd1" || toset == "comand_cmd2")
+		{
+			selectlist =cmdselect(text,toset,newtemplate,typ)
+			out+=selectlist;
+			out+="<br>&nbsp;<br><input type='button' value='weiter' onclick='javascript: cmdselectok(\""+toset+"\",\""+typ+"\")'>";
+			out+="<br>&nbsp;<br>&nbsp;<br>";
+			out+="<input id='newtemplate' type='text' value='"+newtemplate+"' "+style+">";
+			document.getElementById('importTemplate1').innerHTML = out;
+			return;
+		}
+		else
+		{
+			selectlist = devicelist('selectlist','name','no_script',2)
+		}
+	}
+	else// typ = A
+	{
 	selectlist = attrlist('selectlist','name',toset)	
 	}
 
-
-
-
-
-
-
-
-// alert(selectlist);
-//return;
 out+=selectlist;
-
-out+="<br>&nbsp;<br><input type='button' value='ok' onclick='javascript: selectinputok(\""+toset+"\",\""+typ+"\")'>";
+out+="<br>&nbsp;<br><input type='button' value='weiter' onclick='javascript: selectinputok(\""+toset+"\",\""+typ+"\")'>";
 out+="<br>&nbsp;<br>&nbsp;<br>";
-out+="<input id='newtemplate' type='text' value='"+newtemplate+"'>";
+out+="<input id='newtemplate' type='text' value='"+newtemplate+"' "+style+">";
 document.getElementById('importTemplate1').innerHTML = out;
 return;
-	
 }
+
+// #################
 function selectinputok(toset,typ)
 {
 var befehl = "SET>>"+toset+">>"+document.getElementById('selectlist').value;
 if (typ =="A"){
 	befehl="ATTR>>"+befehl;
 }
-
 var template = document.getElementById('newtemplate').value;
 execcmd(befehl);
 starttemplate(newtemplate);
 return;
 }
-
-// selectinput ende
-
-
-// endgültige befehlsausführung
+// #################
 function execcmd(befehl)
 {
-
-
 var cmdsatz = befehl.split(">>");
-
-
-
-
 if (cmdsatz[0] == "ATTR"){
 	typa="A";
-	//alert(line);
 	cmdsatz.shift(); 
 }
 else{
-
 typa="S";
 }
-
-
-
 	var befehl = cmdsatz[1];
 	var typ = cmdsatz[0];
 	var inhalt = cmdsatz[2];
+	// hole config
+	
+	//alert("eingehender befehl: "+befehl);
 	
 	
-	//alert ("befehl-"+befehl+" typa-"+typa+" "+cmdsatz);
-	
-	
-// #S Trigger_device -> All_Off_Dev - Trigger
-// # TRIGGERTIME - zeitgesteuerter Auslöser
-// # TRIGGERCONDITION - bedingungen für triggerauslösung
-// # ACTIONDEVICE - zu schaltende geräte
-
-// hole config
-
-
-    
 	
 	if (befehl == "INFO"){
 	document.getElementById('help').innerHTML = inhalt;
 	return;
 	}
-	
-	// #A MSwitch_Expert -> 1
-	
-	
-	
-	
-	
-var configuration=document.getElementById('rawconfig10').value;
-configuration = configuration.split("\n");
-
-
+	// #A MSwitch_Expert -> 1	
+	var configuration=document.getElementById('rawconfig10').value;
+	configuration = configuration.split("\n");
+	conflenght = configuration.length;
 if (typa == "A" ){
-	
 	newattr = "#A "+befehl+" -> "+inhalt;
 	var newconfig =configuration.join("\n");
-	
-	
 	if (inhalt != ""){
 	newconfig=newconfig+"\n"+newattr;
 	}
-	
-	
 	document.getElementById('rawconfig10').value = newconfig;
-	
 	return;
 	}
-
-//timerfelder vorbereiten
-var fields = configuration[13].split("->");
+	//timerfelder vorbereiten
+	var fields = configuration[13].split("->");
 	//alert(fields[0]+'-'+fields[1]+'-');
-
 	if (fields[1] ==" "){
 		fields[1]="on~off~ononly~offonly~onoffonly";
 	}
 	var satz = fields[1].split("~");
-	//alert(fields[0]+'-'+fields[1]);
-	
-
-	//trigger device
 	if (befehl == "Trigger_device"){
 	configuration[5] = "#S Trigger_device -> "+inhalt;
+	document.getElementById('bank1').value = inhalt;
 	}
-	
-	//time_on
-	// #S .Trigger_time -> on[20#[dp]00]~off~ononly~offonly~onoffonly
-	// feld 13
-	
 
-	
+	if (befehl == "Trigger_Whitelist"){
+	configuration[conflenght] = "#S .Trigger_Whitelist -> "+inhalt;
+	}
 	
 	if (befehl == "Time_on"){
 	inhalt = inhalt.replace(/:/gi,"#[dp]");
@@ -1883,18 +2085,257 @@ var fields = configuration[13].split("->");
 	configuration[13] = "#S .Trigger_time -> "+newsatz;
 	}
 	
-	
 	// Trigger_condition
  	if (befehl == "Trigger_condition"){
 	configuration[9] = "#S .Trigger_condition -> "+inhalt;
 	} 
 	
+	// Trigger_on
+ 	if (befehl == "MSwitch_on"){
+	configuration[7] = "#S .Trigger_on -> "+inhalt;
+	} 
+	
+	// Trigger_on
+ 	if (befehl == "MSwitch_off"){
+	configuration[3] = "#S .Trigger_off -> "+inhalt;
+	} 
+	
+	// Trigger_cmd1
+ 	if (befehl == "MSwitch_cmd1"){
+	configuration[8] = "#S .Trigger_cmd_on -> "+inhalt;
+	//alert(configuration);
+	} 
+	
+	// Trigger_cmd2
+ 	if (befehl == "MSwitch_cmd2"){
+	configuration[4] = "#S .Trigger_cmd_off -> "+inhalt;
+	} 
+	
+	// comand_cmd1 und 2
+	if (befehl == "comand_cmd1" || befehl == "comand_cmd2"){
+		if (befehl == "comand_cmd1"){
+			var field1 =1;
+			var field2 =3;
+		}
+		if (befehl == "comand_cmd2"){
+			var field1 =2;
+			var field2 =4;
+		}
+		
+	inhalt = inhalt.split(" ");
+	var first =  inhalt.shift();
+	var second = inhalt.join(" ");
+	var device =  document.getElementById('bank6').value.split("\n");	
+	if (document.getElementById('bank1').value == "FreeCmd"){	
+	first = first.replace(/\n/g,';;');	
+	second = second.replace(/\n/g,';;');		
+	device[field1]= "#[NF]"
+	device[field2]="#[NF]"+first+" "+second;
+	}
+	else
+	{
+	device[field1]= "#[NF]"+first;
+	device[field2]="#[NF]"+second;
+	}
+	document.getElementById('bank6').value=device.join("\n");
+	configuration =  makedevice(configuration);
+	}
 	
 	
-	var newconfig =configuration.join("\n");
-	document.getElementById('rawconfig10').value = newconfig;
+	// cmd_repeat
+	if (befehl == "cmd_repeat"){
+	var device =  document.getElementById('bank6').value.split("\n");
+	device[11]="#[NF]"+inhalt;
+	document.getElementById('bank6').value=device.join("\n");
+	configuration =  makedevice(configuration);
+	}
+	
+	// cmd_repeat_time
+	if (befehl == "cmd_repeat_time"){
+	var device =  document.getElementById('bank6').value.split("\n");
+	device[12]="#[NF]"+inhalt;
+	document.getElementById('bank6').value=device.join("\n");
+	configuration =  makedevice(configuration);
+	}
+	
+	// delay_cmd1
+	if (befehl == "delay_cmd1"){
+	var device =  document.getElementById('bank6').value.split("\n");
+	device[7]="#[NF]"+inhalt;
+	document.getElementById('bank6').value=device.join("\n");
+	configuration =  makedevice(configuration);
+	}
+	
+	// delay_cmd2
+	if (befehl == "delay_cmd2"){
+	var device =  document.getElementById('bank6').value.split("\n");
+	device[8]="#[NF]"+inhalt;
+	document.getElementById('bank6').value=device.join("\n");
+	configuration =  makedevice(configuration);
+	}
+	
+	// condition_cmd1
+	if (befehl == "condition_cmd1"){
+	var device =  document.getElementById('bank6').value.split("\n");
+	device[9]="#[NF]"+inhalt;
+	document.getElementById('bank6').value=device.join("\n");
+	configuration =  makedevice(configuration);
+	}
+	
+	// condition_cmd2
+	if (befehl == "condition_cmd2"){
+	var device =  document.getElementById('bank6').value.split("\n");
+	device[10]="#[NF]"+inhalt;
+	document.getElementById('bank6').value=device.join("\n");
+	configuration =  makedevice(configuration);
+	}
 	
 	
+	// Device_to_switch
+	if (befehl == "Device_to_switch"){
+		
+	//alert(inhalt);
+	if (inhalt == "free"){ inhalt = "FreeCmd";}
+	var inhalt1 = configuration[12].split("-> ");	
+	var inhalt2 = inhalt1[1].split("#\[ND\]");
+	var anzdevices=inhalt2.lenght;
+	if (anzdevices === undefined){anzdevices=0;}
+	var satz = inhalt1[1].split(",");
+	if (satz[0] == "no_device"){
+		satz.shift(); 
+	}
+	satz.push(inhalt+"-AbsCmd1"); 
+	var newsatz = satz.join(",");
+	configuration[12] = "#S .Device_Affected -> "+newsatz;
+	emptydevice[0]=inhalt+"-AbsCmd1";
+	document.getElementById('bank6').value = emptydevice.join("\n");
+	document.getElementById('bank1').value = inhalt;
+	configuration =  makedevice(configuration);
+	} 
+	
+	
+//alert(configuration);
+
+var newconfig =configuration.join("\n");
+document.getElementById('rawconfig10').value = newconfig;
+return;
+}
+
+// #################
+
+function makedevice(configuration){
+	//alert("makedevice");
+	//var configuration=document.getElementById('rawconfig10').value;
+	//configuration = configuration.split("\n");
+	var device=document.getElementById('bank6').value;
+	device = device.replace(/#\[NF\]/g,'');
+	device =device.split("\n");
+	document.getElementById('bank7').value=device.join("#[NF]");
+	
+	// fertige line in bank 7
+	
+	
+	var key  = document.getElementById('bank1').value+"-AbsCmd1"
+	
+	Devices[key] = document.getElementById('bank7').value;
+	// hier aufruf um das device in config einzufügen !!!
+	
+	//alert("KEY: "+key);
+	//alert(Devices[key]);
+	var newmasterline ="";
+	var affected= configuration[12].split("-> ");
+	var affecteddevices = affected[1].split(",");
+	
+	//alert(affecteddevices);
+	
+	for (var i = 0; i < affecteddevices.length; i++) {
+		
+		
+		var name = affecteddevices[i];
+		newmasterline += Devices[name]+"#[ND]";
+    }
+	
+	newmasterline=newmasterline.substr(0,newmasterline.length - 5);
+	
+	
+	//alert("newmaster: "+newmasterline);
+	
+	
+	
+	
+/* 	var inhalt1 = configuration[14].split("-> ");	
+	var inhalt2 = inhalt1[1].split("#\[ND\]");
+	
+	
+
+	var anzdevices=inhalt2.lenght;
+	
+	//alert ("anzahl devices: "+anzdevices);
+	
+	if (anzdevices === undefined){anzdevices=0;}
+	
+	inhalt2[anzdevices] = document.getElementById('bank7').value;
+	
+	var newstring = inhalt2.join("#[ND]"); */
+	
+	configuration[14] = "#S .Device_Affected_Details -> "+newmasterline;
+	
+	return configuration;
+}
+
+// #################
+
+function makecmdhashtemp(line){
+	if (line === undefined){
+		return;
+	}
+	var retoption = '<select id =\"comand\" name=\"\" onchange=\"javascript: selectcmdoptionstemp(this.value)\">';
+	retoption +='<option selected value=\"0\">Befehl wählen</option>';
+	
+	sets = new Object();
+	var cmdset = new Array;
+	cmdset = line.split(" ");
+	var anzahl = cmdset.length;
+	
+	for (i=0; i<anzahl; i++)
+		{
+		aktset = cmdset[i].split(":");	
+		sets[aktset[0]]=aktset[1];
+		if (aktset[0] != ""){
+		retoption +='<option value='+aktset[0]+'>'+aktset[0]+'</option>';
+			}
+		}
+	retoption +='</select>';
+	var arraysetskeys = Object.keys(sets);
+	return retoption;
+}
+
+// #################
+
+function selectcmdoptionstemp(inhalt){
+	document.getElementById('setcmd1temp').innerHTML ='';
+	// wenn undefined textfeld erzeugen
+	if (sets[inhalt] == 'noArg'){ return;}
+	// wenn noarg befehl übernehmen
+	if (sets[inhalt] === undefined){ 
+	retoption1 = '<input name=\"\" id=\"comand1\" type=\"text\" value=\"\">&nbsp;';
+	document.getElementById('setcmd1temp').innerHTML = retoption1;
 	return;
+	}
+	// wenn liste subcmd erzeugen
+	var retoption1;
+	retoption1 = '<select id =\"comand1\" name=\"\">';
+	retoption1 +='<option selected value=\"0\">Option wählen</option>';
+	
+	var cmdset1= new Array;
+	cmdset1= sets[inhalt].split(",");
+	console.log(cmdset1);
+	var anzahl = cmdset1.length;
+	for (i=0; i<anzahl; i++)
+		{
+		retoption1 +='<option value='+cmdset1[i]+'>'+cmdset1[i]+'</option>';
+		}
+	retoption1 +='</select>';
+	document.getElementById('setcmd1temp').innerHTML = retoption1;
 }
 
