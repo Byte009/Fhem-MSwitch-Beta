@@ -58,6 +58,9 @@ use POSIX;
 use SetExtensions;
 use LWP::Simple;
 
+
+#use utf8;
+
 my $updateinfo  = "";    # wird mit info zu neuen versionen besetzt
 my $generalinfo = "";    # wird mit aktuellen informationen besetzt
 my $updateinfolink =
@@ -1296,6 +1299,17 @@ sub MSwitch_Set($@) {
 		my $ret=MSwitch_gettemplate( $hash, $args[0] );
         return $ret;
     }
+	
+		    #################################
+    if ( $cmd eq 'loadpreconf' ) {
+        #MSwitch_makegroupcmdout( $hash, $args[0] );
+	#Log3("test",0,"args @args");
+		my $ret=MSwitch_loadpreconf( $hash );
+        return $ret;
+    }
+
+
+
 
 ############# Befehle  aus web.js
     if ( $cmd eq 'logging' ) {
@@ -4162,6 +4176,47 @@ MSwitch_LOG( $name, 6,"ID Bridge gefunden: zweig $bridge[0] , $bridge[2] ".@brid
     return ( "bridge found", $zweig, $bridge[2] );
 }
 ############################
+
+
+sub clear_utf8_flag {
+    my ($data) = @_;
+
+    my $wanted = sub {
+        if (ref $_) {
+            my $obj = $_;
+            if ('HASH' eq reftype $obj) {
+                foreach my $key (keys %$obj) {
+                    if (Encode::is_utf8($key)) {
+                        my $value = delete $obj->{$key};
+                        Encode::_utf8_off($key);
+                        $obj->{$key} = $value;
+                    }
+
+                    my $value = $obj->{$key};
+                    if (defined $value && !ref $value
+                        && Encode::is_utf8($value)) {
+                        Encode::_utf8_off($obj->{$key});
+                    }
+                }
+            } elsif ('ARRAY' eq reftype $obj) {
+                foreach my $item (@$obj) {
+                    if (defined $item && !ref $item
+                        && Encode::is_utf8($item)) {
+                        Encode::_utf8_off($item);
+                    }
+                }
+            }
+        }
+    };
+
+    walk $wanted, $data;
+
+    return $data;
+}
+
+
+
+############################
 sub MSwitch_fhemwebconf($$$$) {
 
     my ( $FW_wname, $d, $room, $pageHash ) =
@@ -4172,14 +4227,31 @@ sub MSwitch_fhemwebconf($$$$) {
     delete( $hash->{NOTIFYDEV} );
     readingsSingleUpdate( $hash, "EVENTCONF", "start", 1 );
 
+
+    my $preconf1 = '';
     my $preconf = '';
-    $preconf = get($preconffile);
-    $preconf =~ s/\n/#[NEWL]\\\n/g;
-    $preconf =~ s/\r//g;
-    $preconf =~ s/'/\\\'/g;
+    #$preconf = get($preconffile);
 	
-	$preconf =~ s/</&lt;/g;
-    $preconf =~ s/>/&gt;/g;
+	
+	
+	
+	
+	# open(my $DATEIHANDLER, "<$preconffile") || die "File not found\n";
+# while (<$DATEIHANDLER>) {
+    # $preconf.= $_;
+# }
+# close($DATEIHANDLER);
+	
+	
+	
+	
+	
+   # $preconf =~ s/\n/#[NEWL]\\\n/g;
+   # $preconf =~ s/\r//g;
+   # $preconf =~ s/'/\\\'/g;
+	
+	#$preconf =~ s/</&lt;/g;
+   # $preconf =~ s/>/&gt;/g;
 
     my $devstring;
     my $cmds;
@@ -4462,7 +4534,10 @@ my @owna = split( / /, $ownattr );
     my $j1 = "
 	<script type=\"text/javascript\">
 	//preconf
-	var preconf ='" . $preconf . "';
+	//var preconf ='" . $preconf . "';
+	var preconf ='';
+	
+	
 	";
 	$j1 .="// VARS
 	const ownattr = [];
@@ -4494,6 +4569,7 @@ my @owna = split( / /, $ownattr );
 	var mVersion= '" . $version . "';
 	var MSDATAVERSION = '" . $vupdate . "';
 
+
 	\$(document).ready(function() {
     \$(window).load(function() {
 	name = '$Name';
@@ -4501,6 +4577,8 @@ my @owna = split( / /, $ownattr );
     loadScript(\"pgm2/MSwitch_Wizard.js?v=" . $fileend
       . "\", function(){start1(name)});
 	return;
+	
+	
 	}); 
 	});
 	</script>";
@@ -4514,6 +4592,9 @@ my @owna = split( / /, $ownattr );
     # var notifydef = " . $notifydef . ";
 
     $return .= "<br>&nbsp;<br>" . $j1;
+	
+	
+	
     return $return;
 }
 ############################
@@ -12305,9 +12386,7 @@ sub MSwitch_gettemplate($$){
 	my ( $hash, $template ) = @_;
     my $Name = $hash->{NAME};
 	my $tZeilen="";
-	
-	
-	 my %UMLAUTE = (
+	my %UMLAUTE = (
                         'Ä' => 'Ae',
                         'Ö' => 'Oe',
                         'Ü' => 'Ue',
@@ -12326,15 +12405,28 @@ sub MSwitch_gettemplate($$){
         $tZeilen = $tZeilen . $_;
     }
 	close(BACKUPDATEI);
-	
-	
-     
-        
-	
-	
-	
 	return "$tZeilen";
 	
 }
+
+##########################################
+
+sub MSwitch_loadpreconf($){
+	my ( $hash ) = @_;
+    my $Name = $hash->{NAME};
+    my $preconf = '';
+    $preconf = get($preconffile);
+    $preconf =~ s/\n/#[NEWL]/g;
+    $preconf =~ s/\r//g;
+   # $preconf =~ s/'/\\\'/g;
+	$preconf =~ s/</&lt;/g;
+    $preconf =~ s/>/&gt;/g;
+#Log3("test",0,$preconf);
+	return $preconf;
+	
+}
+
+
+
 1;
 
