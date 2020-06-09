@@ -386,7 +386,8 @@ function conf(typ,but){
 }	
 	
 function start1(name){
-	
+	//alert("start");
+	//return;
 	    // this code will run after all other $(document).ready() scripts
         // have completely finished, AND all page elements are fully loaded.
 		$( ".makeSelect" ).text( "" );
@@ -1250,26 +1251,39 @@ function savenot(){
 }
 
 function startimportpreconf(){
+	
+	
+	
+	
+	FW_cmd(FW_root+'?cmd=set '+devicename+' loadpreconf &XHR=1', function(data){startimportpreconf1(data)})
+	return;
+	
+	
+}
+
+function startimportpreconf1(data){
+
+	preconf = data;
+
 	preconfparts = preconf.split("#-NEXT-");
 	var anzahl = preconfparts.length;
 	var count =0;
 	
 	
+	
+	alert("anzahl: "+anzahl);
+	alert(preconfparts);
+	
 	for (i=count; i<anzahl; i++)
 		{
 		treffer = preconfparts[i].match(/#NAME.(.*?)(#\[NEWL\])/);
+		//alert(treffer);
 		help = preconfparts[i].match(/#HELP.(.*?)(#\[NEWL\])/);
+		//alert(help);
 		preconfparts[i] = (preconfparts[i].split(treffer[0]).join(''));
 		preconfparts[i] = (preconfparts[i].split(help[0]).join(''));
-		
-		
-		
-		preconfparts[i] = preconfparts[i].replace(/\n/g,'#[REGEXN]');
+		//preconfparts[i] = preconfparts[i].replace(/\n/g,'#[REGEXN]');
 		preconfparts[i] = preconfparts[i].replace(/#\[NEWL\]/gi,"\n");
-		
-		
-		
-		
 		preconfpartsname.push(treffer[1]);
 		preconfpartshelp.push(help[1]); 
 		}
@@ -1435,20 +1449,31 @@ function loadtemplate(){
 	
 	
 	nosave=0;
-	if (file == "empty_template"){
+	if (file == "empty_template")
+	{
 		document.getElementById('empty').style.display='block';
 		
 		// cookie einlesen
-		if (document.cookie) {
-			  var Wert = "";
-			  if (document.cookie) {
-				var Wertstart = document.cookie.indexOf("=") + 1;
-				var Wertende = document.cookie.indexOf(";");
-				if (Wertende == -1) {
-				  Wertende = document.cookie.length;
-				}
-				Wert = document.cookie.substring(Wertstart, Wertende);
-			  }
+		
+		
+		
+		var cookie = getCookieValue("Mswitch_template");
+		
+	
+		if (cookie != "")
+		{
+			
+			//alert(cookie);
+		
+				  var Wert = cookie;
+			 // if (document.cookie) 
+			/* 
+				var Wertstart = cookie.indexOf("=") + 1;
+				var Wertende = cookie.indexOf(";");
+				if (Wertende == -1) 
+				{
+				  Wertende =cookie.length;
+				} */
 			  
 			  Wert=Wert.split("[TRENNER]");
 			  Wert=Wert.join("\n");
@@ -1460,7 +1485,7 @@ function loadtemplate(){
 		document.getElementById('execbutton').value="Template ausführen";
 		nosave=1;
 		return;
-		}
+	}
 	document.getElementById('empty').style.display='block';
 	file+=".txt";
 	
@@ -1475,6 +1500,15 @@ function loadtemplate(){
 	return;
 	
 }
+
+
+// #################
+function getCookieValue(a) {
+   const b = document.cookie.match('(^|;)\\s*' + a + '\\s*=\\s*([^;]+)');
+   return b ? b.pop() : '';
+}
+
+
 
 // #################
 function filltemplate(data){
@@ -1531,8 +1565,13 @@ function execempty(){
 	var Auszeit = new Date(jetzt.getTime() + Verfall);
 	var Wert = document.getElementById('emptyarea').value.split("\n");;
 	Wert=Wert.join("[TRENNER]");
-	document.cookie = "template" + "=" + Wert + "; expires=" + Auszeit.toGMTString() + ";";
+	document.cookie = "Mswitch_template" + "=" + Wert + "; expires=" + Auszeit.toGMTString() + ";";
 	}
+	
+	
+	// löschen
+	document.cookie = "templatetest" + "=" + " inhalt" + "; expires=" + Auszeit.toGMTString() + ";";
+	
 	data = document.getElementById('emptyarea').value;
 	for (elem in INQ) {
 		delete INQ[elem];
@@ -1600,7 +1639,7 @@ function starttemplate(template){
 	var Auszeit = new Date(jetzt.getTime() + Verfall);
 	var Wert = document.getElementById('emptyarea').value.split("\n");;
 	Wert=Wert.join("[TRENNER]");
-	document.cookie = "template" + "=" + Wert + "; expires=" + Auszeit.toGMTString() + ";";
+	document.cookie = "Mswitch_template" + "=" + Wert + "; expires=" + Auszeit.toGMTString() + ";";
 	//
 	}
 
