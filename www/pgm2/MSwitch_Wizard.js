@@ -1252,27 +1252,21 @@ function savenot(){
 
 function startimportpreconf(){
 	
-	
-	
-	
 	FW_cmd(FW_root+'?cmd=set '+devicename+' loadpreconf &XHR=1', function(data){startimportpreconf1(data)})
 	return;
-	
-	
 }
 
 function startimportpreconf1(data){
 
 	preconf = data;
-
 	preconfparts = preconf.split("#-NEXT-");
 	var anzahl = preconfparts.length;
 	var count =0;
 	
 	
 	
-	alert("anzahl: "+anzahl);
-	alert(preconfparts);
+	//alert("anzahl: "+anzahl);
+	//alert(preconfparts);
 	
 	for (i=count; i<anzahl; i++)
 		{
