@@ -4232,36 +4232,22 @@ sub MSwitch_fhemwebconf($$$$) {
     my $preconf = '';
     #$preconf = get($preconffile);
 	
-	
-	
-	
-	
 	# open(my $DATEIHANDLER, "<$preconffile") || die "File not found\n";
 # while (<$DATEIHANDLER>) {
     # $preconf.= $_;
 # }
 # close($DATEIHANDLER);
-	
-	
-	
-	
-	
    # $preconf =~ s/\n/#[NEWL]\\\n/g;
    # $preconf =~ s/\r//g;
    # $preconf =~ s/'/\\\'/g;
-	
 	#$preconf =~ s/</&lt;/g;
    # $preconf =~ s/>/&gt;/g;
 
     my $devstring;
     my $cmds;
 	
-	
 	$cmds      .= "' del_repeats reset_device active del_function_data inactive on off del_delays backup_MSwitch fakeevent exec_cmd_1 exec_cmd_2 wait del_repeats reload_timer change_renamed reset_cmd_count ',";
     $devstring .= "'MSwitch_Self',";
-	
-	
-	
 	
     @found_devices = devspec2array("TYPE=.*");
     for (@found_devices) {
@@ -4269,8 +4255,6 @@ sub MSwitch_fhemwebconf($$$$) {
         $cmds      .= "'" . $test . "',";
         $devstring .= "'" . $_ . "',";
     }
-	
-	
 	
 	
     chop $devstring;
@@ -4344,9 +4328,11 @@ sub MSwitch_fhemwebconf($$$$) {
 
     my $return = "
 
-	<div id='mode'>Konfigurationsmodus:&nbsp;
-	<input name=\"conf\" id=\"wizard\" type=\"button\" value=\"Wizard\" onclick=\"javascript: conf('importWIZARD',id)\"\">&nbsp;
-	<input name=\"conf\" id=\"config\" type=\"button\" value=\"import MSwitch_Config\" onclick=\"javascript: conf('importCONFIG',id)\"\">&nbsp;
+	<div id='mode'>Konfigurationsmodus:&nbsp;";
+	#<input name=\"conf\" id=\"wizard\" type=\"button\" value=\"Wizard\" onclick=\"javascript: conf('importWIZARD',id)\"\">&nbsp;
+	
+	
+	$return .= "<input name=\"conf\" id=\"config\" type=\"button\" value=\"import MSwitch_Config\" onclick=\"javascript: conf('importCONFIG',id)\"\">&nbsp;
 	<input name=\"conf\" id=\"importat\" type=\"button\" value=\"import AT\" onclick=\"javascript: conf('importAT',id)\"\">&nbsp;
 	<input name=\"conf\" id=\"importnotify\" type=\"button\" value=\"import NOTIFY\" onclick=\"javascript: conf('importNOTIFY',id)\"\">
 	<input name=\"conf\" id=\"importpreconf\" type=\"button\" value=\"import PRECONF\" onclick=\"javascript: conf('importPRECONF',id)\"\">
@@ -4401,13 +4387,7 @@ closedir(DIR) or die $!;
           . $template
           . "</select>";
 		  
-		  
-	
-	
-		# <--
 
-	
-	
 	$return .= "
 	</div>
 	<br><br>
@@ -4442,51 +4422,25 @@ closedir(DIR) or die $!;
 	<td id='help1'></td>
 	</tr>
 	</table>";
-	
-	
 		
 	
-	
-	
-	
-	
-	
+	$return.= "<input type=\"button\" id = \"showtemplate\" value=\"zeige Template\" onclick=\"javascript: toggletemplate()\" style=\"display:none\">";
+	$return.= "<br>&nbsp;<br>";
 	$return .= "<div id='empty' style=\"display:none\">";
 	$return .= "Template: ";
 	$return .= "<input type=\"text\" id = \"templatename\" value=\"\"  style=\"background-color:transparent\"><br>&nbsp;<br>";
 	 
 	 $return .= "<textarea id='emptyarea' style='width: 100%; height: 300px'>### insert template ###</textarea><br>
 	 <input type=\"button\" id = \"execbutton\" value=\"Template ausführen\" onclick=\"javascript: execempty()\">
-	 <br>
-	 </div>
+	 <br>&nbsp;<br>
+	 </div>";
 	
 	
 	
-	
-	
-	&nbsp;<br>
-	<div id='importWIZARD'>
-	<table border = '0'>
-	<tr>
-	<td style=\"text-align: left; vertical-align: top;\">
-	
-	<table border = '0'>
-	<tr>
-	<td colspan='2'>Teil 1 (Ausloeser des Devices)
-	<br>&nbsp;
-	</td>
-	</tr>
-	<tr><td><div id='1step1' ></div></td><td><div id='1step2' ></div></td></tr>
-	<tr><td><div id='2step1' ></div></td><td><div id='2step2' ></div></td></tr>
-	<tr><td><div id='3step1' ></div></td><td><div id='3step2' ></div></td></tr>
-	<tr><td><div id='4step1' ></div></td><td><div id='4step2' ></div></td></tr>
-	<tr><td><div id='5step1' ></div></td><td><div id='5step2' ></div></td></tr>
-	</table>
-		
-	<div>&nbsp;</div>
-	<div id='part2'>&nbsp;</div>
-	</td>
-	</tr>
+$return .= "
+	<div id='importWIZARD' style=\"display:none\">
+	<table border = ''>
+
 	<tr>
 	<td id='monitor' style=\"text-align: center; vertical-align: middle;\">
 	<br><select disabled=\"disabled\" style=\"width: 50em;\" size=\"15\" id =\"eventcontrol\" multiple=\"multiple\"></select>
@@ -4505,14 +4459,14 @@ closedir(DIR) or die $!;
 	</td>
 	</tr>
 	</table>
-	</div>
+	</div>";
 
 
 	
 	
 	
 	
-	
+	$return .= "
 	<div id='importAT'>@found_devices</div>
 	<div id='importNOTIFY'>import notify</div>
 	<div id='importCONFIG'>import config</div>
@@ -4522,22 +4476,14 @@ closedir(DIR) or die $!;
 	";
 
 
-
-
 my $ownattr= getAllAttr($Name);
 my @owna = split( / /, $ownattr );
-
-
-	
-
 
     my $j1 = "
 	<script type=\"text/javascript\">
 	//preconf
 	//var preconf ='" . $preconf . "';
 	var preconf ='';
-	
-	
 	";
 	$j1 .="// VARS
 	const ownattr = [];
@@ -4589,9 +4535,9 @@ my @owna = split( / /, $ownattr );
     # var atcmd = " . $comand . ";
     # var atspec = " . $timespec . ";
     #	var notify = " . $notify . ";
-    # var notifydef = " . $notifydef . ";
+    # var notifydef = " . $notifydef . ";"<br>&nbsp;<br>" .
 
-    $return .= "<br>&nbsp;<br>" . $j1;
+    $return .=  $j1;
 	
 	
 	
@@ -12419,8 +12365,8 @@ sub MSwitch_loadpreconf($){
     $preconf =~ s/\n/#[NEWL]/g;
     $preconf =~ s/\r//g;
    # $preconf =~ s/'/\\\'/g;
-	$preconf =~ s/</&lt;/g;
-    $preconf =~ s/>/&gt;/g;
+	#$preconf =~ s/</&lt;/g;
+    #$preconf =~ s/>/&gt;/g;
 #Log3("test",0,$preconf);
 	return $preconf;
 	
