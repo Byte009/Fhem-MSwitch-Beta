@@ -54,10 +54,10 @@ package main;
 use Time::Local;
 use strict;
 use warnings;
-use POSIX;
+use POSIX; 
 use SetExtensions;
 use LWP::Simple;
-
+#use utf8;
 
 #use utf8;
 
@@ -67,6 +67,12 @@ my $updateinfolink =
 "https://raw.githubusercontent.com/Byte009/FHEM-MSwitch/master/updateinfo.txt";
 my $preconffile =
 "https://raw.githubusercontent.com/Byte009/MSwitch_Addons/master/MSwitch_Preconf.conf";
+
+my $templatefile =
+"https://raw.githubusercontent.com/Byte009/MSwitch_Templates/master/";
+
+
+
 my $helpfile    = "www/MSwitch/MSwitch_Help.txt";
 my $helpfileeng = "www/MSwitch/MSwitch_Help_eng.txt";
 my $support =
@@ -1308,7 +1314,13 @@ sub MSwitch_Set($@) {
         return $ret;
     }
 
-
+		    #################################
+    if ( $cmd eq 'loadnotify' ) {
+        #MSwitch_makegroupcmdout( $hash, $args[0] );
+	#Log3("test",0,"args @args");
+		my $ret=MSwitch_loadnotify( $hash, $args[0] );
+        return $ret;
+    }
 
 
 ############# Befehle  aus web.js
@@ -3447,8 +3459,7 @@ sub MSwitch_Notify($$) {
         return;
     }
 
-    readingsSingleUpdate( $own_hash, "last_activation_by", 'event',
-                          $showevents );
+    readingsSingleUpdate( $own_hash, "last_activation_by", 'event',0 );
     my $triggerdevice =
       ReadingsVal( $ownName, 'Trigger_device', '' );    # Triggerdevice
     my @cmdarray;
@@ -3540,9 +3551,9 @@ sub MSwitch_Notify($$) {
         }
 ##########################
 
-      EVENT: foreach my $event (@eventscopy) {
+      EVENT: foreach my $event (@eventscopy){
             if ( $event =~ m/^.*:.\{.*\}?/ ) {
-                MSwitch_LOG( $ownName, 1,
+                MSwitch_LOG( $ownName, 2,
                              "$ownName:    found jason -> $event  " );
                 next EVENT;
             }
@@ -3564,6 +3575,11 @@ sub MSwitch_Notify($$) {
 MSwitch_LOG( $ownName, 6,"eigegangenes Event $event L:" . __LINE__ );
 
 
+
+
+
+
+
             $own_hash->{eventsave} = 'unsaved';
 
             # durchlauf für jedes ankommende event
@@ -3581,27 +3597,28 @@ MSwitch_LOG( $ownName, 6,"eigegangenes Event $event L:" . __LINE__ );
             $triggercondition =~ s/#\[ti\]/~/g;
             $triggercondition =~ s/#\[sp\]/ /g;
 
-            if ( $triggercondition ne '' ) {
 
+
+
+            if ( $triggercondition ne '' )
+			{
                 my $eventcopy1 = $eventcopy;
-                if ( $triggerdevice eq "all_events" ) {
-
-           # fügt dem event den devicenamen hinzu , wenn global getriggert wird
-                    $eventcopy1 = "$devName:$eventcopy";
-				
-				
-				#Log3("test",0,"global- name zugefügt: $eventcopy1");	#HELPLOG
-
+					if ( $triggerdevice eq "all_events" ) 
+					{
+					# fügt dem event den devicenamen hinzu , wenn global getriggert wird
+					 $eventcopy1 = "$devName:$eventcopy";
+					#Log3("test",0,"global- name zugefügt: $eventcopy1");	#HELPLO
+					}
 					
-                }
+					
+                my $ret = MSwitch_checkcondition( $triggercondition, $ownName,$eventcopy1 );
+				
 
-                my $ret = MSwitch_checkcondition( $triggercondition, $ownName,
-                                                  $eventcopy1 );
-
-                if ( $ret eq 'false' ) {
-
-                    next EVENT;
-                }
+				
+					if ( $ret eq 'false' )
+					{
+						next EVENT;
+					}
             }
 
             # Triggerfilter
@@ -4317,13 +4334,13 @@ sub MSwitch_fhemwebconf($$$$) {
     for (@found_devices) {
         $nothash   = $defs{$_};
         $notinsert = $nothash->{DEF};
-        $notifydef .= "'" . $notinsert . "',";
+       # $notifydef .= "'" . $notinsert . "',";
         $notify    .= "'" . $_ . "',";
     }
     chop $notifydef;
     chop $notify;
 
-    $notifydef = "[" . $notifydef . "]";
+    #$notifydef = "[" . $notifydef . "]";
     $notify    = "[" . $notify . "]";
 
     my $return = "
@@ -4338,44 +4355,52 @@ sub MSwitch_fhemwebconf($$$$) {
 	<input name=\"conf\" id=\"importpreconf\" type=\"button\" value=\"import PRECONF\" onclick=\"javascript: conf('importPRECONF',id)\"\">
 	";
 	
-	
-#my @files = <./FHEM/MSwitch/*.txt>;
-# für jede .init-Datei
 
 
 
-#foreach my $file(@files){
-	
-  #open(FILE,"<$file") or print $!;
- # my $ersteZeile = <FILE>;
-  #close FILE;
-  #my @local_array = split(/,/,$ersteZeile);
-  #$hash{$file} = [@local_array];
-  
- # $return .= $file;
-  
-#}
-	my $Verzeichnis ="./FHEM/MSwitch";
-	opendir(DIR, $Verzeichnis) or die $!;
-my @array = readdir(DIR);
-closedir(DIR) or die $!;
-	
-	#$return .= "@array";
-	
+    my $templateinhalt = '';
 	my $template ="";
+	my $adress = $templatefile."01_inhalt.txt";
 	
-	foreach (@array)
-	{
+	
+	#Log3("test",0,$adress);
+	
+	
+	
+    $templateinhalt = get($adress);
+	
+	
+    my @templates = split( /\n/, $templateinhalt );
+
+
+foreach my $testdevices (@templates) {
+            my ( $key, $val ) = split( /\|/, $testdevices );
+			my $plainkey = (split( /\./, $key ))[0];
+            $template .= "<option value=\"$plainkey\">$plainkey</option>";
+        }
 		
 		
-		next if $_ eq ".";
-		next if $_ eq "..";
 		
-		my @name =split( /\./, $_ );
-		
-		 $template .= "<option value=\"$name[0]\">$name[0]</option>";
-		
-	}
+   # $preconf =~ s/'/\\\'/g;
+	#$preconf =~ s/</&lt;/g;
+    #$preconf =~ s/>/&gt;/g;
+#Log3("test",0,$templateinhalt);
+
+
+
+
+	# my $Verzeichnis ="./FHEM/MSwitch";
+	# opendir(DIR, $Verzeichnis) or die $!;
+	# my @array = readdir(DIR);
+	# closedir(DIR) or die $!;
+	# my $template ="";
+	# foreach (@array)
+	# {
+		# next if $_ eq ".";
+		# next if $_ eq "..";
+		# my @name =split( /\./, $_ );
+		# $template .= "<option value=\"$name[0]\">$name[0]</option>";
+	# }
 	
 
 	
@@ -4488,6 +4513,7 @@ my @owna = split( / /, $ownattr );
 	$j1 .="// VARS
 	const ownattr = [];
 	const INQ = [];
+	const templateinfo= [];
 	";
 	 foreach my $akt (@owna) 
 	 {
@@ -4516,6 +4542,13 @@ my @owna = split( / /, $ownattr );
 	var MSDATAVERSION = '" . $vupdate . "';
 
 
+
+var notify = " . $notify . ";
+//var notifydef = " . $notifydef . ";
+
+
+
+
 	\$(document).ready(function() {
     \$(window).load(function() {
 	name = '$Name';
@@ -4534,7 +4567,7 @@ my @owna = split( / /, $ownattr );
     # var atdef = " . $atdef . ";
     # var atcmd = " . $comand . ";
     # var atspec = " . $timespec . ";
-    #	var notify = " . $notify . ";
+    # var notify = " . $notify . ";
     # var notifydef = " . $notifydef . ";"<br>&nbsp;<br>" .
 
     $return .=  $j1;
@@ -8932,15 +8965,30 @@ sub MSwitch_Restartcmd($) {
 }
 ####################
 sub MSwitch_checkcondition($$$) {
+	
+	
+	
+	
+	
 
     my ( $sec, $min, $hour, $mday, $month, $year, $wday, $yday, $isdst ) =
       localtime( gettimeofday() );
+	  
+	  
+	  
+	  
+	  
+	  
     $month++;
     $year += 1900;
- my ( $condition, $name, $event ) = @_;
+	my ( $condition, $name, $event ) = @_;
 
 MSwitch_LOG( $name, 6,"Bedingungsprüfung Bedingung: $condition L:" . __LINE__ );
 MSwitch_LOG( $name, 6,"Bedingungsprüfung Event: $event L:" . __LINE__ );
+
+
+
+
 
     # antwort execute 0 oder 1
    
@@ -9000,6 +9048,10 @@ MSwitch_LOG( $name, 6,"Bedingungsprüfung1: $condition L:" . __LINE__ );
     my $funktionsstringinc;
 
     my $hms = AnalyzeCommand( 0, '{return $hms}' );
+
+
+
+
 
     if ( $condition =~ m/YEAR|MONTH|DAY|MIN|HOUR|HMS/ ) {
         while ( $condition =~ m/(.*)\[YEAR\](.*)([\d]{4})(.*)/ ) {
@@ -9564,6 +9616,11 @@ m/(.*?)\[(ReadingsVal|ReadingsNum|ReadingsAge|AttrVal|InternalVal):(.+):(.+):(.+
         $x++;
         last if $x > 10;    #notausstieg
     }
+	
+	
+
+	
+	
 
     if ( $attrrandomnumber ne '' ) {
         MSwitch_Createnumber($hash);
@@ -9774,6 +9831,9 @@ m/(.*?)(\[\[[a-zA-Z][a-zA-Z0-9_]{0,30}:[a-zA-Z0-9_]{0,30}\]-\[[a-zA-Z][a-zA-Z0-9
 
   END:
 
+
+
+
     # teste auf typ
     my $count = 0;
     my $testarg;
@@ -9822,7 +9882,15 @@ m/(.*?)(\[\[[a-zA-Z][a-zA-Z0-9_]{0,30}:[a-zA-Z0-9_]{0,30}\]-\[[a-zA-Z][a-zA-Z0-9
   MSwitch_LOG( $name, 6,"Bedingungsprüfung2 (final): $finalstring = L:" . __LINE__ );
 
 
+
+
+
     my $ret = eval $finalstring;
+	
+	
+
+
+
     MSwitch_LOG( $name, 6,"Ergebniss Bedingungsprüfung : $ret L:" . __LINE__ );
 
 if ($ret ne "true"){
@@ -9838,6 +9906,10 @@ MSwitch_LOG( $name, 6,"Befehlsabbruch - Bedingung nicht erfüllt L:" . __LINE__ 
 
     my $test = ReadingsVal( $name, 'last_event', 'undef' );
     $hash->{helper}{conditioncheck} = $finalstring;
+	
+	
+	
+		
     return $ret;
 }
 ####################
@@ -12328,7 +12400,7 @@ sub MSwitch_makegroupcmdout($$) {
 
 #################################
 
-sub MSwitch_gettemplate($$){
+sub OLD_MSwitch_gettemplate($$){
 	my ( $hash, $template ) = @_;
     my $Name = $hash->{NAME};
 	my $tZeilen="";
@@ -12355,6 +12427,46 @@ sub MSwitch_gettemplate($$){
 	
 }
 
+#################################
+
+sub MSwitch_gettemplate($$){
+	my ( $hash, $template ) = @_;
+    my $Name = $hash->{NAME};
+	my $tZeilen="";
+	
+	
+   my $adress = $templatefile.$template;
+
+	 $tZeilen = get($adress);
+	
+	my %UMLAUTE = (
+                        'Ä' => 'Ae',
+                        'Ö' => 'Oe',
+                        'Ü' => 'Ue',
+                        'ä' => 'ae',
+                        'ö' => 'oe',
+                        'ü' => 'ue'
+        );
+	my $UMLKEYS = join( "|", keys(%UMLAUTE) );
+
+
+
+#my $encoding_name = Encode::Detect::Detector::detect($tZeilen);
+
+
+#utf8::decode($tZeilen);
+
+#Log3("test",0,$tZeilen);
+ 
+#
+#$tZeilen =~ s/\n/[TRENNER]/g;
+#$tZeilen =~ s/($UMLKEYS)/$UMLAUTE{$1}/g;
+#$tZeilen =~ s/\[TRENNER\]/\n/g;
+
+	return "$tZeilen";
+	
+}
+
 ##########################################
 
 sub MSwitch_loadpreconf($){
@@ -12371,6 +12483,29 @@ sub MSwitch_loadpreconf($){
 	return $preconf;
 	
 }
+
+
+##########################################
+
+sub MSwitch_loadnotify($$){
+	my ( $hash , $notify) = @_;
+    my $Name = $hash->{NAME};
+ #Log3("test",0,"eingang notifyname: ".$notify);
+    my $nothash   = $defs{$notify};
+    my $notinsert = $nothash->{DEF};
+	
+	#$notinsert =~ s/\n/#[NEWL]/g;
+    $notinsert =~ s/\r//g;
+	$notinsert =~ s/\t/    /g;
+	
+	
+  # Log3("test",0,$nothash);
+  # Log3("test",0,$notinsert);
+	return $notinsert;
+	
+}
+
+
 
 
 
