@@ -3,7 +3,21 @@
 // #########################
 
   
-	var version = 'V1.7-Testversion';
+   window.addEventListener("error", fehlerbehandlung);
+
+    function fehlerbehandlung (errorEvent) {
+      var fehler = "Fehlermeldung:\n" + errorEvent.message + "\n" + errorEvent.filename + "\n" + errorEvent.lineno;
+      zeigeFehler(fehler);
+      errorEvent.preventDefault();
+    }
+
+    function zeigeFehler(meldung) {
+      alert(meldung);
+    }
+  
+  
+  
+	var version = 'V1.71';
 	
 	const Devices = [];
 	var result= 0; // wird für waittimer in templates gebraucht
@@ -256,6 +270,8 @@ function conf(typ,but){
 function start1(name){
 	//alert("start");
 	// return;
+
+	
 	    // this code will run after all other $(document).ready() scripts
         // have completely finished, AND all page elements are fully loaded.
 		$( ".makeSelect" ).text( "" );
@@ -297,18 +313,13 @@ function start1(name){
 	
 		
 setTimeout(function() {
-	//document.getElementById('wizard').value+=' N/A';
-	//document.getElementById('config').value+=' N/A';
-	document.getElementById('importat').value+=' N/A';
-	document.getElementById('importnotify').value+=' N/A';
-  	//document.getElementById('wizard').disabled = true;
-	//document.getElementById('config').disabled = true;
-	document.getElementById('importat').disabled = true;
-	document.getElementById('importnotify').disabled = true;
-	//document.getElementById('importTemplate').disabled = true;
 
-	//document.getElementById('importpreconf').disabled = true;
-    // conf('importPRECONF','importpreconf');
+	document.getElementById('importat').value+=' N/A';
+	//document.getElementById('importnotify').value+=' N/A';
+
+	document.getElementById('importat').disabled = true;
+	//document.getElementById('importnotify').disabled = true;
+
 }, 50);
 
 		
@@ -377,7 +388,7 @@ function XXXmakeconfig(){
 	return;
 } 
 
-function XXXfillconfig(name){
+function fillconfig(name){
 	var showconf='';
 	configstart[0] = '#V '+mVersion;
 	conflines =  configstart.length ;
@@ -618,7 +629,7 @@ function startimportnotify(){
 	for (i=count; i<len; i++)
 		{
 
-			ret +='<option value='+i+'>'+notify[i]+'</option>';
+			ret +='<option value='+notify[i]+'>'+notify[i]+'</option>';
 			
 		}
 		
@@ -630,22 +641,64 @@ function startimportnotify(){
 	html+='<table border=\"0\">';
 	html+='<tr><td colspan=\"3\">';
 	html+='</td></tr>';
+	
+	
+	
+	
 	html+='<tr><td style=\"text-align: center;\">';
 	html+=ret;
 	html+='<br><br><input disabled name=\"\" id=\"not\" type=\"button\" value=\"import this NOTIFY\" onclick=\"javascript: savenot()\"\">';
 
 	html+='</td>';
 	html+='<td>';
-	html+='Definition:<br>';
-	html+='Comand:<br>';
-	html+='Trigger-Device:<br>';
-	html+='Trigger-Event:<br>';
-	html+='</td>';
+	
+	html+='<table border=\"0\">';
+	
+	
+	html+='<tr>'
+	html+='<td>Definition: </td>';
 	html+='<td>';
-	html+='<input id=\"defnotify\" type=\"text\" value=\"\" disabled=\"\" style=\"width:400pt;\"><br>';
-	html+='<input id=\"comandnotify\" type=\"text\" value=\"\" disabled=\"\" style=\"width:400pt;\"><br>';
-	html+='<input id=\"trigdev\" type=\"text\" value=\"\" disabled=\"\" style=\"width:400pt;\"><br>';
-	html+='<input id=\"trigevent\" type=\"text\" value=\"\" disabled=\"\" style=\"width:400pt;\"><br>';
+	html+='<textarea id ="defnotify" cols="40" rows="2"></textarea>';
+	html+='</td></tr>';
+	
+	html+='<tr>'
+	html+='<td>Comand: </td>';
+	html+='<td>';
+	html+='<textarea id ="comandnotify" cols="40" rows="2"></textarea>';
+	html+='</td></tr>';
+	
+	html+='<tr>'
+	html+='<td>Trigger-Device: </td>';
+	html+='<td>';
+	html+='<textarea id ="trigdev" cols="40" rows="2"></textarea>';
+	html+='</td></tr>';
+	
+	html+='<tr>'
+	html+='<td>Trigger-Event: </td>';
+	html+='<td>';
+	html+='<textarea id ="trigevent" cols="40" rows="2"></textarea>';
+	html+='</td></tr>';
+	
+	
+	html+='<tr>'
+	html+='<td>Control: </td>';
+	html+='<td>';
+	html+='<textarea id ="globaltest" cols="40" rows="2"></textarea>';	
+	html+='</td></tr>';
+	
+	
+	html+='<tr>'
+	html+='<td>Control: </td>';
+	html+='<td>';
+	html+='<textarea id ="notifytest" cols="40" rows="2"></textarea>';
+	html+='</td></tr>';
+	
+	html+='</table>';
+
+
+
+
+
 	html+='</td>';
 	html+='</tr>';
 	html+='<tr><td colspan=\"3\" style=\"text-align: center; vertical-align: middle;\">';
@@ -667,46 +720,173 @@ function startimportnotify(){
 	
 }
 
+
 function setnotify(name){
 	
-	if (name == "empty"){
+	
 		document.getElementById('not').disabled = true;
 		document.getElementById('not').style.backgroundColor='#ff0000';
 		document.getElementById('defnotify').value='';
 		document.getElementById('comandnotify').value='';
 		document.getElementById('trigdev').value='';
-		document.getElementById('trigevent').value='';
+		document.getElementById('trigevent').value='';	
+		document.getElementById('globaltest').value='';	
+		document.getElementById('notifytest').value='';	
+	
+	if (name == "empty"){
+		
+		return;
+		}
+		FW_cmd(FW_root+'?cmd=set '+devicename+' loadnotify '+name+' &XHR=1', function(data){setnotify1(data)})
+}
+	
+	
+function setnotify1(name){
+	document.getElementById('not').style.backgroundColor='';
+	document.getElementById('not').disabled = false;
+	document.getElementById('defnotify').value=name;
+	var first =  name.indexOf(" ");
+	var laenge = name.length;
+	var cmd = name.substring(first+1,laenge);
+	document.getElementById('comandnotify').value=cmd;
+	
+	
+	
+	var trigger = name.substring(0,first);
+	//alert(trigger);
+	
+	
+	var mapp = trigger.match(/^(\()(.*)(\))/);
+	if (mapp!=null && mapp.length!=0)
+		{	
+	//alert(mapp[0]);
+		trigger=mapp[0];
+		
+		
+		// voll globales triggern
+		
+		// im cmd eventausdrücke auf mswitchausdrücke mappen !!!
+		trigger = trigger.replace(/:\./g,':.*');
+		trigger = "\"\$EVENT\" =~m/"+trigger+"/";
+	//alert(trigger);
+		
+		
+		
+		document.getElementById('globaltest').value=trigger;
+		document.getElementById('trigevent').value=".*";
+		document.getElementById('trigdev').value="all_events";
 		return;
 		}
 	
-	document.getElementById('not').style.backgroundColor='';
-	document.getElementById('not').disabled = false;
-	document.getElementById('defnotify').value=notifydef[name];
-	var first =  notifydef[name].indexOf(" ");
-	var laenge = notifydef[name].length;
-	var cmd = notifydef[name].substring(first+1,laenge);
-	document.getElementById('comandnotify').value=cmd;
-	var trigger = notifydef[name].substring(0,first);
-	var tlaenge = trigger.length;
-	var trenner =  trigger.indexOf(":");
-	var tdevice = notifydef[name].substring(0,trenner);
-	document.getElementById('trigdev').value=tdevice;
-	var tevent = notifydef[name].substring(trenner+1,tlaenge);
-	document.getElementById('trigevent').value=tevent;
+	
+	var mapp1 = trigger.match(/(.*):(.*:.*)/);
+	if (mapp1!=null && mapp1.length!=0)
+		{	
+		var tdevice = mapp1[1];
+		var tevent = mapp1[2];
+		tevent = tevent.replace(/:\./g,':');
+		document.getElementById('trigdev').value=tdevice;
+		document.getElementById('trigevent').value=tevent;
+		return;	
+		}
+		else
+		{
+		var mapp2 = trigger.match(/(.*):(.*)/);
+		var tdevice = mapp2[1];
+		var tevent = mapp2[2];
+		tevent = tevent.replace(/:\./g,':');
+		document.getElementById('trigdev').value=tdevice;
+		document.getElementById('trigevent').value=tevent;
+			
+		}
+	
+	
 	return;	
 }
 
 
+
+
 function savenot(){
 	var cmdstring = document.getElementById('comandnotify').value;
+	//return;
+	// funktionsfähige ersetzung für detailübertragung
+	cmdstring = cmdstring.replace(/\n/g,'#[nl]');
+	cmdstring = cmdstring.replace(/:/g,'#[dp]');
+	cmdstring = cmdstring.replace(/;/g,'#[se]');
+	cmdstring = cmdstring.replace(/ /g,'#[sp]');
+	cmdstring = cmdstring.replace(/'/g,'#[st]');
+	cmdstring = cmdstring.replace(/\t/g,'#[tab]');
+	cmdstring = cmdstring.replace(/\\/g,'#[bs]');
+	cmdstring = cmdstring.replace(/,/g,'#[ko]');
+	cmdstring = cmdstring.replace(/\|/g,'#[wa]');
+	cmdstring = cmdstring.replace(/\|/g,'#[wa]');
+	
+	// hier notify to mswitch mappen
+	// EVENT - EVTPART3
+	// NAME
+	//
+	cmdstring = cmdstring.replace(/\$NAME/g,'$NAME');
+	cmdstring = cmdstring.replace(/\$EVENT/g,'$EVTPART3');
+	
+	
+	document.getElementById('notifytest').value=cmdstring;
+	
+	
+	
+	
+	//alert(cmdstring);
+	//return;
 	configstart[12] ='#S .Device_Affected -> FreeCmd-AbsCmd1';
     var newcmdline = '#S .Device_Affected_Details -> FreeCmd-AbsCmd1'+'#[NF]undefined#[NF]cmd#[NF]'+cmdstring+'#[NF]#[NF]delay1#[NF]delay1#[NF]00:00:00#[NF]00:00:00#[NF]#[NF]#[NF]undefined#[NF]undefined#[NF]1#[NF]0#[NF]#[NF]0#[NF]0#[NF]1#[NF]0';
 	configstart[29]=newcmdline;
+	
+	
+	
 	configstart[5] ='#S Trigger_device -> '+ document.getElementById('trigdev').value;
-	configstart[8] ='#S .Trigger_cmd_on -> '+ document.getElementById('trigevent').value;
+	
+	
+	
+	
+	
+	var testevent = document.getElementById('trigevent').value.indexOf(":")
+	if (testevent == -1 && document.getElementById('trigdev').value != 'global' && document.getElementById('trigevent').value != '.*')
+	{
+		configstart[8] ='#S .Trigger_cmd_on -> state:'+ document.getElementById('trigevent').value;
+	}
+	else{
+		configstart[8] ='#S .Trigger_cmd_on -> '+ document.getElementById('trigevent').value;
+	}
+	
+	
+	
+	
+	
+	
+
+
+if (document.getElementById('trigdev').value =="all_events")
+{
+	configstart[26] ='#A MSwitch_Expert -> 1';
+	configstart[9] ='#S .Trigger_condition -> '+document.getElementById('globaltest').value;
+	
+	
+	//#S .Trigger_Whitelist -> NAME!=Template
+	
+	configstart[28] ='#S .Trigger_Whitelist -> NAME!='+devicename;
+	//#S .Trigger_condition -> "$EVENT"#[sp]=#[ti]m/(G_Steckdosen_2E070C#[dp]ENERGY_Power#[dp].*|G_Steckdosen_2E070C/
+}
+	
 	fillconfig('rawconfig2');
+	
+	
+	//return;
+	
 	saveconfig('rawconfig2');
+	
+	
 	return;
+	
 }
 
 function startimportpreconf(){
@@ -1638,7 +1818,38 @@ if (typa == "A" ){
 	var device =  document.getElementById('bank6').value.split("\n");	
 	if (document.getElementById('bank1').value == "FreeCmd"){	
 	first = first.replace(/\n/g,';;');	
-	second = second.replace(/\n/g,';;');		
+	second = second.replace(/\n/g,';;');
+
+
+
+	first = first.replace(/\n/g,'#[nl]');
+	first = first.replace(/:/g,'#[dp]');
+	first = first.replace(/;/g,'#[se]');
+	first = first.replace(/ /g,'#[sp]');
+	first = first.replace(/'/g,'#[st]');
+	first = first.replace(/\t/g,'#[tab]');
+	first = first.replace(/\\/g,'#[bs]');
+	first = first.replace(/,/g,'#[ko]');
+	first = first.replace(/\|/g,'#[wa]');
+	first = first.replace(/\|/g,'#[wa]');
+
+
+	second = second.replace(/\n/g,'#[nl]');
+	second = second.replace(/:/g,'#[dp]');
+	second = second.replace(/;/g,'#[se]');
+	second = second.replace(/ /g,'#[sp]');
+	second = second.replace(/'/g,'#[st]');
+	second = second.replace(/\t/g,'#[tab]');
+	second = second.replace(/\\/g,'#[bs]');
+	second = second.replace(/,/g,'#[ko]');
+	second = second.replace(/\|/g,'#[wa]');
+	second = second.replace(/\|/g,'#[wa]');
+
+
+
+
+
+	
 	device[field1]= "#[NF]"
 	device[field2]="#[NF]"+first+" "+second;
 	}
