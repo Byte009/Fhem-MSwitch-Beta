@@ -1,8 +1,7 @@
-Testversion
-Templatesteuerung
-UTF8-Flag Fix
-alten wizzard entfernt
-JS-code bereinigt
-kleinere Änderungen neuer Wizard
-.pl - Modul angepassst
-importNOTIFY aktiviert
+Testversion V4.0
+geänderte Eventbehandlung conditions
+geänderte Eventbehandlung Befehlszweige
+attribut Switching_once
+set reset_Switching_once
+set writelog
+geänderte MSwitch_Extensions
