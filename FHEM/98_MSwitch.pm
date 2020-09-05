@@ -79,7 +79,7 @@ my $helpfileeng = "www/MSwitch/MSwitch_Help_eng.txt";
 my $support =
 "Support Whatsapp: https://chat.whatsapp.com/IOr3APAd6eh6tVYsHpbDqd Mail: Byte009\@web.de";
 my $autoupdate   = 'on';     # off/on
-my $version      = '4.0 Beta';
+my $version      = '4.04';
 my $wizard       = 'on';     # on/off
 my $importnotify = 'on';     # on/off
 my $importat     = 'on';     # on/off
@@ -3830,6 +3830,12 @@ sub MSwitch_Notify($$) {
       EVENT: foreach my $event (@eventscopy)
 		{
 			
+		MSwitch_LOG( $ownName, 6, "$ownName: event -> $event  " );
+		
+		
+		
+		
+		
 		
 			
             if ( $event =~ m/^.*:.\{.*\}?/ ) {
@@ -3853,6 +3859,8 @@ sub MSwitch_Notify($$) {
             # durchlauf für jedes ankommende event
             $event = "" if ( !defined($event) );
             $eventcopy = $event;
+			
+			
             $eventcopy =~ s/: /:/s;    # BUG  !!!!!!!!!!!!!!!!!!!!!!!!
             $event =~ s/: /:/s;
 
@@ -3863,17 +3871,22 @@ sub MSwitch_Notify($$) {
 
 
   my $eventcopy1 = $eventcopy;
-  
+  $own_hash->{helper}{evtparts}=2;
   
                 if ( $triggerdevice eq "all_events" )
 				{
 				# fügt dem event den devicenamen hinzu , wenn global getriggert wird
                 $eventcopy1 = "$devName:$eventcopy";
+				
+				
+				$own_hash->{helper}{evtparts}=3;
+
 				}
 
                 if ( AttrVal( $ownName, "MSwitch_Selftrigger_always", 0 ) eq "1" && $incommingdevice eq "MSwitch_Self" )
                 {
                 $eventcopy1 = "MSwitch_Self:$eventcopy";
+				$own_hash->{helper}{evtparts}=3;
                 }
 
 ##########################################
@@ -3971,32 +3984,6 @@ MSwitch_LOG( $ownName, 6, "--- eigegangenes Event --- $event ---L:" . __LINE__ )
 			}
 
 ######################################
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -4176,7 +4163,27 @@ MSwitch_LOG( $ownName, 6, "--- eigegangenes Event --- $event ---L:" . __LINE__ )
             }
 
             my $direktswitch = 0;
-            my @eventsplit   = split( /\:/, $eventcopy );
+			
+			
+			
+			 MSwitch_LOG( $ownName, 6, "eventcopy $eventcopy L:" . __LINE__ );
+			
+			 MSwitch_LOG( $ownName, 6, "benötigte eventparts $own_hash->{helper}{evtparts} L:" . __LINE__ );
+			
+			
+			
+            my @eventsplit   = split( /:/, $eventcopy ,$own_hash->{helper}{evtparts});
+			
+			
+			 MSwitch_LOG( $ownName, 6, "eventsplit @eventsplit  L:" . __LINE__ );
+			
+			
+			
+			
+			
+			
+			
+			
             my $eventstellen = @eventsplit;
             my $testvar      = '';
 
@@ -4263,14 +4270,15 @@ MSwitch_LOG( $ownName, 6, "--- eigegangenes Event --- $event ---L:" . __LINE__ )
             }
 
             # speichert 20 events ab zur weiterne funktion ( funktionen )
-            # ändern auf bedarfschaltung
+            # ändern auf bedarfschaltung   ,$own_hash->{helper}{evtparts}
 
-            if (    $check == '1'
+             if (    $check == '1'
                 and defined( ( split( /:/, $eventcopy ) )[1] )
                 and ( ( split( /:/, $eventcopy ) )[1] =~ /^[-]?[0-9,.E]+$/ ) )
+                
             {
-                my $evwert    = ( split( /:/, $eventcopy ) )[1];
-                my $evreading = ( split( /:/, $eventcopy ) )[0];
+                my $evwert    = ( split( /:/  ))[1];
+                my $evreading = ( split( /:/ ))[0];
                 my @eventfunction;
 				@eventfunction = split( / /, $own_hash->{helper}{eventhistory}{$evreading} ) if defined $evreading;
                 unshift( @eventfunction, $evwert );
@@ -4542,8 +4550,8 @@ sub MSwitch_checkbridge($$$) {
             "ID Bridge gefunden: zweig $bridge[0] , $bridge[2] "
           . @bridge . " L:"
           . __LINE__ );
-
-    MSwitch_Exec_Notif( $hash, $zweig, 'nocheck', '', $bridge[2] );
+	#$hash->{helper}{aktevent}=$event;
+    MSwitch_Exec_Notif( $hash, $zweig, 'nocheck', $event, $bridge[2] );
 
     return ( "bridge found", $zweig, $bridge[2] );
 }
@@ -7293,22 +7301,22 @@ MS-HELPcond
 
     $MSonand1 =
       "<input type='text' id='timeon' name='timeon' size='35'  value ='"
-      . $timeon . "'>";
+      . $timeon . "' onClick=\"javascript:bigwindow(this.id);\">";
     $MSonand2 =
       "<input type='text' id='timeoff' name='timeoff' size='35'  value ='"
-      . $timeoff . "'>";
+      . $timeoff . "' onClick=\"javascript:bigwindow(this.id);\">";
     $MSexec1 =
       "<input type='text' id='timeononly' name='timeononly' size='35'  value ='"
-      . $timeononly . "'>";
+      . $timeononly . "' onClick=\"javascript:bigwindow(this.id);\">";
 
     if ( $hash->{INIT} ne 'define' ) {
         $MSexec2 =
 "<input type='text' id='timeoffonly' name='timeoffonly' size='35'  value ='"
-          . $timeoffonly . "'>";
+          . $timeoffonly . "'onClick=\"javascript:bigwindow(this.id);\">";
 
         $MSexec12 =
 "<input type='text' id='timeoffonly' name='timeoffonly' size='35'  value ='"
-          . $timeonoffonly . "'>";
+          . $timeonoffonly . "' onClick=\"javascript:bigwindow(this.id);\">";
     }
 
     $MSconditiontext = "Trigger condition (events only)";
@@ -8920,6 +8928,9 @@ delete( $hash->{helper}{aktevent} );
 	
 
     MSwitch_LOG( $name, 6, "Ausführung Befehlsstapel L:" . __LINE__ );
+	
+	
+
 
     if ( AttrVal( $name, 'MSwitch_Switching_once', 0 ) == 1
         && $fullstring eq $hash->{helper}{lastexecute} )
@@ -8930,11 +8941,17 @@ delete( $hash->{helper}{aktevent} );
         MSwitch_LOG( $name, 6,
             "(attr MSwitch_Switching_once gesetzt) L:" . __LINE__ );
     }
-    else {
+    else 
+	{
+		
+		
+	MSwitch_LOG( $name, 6,"anzahl befehle : ".@execute );	
+
+		
         foreach my $device (@execute) {
 			
 	
-			
+		 MSwitch_LOG( $name, 6,"-- Ausgeführter Befehl: -$device- L:". __LINE__ );	
             next if $device eq "";
             next if $device eq " ";
             next if $device eq "  ";
@@ -9034,8 +9051,14 @@ delete( $hash->{helper}{aktevent} );
         readingsSingleUpdate( $hash, "last_exec_cmd", $msg, $showevents ) if defined $msg ;
 	
 		
-		
+		if (@execute > 0){
         $hash->{helper}{lastexecute} = $fullstring;
+		MSwitch_LOG( $name, 6, "LOCK gelöscht" );
+		}
+		else
+		{
+			MSwitch_LOG( $name, 6, "LOCK nicht gelöscht" );
+		}
     }
 
     return $satz;
@@ -10040,7 +10063,7 @@ m/(.*?)\[(ReadingsVal|ReadingsNum|ReadingsAge|AttrVal|InternalVal):(.+):(.+):(.+
 
     if ($event) {
 
-        @evtparts = split( /:/, $event );
+        @evtparts = split( /:/, $event,$hash->{helper}{evtparts} );
     }
     else {
         $event       = "";
@@ -12009,7 +12032,10 @@ sub MSwitch_EventBulk($$$$) {
     #Log3("test",2,"everntbulk - $name : $event");
     MSwitch_LOG( $name, 6, "+++ +++ aktualisiere Eventreadings L:" . __LINE__ );
 
-    my @evtparts = split( /:/, $event );
+    my @evtparts = split( /:/, $event,$hash->{helper}{evtparts} );
+	
+	
+	
     $update = '1';
     my $evtsanzahl = @evtparts;
 
@@ -12308,13 +12334,21 @@ sub MSwitch_dec($$) {
 
 
 
-#MSwitch_LOG( $name, 0,"Durchlauf todec $todec L:" . __LINE__ );
+MSwitch_LOG( $name, 6,"Durchlauf todec $todec L:" . __LINE__ );
+MSwitch_LOG( $name, 6,"Durchlauf todecevent $hash->{helper}{aktevent} L:" . __LINE__ );
+
+
 
  my @evtparts;
  my $event;
     if ($hash->{helper}{aktevent}) {
 
-        @evtparts = split( /:/, $hash->{helper}{aktevent} );
+
+MSwitch_LOG( $name, 6,"todecevent $hash->{helper}{aktevent} L:" . __LINE__ );
+MSwitch_LOG( $name, 6,"evtparts $hash->{helper}{evtparts} L:" . __LINE__ );
+
+
+        @evtparts = split( /:/, $hash->{helper}{aktevent},$hash->{helper}{evtparts} );
 		$event=$hash->{helper}{aktevent};
     }
     else {
@@ -12478,7 +12512,7 @@ sub MSwitch_makefreecmdonly($$) {
  my $event;
     if ($hash->{helper}{aktevent}) {
 
-        @evtparts = split( /:/, $hash->{helper}{aktevent} );
+        @evtparts = split( /:/, $hash->{helper}{aktevent},$hash->{helper}{evtparts} );
     }
     else {
         $event       = "";
@@ -12581,14 +12615,14 @@ sub MSwitch_makefreecmd($$) {
         my $newcode = "";
 
 
-
+ 
 
 
  my @evtparts;
  my $event;
     if ($hash->{helper}{aktevent}) {
 
-        @evtparts = split( /:/, $hash->{helper}{aktevent} );
+        @evtparts = split( /:/, $hash->{helper}{aktevent},$hash->{helper}{evtparts} );
     }
     else {
         $event       = "";
