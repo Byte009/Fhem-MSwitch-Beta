@@ -10563,7 +10563,7 @@ MSwitch_LOG( $Name, 6, "Timer1: $condition" . __LINE__ );
 
     # trenne timerfile
 	
-	
+	 my $key ;
 	
 	
     # my $key = 'on';
