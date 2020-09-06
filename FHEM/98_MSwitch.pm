@@ -10550,6 +10550,11 @@ sub MSwitch_Createtimer($) {
     }
     my $lenght = length($condition);
 
+
+
+MSwitch_LOG( $Name, 6, "Timer1: $condition" . __LINE__ );
+
+
     #remove all timers
     MSwitch_Clear_timer($hash);
     if ( $lenght == 0 ) {
@@ -10557,12 +10562,31 @@ sub MSwitch_Createtimer($) {
     }
 
     # trenne timerfile
-    my $key = 'on';
-    $condition =~ s/$key//ig;
-    $key = 'off';
-    $condition =~ s/$key//ig;
-    $key = 'ly';
-    $condition =~ s/$key//ig;
+	
+	
+	
+	
+    # my $key = 'on';
+    # $condition =~ s/$key//ig;
+    # $key = 'off';
+    # $condition =~ s/$key//ig;
+    # $key = 'ly';
+    # $condition =~ s/$key//ig;
+	
+	
+	#
+	
+	$condition =~ s/~offonly/~/ig;
+	$condition =~ s/~ononly/~/ig;
+	
+    $condition =~ s/~off/~/ig;
+
+    $condition =~ s/^on//ig;
+	$condition =~ s/~onoffonly/~/ig;
+	
+	
+	
+	
     $condition =~ s/\$name/$Name/g;
     $condition =~ s/\$SELF/$Name/g;
     $x = 0;
@@ -10577,7 +10601,16 @@ sub MSwitch_Createtimer($) {
             my $part1 = $1;
             my $part3 = $3;
 
+
+MSwitch_LOG( $Name, 6, "s2: $2" . __LINE__ );
+
+
             my $part2 = eval $2;
+			
+			
+			
+			
+			
             if ( $part2 !~ m/^[0-9]{2}:[0-9]{2}$|^[0-9]{2}:[0-9]{2}:[0-9]{2}$/ )
             {
                 MSwitch_LOG( $Name, 1,
@@ -10591,6 +10624,11 @@ sub MSwitch_Createtimer($) {
             $condition = $part1 . $part2 . $part3;
         }
     }
+	
+	
+	MSwitch_LOG( $Name, 6, "Timer2: $condition" . __LINE__ );
+	
+	
     my @timer = split /~/, $condition;
     $timer[0] = '' if ( !defined $timer[0] );    #on
     $timer[1] = '' if ( !defined $timer[1] );    #off
@@ -10598,6 +10636,16 @@ sub MSwitch_Createtimer($) {
     $timer[3] = '' if ( !defined $timer[3] );    #cmd2
     $timer[4] = '' if ( !defined $timer[4] );    #cmd1+2
                                                  # lösche bei notify und toggle
+
+
+
+
+MSwitch_LOG( $Name, 6, "cmd2: $timer[2]" . __LINE__ );
+
+
+
+
+
 
     if ( AttrVal( $Name, 'MSwitch_Mode', 'Notify' ) eq "Notify" ) {
         $timer[0] = '';
