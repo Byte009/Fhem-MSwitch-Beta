@@ -10588,7 +10588,7 @@ MSwitch_LOG( $Name, 6, "Timer1: $condition" . __LINE__ );
 	
 	
     $condition =~ s/\$name/$Name/g;
-    $condition =~ s/\$SELF/$Name/g;
+    #$condition =~ s/\$SELF/$Name/g;
     $x = 0;
 
     MSwitch_LOG( $Name, 5, "Timer: $condition" . __LINE__ );
@@ -10603,9 +10603,16 @@ MSwitch_LOG( $Name, 6, "Timer1: $condition" . __LINE__ );
 
 
 MSwitch_LOG( $Name, 6, "s2: $2" . __LINE__ );
+my $exec="my \$SELF='".$Name."';my \$return = ".$2.";return \$return;";
+#MSwitch_LOG( $Name, 0, "exec $exec" . __LINE__ );
 
 
-            my $part2 = eval $2;
+            my $part2 = eval $exec;
+			
+#MSwitch_LOG( $Name, 0, "ret $part2" . __LINE__ );			
+			
+
+            #my $part2 = eval $2;
 			
 			
 			
@@ -10627,7 +10634,7 @@ MSwitch_LOG( $Name, 6, "s2: $2" . __LINE__ );
 	
 	
 	MSwitch_LOG( $Name, 6, "Timer2: $condition" . __LINE__ );
-	
+	$condition =~ s/\$SELF/$Name/g;
 	
     my @timer = split /~/, $condition;
     $timer[0] = '' if ( !defined $timer[0] );    #on
