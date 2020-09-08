@@ -185,6 +185,10 @@ sub MSwitch_PerformHttpRequest($$);
 sub MSwitch_savetemplate($$$);
 
 ##############################
+
+
+
+#newblock
 my %sets = (
     "wizard"            => "noArg",
     "on"                => "noArg",
@@ -212,6 +216,7 @@ my %sets = (
     "exec_cmd_1"        => "noArg",
     "exec_cmd_2"        => "noArg",
     "del_repeats"       => "noArg",
+	"timer"       => "on,off",
     "wait"              => "noArg",
     "VUpdate"           => "noArg",
     "Writesequenz"      => "noArg",
@@ -1187,6 +1192,18 @@ m/(.*)(ReadingsVal|ReadingsNum|ReadingsAge|AttrVal|InternalVal)(.*?\))(.*)/
             $ret .= "<br>" . $NOTIMER . "<br>";
             return $ret;
         }
+		
+	 if ( ReadingsVal( $name, 'Timercontrol', 'on' ) eq "off" )
+	 {
+		
+         $ret .= "<br>Timersteuerung ist deaktiviert<br>";
+		 return $ret;
+	
+	}
+		
+		
+		
+		
         $ret .= "<div nowrap>" . $SYSTEMZEIT . " " . localtime() . "</div><hr>";
         $ret .= "<div nowrap>" . $SCHALTZEIT . "</div><hr>";
 
@@ -1265,6 +1282,16 @@ m/(.*)(ReadingsVal|ReadingsNum|ReadingsAge|AttrVal|InternalVal)(.*?\))(.*)/
                   . " only</div>";
             }
         }
+		
+		
+		
+		# if ( ReadingsVal( $name, 'Timercontrol', 'on' ) eq "off" )
+	# {
+		
+         # $ret .="<div nowrap><br>Timer sind deaktiviert.</div>";
+	# }
+		
+		
 
         #delays
         $ret .= "<br>&nbsp;<br><div nowrap>aktive Delays:</div><hr>";
@@ -1353,7 +1380,33 @@ sub MSwitch_Set($@) {
         return;
     }
 
+  
+	#################################
+    if ( $cmd eq 'timer' ) {
+		readingsSingleUpdate( $hash, "Timercontrol", "@args[0]", 1 );
+		
+		
+		
+		if ($args[0] eq "on"){
+		MSwitch_Clear_timer($hash);
+        MSwitch_Createtimer($hash);
+        MSwitch_LOG( $name, 6, "Timer neu berechnet L:" . __LINE__ );
+		}
+		
+		if ($args[0] eq "off"){
+		MSwitch_Clear_timer($hash);
+		}
+		
+		
+		
+		
+        return;
+    }
+
     #################################
+	
+	
+	
     if ( $cmd eq 'showgroup' ) {
         MSwitch_makegroupcmdout( $hash, $args[0] );
         return;
@@ -1659,12 +1712,12 @@ sub MSwitch_Set($@) {
 
         if ( $devicemode eq "Notify" ) {
             return
-"Unknown argument $cmd, choose one of $dynsetlist writelog reset_Switching_once:noArg loadHTTP reset_device:noArg active:noArg inactive:noArg del_function_data:noArg del_delays backup_MSwitch:all_devices fakeevent exec_cmd_1 exec_cmd_2 wait reload_timer:noArg del_repeats:noArg change_renamed reset_cmd_count:1,2,all $setList "
+"Unknown argument $cmd, choose one of timer:on,off $dynsetlist writelog reset_Switching_once:noArg loadHTTP reset_device:noArg active:noArg inactive:noArg del_function_data:noArg del_delays backup_MSwitch:all_devices fakeevent exec_cmd_1 exec_cmd_2 wait reload_timer:noArg del_repeats:noArg change_renamed reset_cmd_count:1,2,all $setList "
               ;    #$special
         }
         elsif ( $devicemode eq "Toggle" ) {
             return
-"Unknown argument $cmd, choose one of $dynsetlist writelog reset_Switching_once:noArg reset_device:noArg active:noArg del_function_data:noArg inactive:noArg on off del_delays:noArg backup_MSwitch:all_devices fakeevent wait reload_timer:noArg del_repeats:noArg change_renamed $setList "
+"Unknown argument $cmd, choose one of timer:on,off $dynsetlist writelog reset_Switching_once:noArg reset_device:noArg active:noArg del_function_data:noArg inactive:noArg on off del_delays:noArg backup_MSwitch:all_devices fakeevent wait reload_timer:noArg del_repeats:noArg change_renamed $setList "
               ;    #$special
         }
         elsif ( $devicemode eq "Dummy" ) {
@@ -1676,18 +1729,18 @@ sub MSwitch_Set($@) {
                 if ( AttrVal( $name, "MSwitch_Selftrigger_always", 0 ) eq "1" )
                 {
                     return
-"Unknown argument $cmd, choose one of $dynsetlist writelog reset_Switching_once:noArg loadHTTP del_repeats:noArg del_delays exec_cmd_1 exec_cmd_2 reset_device:noArg wait backup_MSwitch:all_devices $setList $special";
+"Unknown argument $cmd, choose one of timer:on,off $dynsetlist writelog reset_Switching_once:noArg loadHTTP del_repeats:noArg del_delays exec_cmd_1 exec_cmd_2 reset_device:noArg wait backup_MSwitch:all_devices $setList $special";
                 }
                 else {
                     return
-"Unknown argument $cmd, choose one of $dynsetlist writelog reset_Switching_once:noArg loadHTTP reset_device:noArg backup_MSwitch:all_devices $setList $special";
+"Unknown argument $cmd, choose one of timer:on,off $dynsetlist writelog reset_Switching_once:noArg loadHTTP reset_device:noArg backup_MSwitch:all_devices $setList $special";
                 }
             }
         }
         else {
             #full
             return
-"Unknown argument $cmd, choose one of $dynsetlist writelog reset_Switching_once:noArg loadHTTP del_repeats:noArg reset_device:noArg active:noArg del_function_data:noArg inactive:noArg on off  del_delays backup_MSwitch:all_devices fakeevent exec_cmd_1 exec_cmd_2 wait del_repeats:noArg reload_timer:noArg change_renamed reset_cmd_count:1,2,all $setList $special";
+"Unknown argument $cmd, choose one of timer:on,off $dynsetlist writelog reset_Switching_once:noArg loadHTTP del_repeats:noArg reset_device:noArg active:noArg del_function_data:noArg inactive:noArg on off  del_delays backup_MSwitch:all_devices fakeevent exec_cmd_1 exec_cmd_2 wait del_repeats:noArg reload_timer:noArg change_renamed reset_cmd_count:1,2,all $setList $special";
         }
     }
 
@@ -1784,6 +1837,7 @@ sub MSwitch_Set($@) {
                 "details"           => "noArg",
                 "del_trigger"       => "noArg",
                 "del_delays"        => "",
+				"timer"       => "on,off",
                 "del_function_data" => "noArg",
                 "trigger"           => "noArg",
                 "filter_trigger"    => "noArg",
@@ -3006,7 +3060,7 @@ sub MSwitch_toggle($$) {
 
 
 
-$cmds=~ s/#\[SR\]/|/g;
+	$cmds=~ s/#\[SR\]/|/g;
 	
     $cmds =~ m/(set) (.*)( )MSwitchtoggle (.*)/;
 	
@@ -3016,13 +3070,8 @@ $cmds=~ s/#\[SR\]/|/g;
 	
     my $newcomand = $1 . " " . $2 . " ";
 	
-	# MSwitch_LOG( $Name, 6, "1 $1 L:" . __LINE__ );
-	# MSwitch_LOG( $Name, 6, "cmds $cmds L:" . __LINE__ );
-	
-	
-	
-	
-	
+	MSwitch_LOG( $Name, 6, "1 $1 L:" . __LINE__ );
+	MSwitch_LOG( $Name, 6, "cmds $cmds L:" . __LINE__ );
 	
 	if ($2 eq "MSwitch_Self")
 	{
@@ -3034,7 +3083,7 @@ $cmds=~ s/#\[SR\]/|/g;
 	
     my @togglepart = split( /:/, $4 );
 	
-	#MSwitch_LOG( $Name, 6, "Toggleparts @togglepart!!! L:" . __LINE__ );
+	MSwitch_LOG( $Name, 6, "Toggleparts @togglepart!!! L:" . __LINE__ );
 	
 	
 	
@@ -3062,7 +3111,7 @@ if ($togglepart[0] =~ m/^\[(.)\]/)
 	
 	
 		
-#MSwitch_LOG( $Name, 6, "Trennercheck $togglepart[0]!!! L:" . __LINE__ );
+	MSwitch_LOG( $Name, 6, "Trennercheck $togglepart[0]!!! L:" . __LINE__ );
 	
 	
 	shift @togglepart;
@@ -3093,7 +3142,7 @@ if ($togglepart[0] =~ m/^\[(.)\]/)
         $togglepart[1] =~ s/\]//g;
         @muster = split( /$trenner/, $togglepart[1] );
 		
-		#MSwitch_LOG( $Name, 6, "cmds @cmds!!! L:" . __LINE__ );
+		MSwitch_LOG( $Name, 6, "cmds @cmds!!! L:" . __LINE__ );
 				
 				
         $anzmuster = @cmds;
@@ -3120,12 +3169,15 @@ my $aktstate;
 #MSwitch_LOG( $Name, 6, "S2 $devicename L:" . __LINE__ );
 
 
-		
+if ($reading eq "MSwitch_self")
+{
+	$aktstate = ReadingsVal( $Name, 'last_toggle_state', 'undef' );	
+} else {
 	$aktstate = ReadingsVal( $devicename, $reading, 'undef' );	
-	#MSwitch_LOG( $Name, 6, "NAME -$Name- Reading -$reading-!!! $aktstate L:" . __LINE__ );
-	
+}
 
 
+#MSwitch_LOG( $Name, 6, "NAME -$Name- Reading -$reading-!!! $aktstate L:" . __LINE__ );
 #MSwitch_LOG( $Name, 6, "AKTSTATE von reading $reading = $aktstate L:" . __LINE__ );
 
 
@@ -3144,6 +3196,8 @@ my $aktstate;
 
     my $nextcmd = $cmds[$nextpos];
     $newcomand = $newcomand . $nextcmd;
+
+	readingsSingleUpdate( $hash, "last_toggle_state", $nextcmd, 1 );
 
     MSwitch_LOG( $Name, 6, "Toggle Rückgabe:\n $newcomand \nL:" . __LINE__ );
     return $newcomand;
@@ -4614,7 +4668,7 @@ sub MSwitch_fhemwebconf($$$$) {
     my $cmds;
 	
     $cmds .=
-"' reset_Switching_once loadHTTP del_repeats reset_device active del_function_data inactive on off del_delays backup_MSwitch fakeevent exec_cmd_1 exec_cmd_2 wait del_repeats reload_timer change_renamed reset_cmd_count ',";
+"' reset_Switching_once loadHTTP timer:on,off del_repeats reset_device active del_function_data inactive on off del_delays backup_MSwitch fakeevent exec_cmd_1 exec_cmd_2 wait del_repeats reload_timer change_renamed reset_cmd_count ',";
     $devstring .= "'MSwitch_Self',";
 
     @found_devices = devspec2array("TYPE=.*");
@@ -10532,7 +10586,11 @@ sub MSwitch_Checkcond_day($$$$) {
         "Ergebniss tagesbezogene Bedingung: $daycond L:" . __LINE__ );
     return $daycond;
 }
+
+
 ####################
+
+
 sub MSwitch_Createtimer($) {
     my ($hash) = @_;
     my $Name = $hash->{NAME};
@@ -10542,18 +10600,16 @@ sub MSwitch_Createtimer($) {
     my $condition = ReadingsVal( $Name, '.Trigger_time', '' );
     $condition =~ s/#\[dp\]/:/g;
     my $x = 0;
-    while ( $condition =~ m/(.*)(\[)([0-9]?[a-zA-Z]{1}.*)\:(.*)(\])(.*)/ ) {
-        $x++;    # notausstieg notausstieg
-        last if $x > 20;    # notausstieg notausstieg
-        my $setmagic = ReadingsVal( $3, $4, 0 );
-        $condition = $1 . '[' . $setmagic . ']' . $6;
-    }
+	
+	
+
+	
     my $lenght = length($condition);
 
 
 
-MSwitch_LOG( $Name, 6, "Timer1: $condition" . __LINE__ );
 
+	MSwitch_LOG( $Name, 6, "Timer1: $condition" . __LINE__ );
 
     #remove all timers
     MSwitch_Clear_timer($hash);
@@ -10561,26 +10617,73 @@ MSwitch_LOG( $Name, 6, "Timer1: $condition" . __LINE__ );
         return;
     }
 
+
+
+# suche nach setmagic 
+# Rückgabe muss ein string in akzeptierten timerformat sein HH:MM(ptional|1234567)
+################################################
+    while ( $condition =~ m/(.*)\[([0-9]?[a-zA-Z\$]{1}.*\:.*?)\](.*)/ ) {
+        $x++;    # notausstieg notausstieg
+        last if $x > 20;    # notausstieg notausstieg
+		my $firstpart = $1;
+		my $devname = $2;
+		my $lastpart =$3;
+		#MSwitch_LOG( $Name, 6, "FOUND DEVNAME: $devname" . __LINE__ );
+		$devname =~ s/\$SELF/$Name/g;
+		#MSwitch_LOG( $Name, 6, "AFTER REPLACE FOUND DEVNAME: $devname" . __LINE__ );
+		my ($device,$reading)= split (/:/,$devname);
+        my $setmagic = ReadingsVal( $device, $reading, 'wrongformat' );
+        $condition = $firstpart . '[' . $setmagic . ']' . $lastpart;
+    }
+################################################
+
+# MSwitch_LOG( $Name, 6, "Timer nach setmagic: $condition" . __LINE__ );
+
+
     # trenne timerfile
 	
-	 my $key ;
+	my $key ;
+
+
+    #$condition =~ s/\$SELF/$Name/g;
+    $x = 0;
+
+    MSwitch_LOG( $Name, 6, "Timer: $condition" . __LINE__ );
+
+    # achtung perl 5.30
 	
 	
-    # my $key = 'on';
-    # $condition =~ s/$key//ig;
-    # $key = 'off';
-    # $condition =~ s/$key//ig;
-    # $key = 'ly';
-    # $condition =~ s/$key//ig;
 	
+################################################	
+# Rückgabe muss ein string in akzeptierten timerformat sein HH:MM(ptional|1234567)
+	$x=0;
+    while ( $condition =~ m/(.*)\{(.*)\}(.*)/ ) 
+	{
+        $x++;    # notausstieg
+        last if $x > 20;    # notausstieg
+        if ( defined $2 ) {
+            my $part1 = $1;
+			my $part2 =$2;
+            my $part3 = $3;
+			
+			my $exec="my \$SELF='".$Name."';my \$return = ".$part2.";return \$return;";
+			
+			MSwitch_LOG( $Name, 6, "s2: $2" . __LINE__ );
+			
+			MSwitch_LOG( $Name, 6, "exec $exec" . __LINE__ );
+            my $part2 = eval $exec;
+			MSwitch_LOG( $Name, 6, "ret $part2" . __LINE__ );	
+			
+			
+            $condition = $part1 . $part2 . $part3;
+        }
+    }
+################################################	
 	
-	#
 	
 	$condition =~ s/~offonly/~/ig;
 	$condition =~ s/~ononly/~/ig;
-	
     $condition =~ s/~off/~/ig;
-
     $condition =~ s/^on//ig;
 	$condition =~ s/~onoffonly/~/ig;
 	
@@ -10588,72 +10691,30 @@ MSwitch_LOG( $Name, 6, "Timer1: $condition" . __LINE__ );
 	
 	
     $condition =~ s/\$name/$Name/g;
-    #$condition =~ s/\$SELF/$Name/g;
-    $x = 0;
-
-    MSwitch_LOG( $Name, 5, "Timer: $condition" . __LINE__ );
-
-    # achtung perl 5.30
-    while ( $condition =~ m/(.*)\{(.*)\}(.*)/ ) {
-        $x++;    # notausstieg
-        last if $x > 20;    # notausstieg
-        if ( defined $2 ) {
-            my $part1 = $1;
-            my $part3 = $3;
-
-
-MSwitch_LOG( $Name, 6, "s2: $2" . __LINE__ );
-my $exec="my \$SELF='".$Name."';my \$return = ".$2.";return \$return;";
-#MSwitch_LOG( $Name, 0, "exec $exec" . __LINE__ );
-
-
-            my $part2 = eval $exec;
-			
-#MSwitch_LOG( $Name, 0, "ret $part2" . __LINE__ );			
-			
-
-            #my $part2 = eval $2;
-			
-			
-			
-			
-			
-            if ( $part2 !~ m/^[0-9]{2}:[0-9]{2}$|^[0-9]{2}:[0-9]{2}:[0-9]{2}$/ )
-            {
-                MSwitch_LOG( $Name, 1,
-"$Name:  ERROR wrong format in set timer. There are no timers running. Format must be HH:MM. Format is: $part2 "
-                );
-                return;
-            }
-            $part2 = substr( $part2, 0, 5 );
-            my $test = substr( $part2, 0, 2 ) * 1;
-            $part2 = "" if $test > 23;
-            $condition = $part1 . $part2 . $part3;
-        }
-    }
 	
 	
-	MSwitch_LOG( $Name, 6, "Timer2: $condition" . __LINE__ );
+	
+	
+	
+	MSwitch_LOG( $Name, 6, "Timer: $condition" . __LINE__ );
+	
+	
+# aufteilung in einzeltimer	
+################################################	
 	$condition =~ s/\$SELF/$Name/g;
-	
     my @timer = split /~/, $condition;
     $timer[0] = '' if ( !defined $timer[0] );    #on
     $timer[1] = '' if ( !defined $timer[1] );    #off
     $timer[2] = '' if ( !defined $timer[2] );    #cmd1
     $timer[3] = '' if ( !defined $timer[3] );    #cmd2
     $timer[4] = '' if ( !defined $timer[4] );    #cmd1+2
-                                                 # lösche bei notify und toggle
-
-
-
+    # lösche bei notify und toggle
+################################################
 
 MSwitch_LOG( $Name, 6, "cmd2: $timer[2]" . __LINE__ );
 
-
-
-
-
-
+# anpassung der timerzweeige an mswitchmode
+################################################
     if ( AttrVal( $Name, 'MSwitch_Mode', 'Notify' ) eq "Notify" ) {
         $timer[0] = '';
         $timer[1] = '';
@@ -10664,6 +10725,8 @@ MSwitch_LOG( $Name, 6, "cmd2: $timer[2]" . __LINE__ );
         $timer[3] = '';
         $timer[4] = '';
     }
+################################################
+	
     my $akttimestamp = TimeNow();
     my ( $aktdate, $akttime ) = split / /, $akttimestamp;
     my ( $aktyear, $aktmonth, $aktmday ) = split /-/, $aktdate;
@@ -10687,6 +10750,11 @@ MSwitch_LOG( $Name, 6, "cmd2: $timer[2]" . __LINE__ );
         "Sun" => 7
     );
     $day = $daysforcondition{$day};    # enthält aktuellen tag
+	
+	
+	
+	# ausführung für jedes timerfeld
+	################################################
     ## für jeden Timerfile ( 0 -4 )
     my $i  = 0;
     my $id = "";
@@ -10702,9 +10770,9 @@ MSwitch_LOG( $Name, 6, "cmd2: $timer[2]" . __LINE__ );
         $option =~ s/$key//ig;
         my $y = 0;
 
-        while ( $option =~
-m/(.*?)([0-9]{2}):([0-9]{2})\*([0-9]{2}:[0-9]{2})-([0-9]{2}:[0-9]{2})\|?([0-9!\$we]{0,7})(.*)?/
-          )
+
+
+        while ( $option =~m/(.*?)([0-9]{2}):([0-9]{2})\*([0-9]{2}:[0-9]{2})-([0-9]{2}:[0-9]{2})\|?([0-9!\$we]{0,7})(.*)?/)
         {
             $y++;
             last if $y > 20;
@@ -10758,6 +10826,8 @@ m/(.*?)([0-9]{2}):([0-9]{2})\*([0-9]{2}:[0-9]{2})-([0-9]{2}:[0-9]{2})\|?([0-9!\$
             $newoption =~ s/  / /g;
             $option = $newoption;
         }
+		
+		
         my @optionarray = split / /, $option;
 
         # für jede angabe eines files
@@ -10775,7 +10845,6 @@ m/(.*?)([0-9]{2}):([0-9]{2})\*([0-9]{2}:[0-9]{2})-([0-9]{2}:[0-9]{2})\|?([0-9!\$
                 my $part4      = '';
                 $part4 = $4 if defined $4;
                 my $opdays = $part4;
-
                 #testrandomsaved erstellen
                 my $newoption1 = MSwitch_Createrandom( $hash, $1, $3 );
                 $option1 = $newoption1 . $opdays;
@@ -10877,6 +10946,14 @@ sub MSwitch_Execute_Timer($) {
     my ( $Name, $timecond, $param ) = split( / /, $input );
     my $hash = $defs{$Name};
     return "" if ( IsDisabled($Name) );
+
+	if ( ReadingsVal( $Name, 'Timercontrol', 'on' ) eq "off" )
+	{
+		MSwitch_LOG( $Name, 6,
+        "ausführung Timer abgebrochen ( deaktiviert ) L:" . __LINE__ );
+		return;
+	}
+
 
     MSwitch_LOG( $Name, 6,
         "ausführung Timer $timecond, $param L:" . __LINE__ );
