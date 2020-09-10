@@ -297,6 +297,7 @@ sub MSwitch_Initialize($) {
       . "  MSwitch_RandomTime"
       . "  MSwitch_RandomNumber"
       . "  MSwitch_Safemode:0,1"
+	  . "  MSwitch_Snippet:textField-long "
       . "  MSwitch_Startdelay:0,10,20,30,60,90,120"
       . "  MSwitch_Wait"
       . "  MSwitch_Sequenz:textField-long "
@@ -732,6 +733,7 @@ sub MSwitch_LoadHelper($) {
           . "  MSwitch_RandomTime"
           . "  MSwitch_RandomNumber"
           . "  MSwitch_Safemode:0,1"
+		  . "  MSwitch_Snippet:textField-long "
           . "  MSwitch_Startdelay:0,10,20,30,60,90,120"
           . "  MSwitch_Wait"
           . "  MSwitch_Sequenz:textField-long "
@@ -1911,6 +1913,7 @@ sub MSwitch_Set($@) {
               . "  MSwitch_RandomTime"
               . "  MSwitch_RandomNumber"
               . "  MSwitch_Safemode:0,1"
+			  . "  MSwitch_Snippet:textField-long "			  
               . "  MSwitch_Startdelay:0,10,20,30,60,90,120"
               . "  MSwitch_Wait"
               . "  MSwitch_Event_Id_Distributor:textField-long "
@@ -3058,16 +3061,10 @@ sub MSwitch_toggle($$) {
 
     MSwitch_LOG( $Name, 6, "ausführung Toggle L:" . __LINE__ );
 
-
-
 	$cmds=~ s/#\[SR\]/|/g;
-	
     $cmds =~ m/(set) (.*)( )MSwitchtoggle (.*)/;
 	
-	
-	
 	my $devicename = $2;
-	
     my $newcomand = $1 . " " . $2 . " ";
 	
 	MSwitch_LOG( $Name, 6, "1 $1 L:" . __LINE__ );
@@ -3079,107 +3076,54 @@ sub MSwitch_toggle($$) {
 	$devicename = $Name;
 	}
 	
-	
-	
     my @togglepart = split( /:/, $4 );
-	
 	MSwitch_LOG( $Name, 6, "Toggleparts @togglepart!!! L:" . __LINE__ );
-	
-	
-	
-	
-	#$togglepart[0]=~ s/#\[SR\]/|/g;
-	
-
-	
 	my $trenner=",";
 	
-if ($togglepart[0] =~ m/^\[(.)\]/)
-{
-	
-	
-	if ($togglepart[0] =~ m/^\[\|\]/){
-		
-	$togglepart[0]="\\|";	
+	if ($togglepart[0] =~ m/^\[(.)\]/)
+	{
+		if ($togglepart[0] =~ m/^\[\|\]/){
+		$togglepart[0]="\\|";	
+		}
+		$trenner = $togglepart[0];
+		$trenner =~ s/\[//g;
+		$trenner =~ s/\]//g;
+		MSwitch_LOG( $Name, 6, "Trennercheck $togglepart[0]!!! L:" . __LINE__ );
+		shift @togglepart;
 	}
 	
-	$trenner = $togglepart[0];
-	
-	$trenner =~ s/\[//g;
-    $trenner =~ s/\]//g;
-	
-	
-	
-		
-	MSwitch_LOG( $Name, 6, "Trennercheck $togglepart[0]!!! L:" . __LINE__ );
-	
-	
-	shift @togglepart;
-	#MSwitch_LOG( $Name, 6, "FOUND TRENNER !!! L:" . __LINE__ );
-}
-	
-	
-	
-
     if ( $togglepart[0] ) {
         $togglepart[0] =~ s/\[//g;
         $togglepart[0] =~ s/\]//g;
         @cmds = split( /$trenner/, $togglepart[0] );
-		
-		#MSwitch_LOG( $Name, 6, "cmds @cmds!!! L:" . __LINE__ );
-		
-		
-		
         $anzcmds = @cmds;
     }
 
     if ( $togglepart[1] ) {
-		
-		#$togglepart[1]=~ s/#\[SR\]/|/g;
-		
-		
         $togglepart[1] =~ s/\[//g;
         $togglepart[1] =~ s/\]//g;
         @muster = split( /$trenner/, $togglepart[1] );
-		
-		MSwitch_LOG( $Name, 6, "cmds @cmds!!! L:" . __LINE__ );
-				
-				
+		MSwitch_LOG( $Name, 6, "cmds @cmds!!! L:" . __LINE__ );		
         $anzmuster = @cmds;
     }
-    else {
+    else 
+	{
         @muster    = @cmds;
         $anzmuster = $anzcmds;
     }
-
     if ( $togglepart[2] ) {
-		
-		#$togglepart[1]=~ s/#\[SR\]/|/g;
-		
-		
         $togglepart[2] =~ s/\[//g;
         $togglepart[2] =~ s/\]//g;
         $reading = $togglepart[2];
     }
+	my $aktstate;
 
-
-my $aktstate;
-
-
-#MSwitch_LOG( $Name, 6, "S2 $devicename L:" . __LINE__ );
-
-
-if ($reading eq "MSwitch_self")
-{
-	$aktstate = ReadingsVal( $Name, 'last_toggle_state', 'undef' );	
-} else {
-	$aktstate = ReadingsVal( $devicename, $reading, 'undef' );	
-}
-
-
-#MSwitch_LOG( $Name, 6, "NAME -$Name- Reading -$reading-!!! $aktstate L:" . __LINE__ );
-#MSwitch_LOG( $Name, 6, "AKTSTATE von reading $reading = $aktstate L:" . __LINE__ );
-
+	if ($reading eq "MSwitch_self")
+	{
+		$aktstate = ReadingsVal( $Name, 'last_toggle_state', 'undef' );	
+	} else {
+		$aktstate = ReadingsVal( $devicename, $reading, 'undef' );	
+	}
 
     my $foundmuster;
     for ( my $i = 0 ; $i < $anzmuster ; $i++ ) {
@@ -3196,41 +3140,12 @@ if ($reading eq "MSwitch_self")
 
     my $nextcmd = $cmds[$nextpos];
     $newcomand = $newcomand . $nextcmd;
-
 	readingsSingleUpdate( $hash, "last_toggle_state", $nextcmd, 1 );
-
     MSwitch_LOG( $Name, 6, "Toggle Rückgabe:\n $newcomand \nL:" . __LINE__ );
     return $newcomand;
 }
 
 ######################################
-sub MSwitch_toggleold($$) {
-
-    my ( $hash, $cmds ) = @_;
-    my $Name = $hash->{NAME};
-    $cmds =~ m/(set) (.*)( )MSwitchtoggle (.*)/;
-    my @tcmd = split( /\//, $4 );
-    if ( !defined $tcmd[2] ) { $tcmd[2] = 'state' }
-    if ( !defined $tcmd[3] ) { $tcmd[3] = $tcmd[0] }
-    if ( !defined $tcmd[4] ) { $tcmd[4] = $tcmd[1] }
-    my $cmd1    = $1 . " " . $2 . " " . $tcmd[0];
-    my $cmd2    = $1 . " " . $2 . " " . $tcmd[1];
-    my $chk1    = $tcmd[0];
-    my $chk2    = $tcmd[1];
-    my $testnew = ReadingsVal( $2, $tcmd[2], 'undef' );
-    if ( $testnew =~ m/$tcmd[3]/ ) {
-        $cmds = $cmd2;
-    }
-    elsif ( $testnew =~ m/$tcmd[4]/ ) {
-        $cmds = $cmd1;
-    }
-    else {
-        $cmds = $cmd1;
-    }
-    return $cmds;
-}
-
-##############################
 
 sub MSwitch_Log_Event(@) {
     my ( $hash, $msg, $me ) = @_;
@@ -3293,6 +3208,7 @@ sub MSwitch_Attr(@) {
       . "  MSwitch_RandomTime"
       . "  MSwitch_RandomNumber"
       . "  MSwitch_Safemode:0,1"
+	  . "  MSwitch_Snippet:textField-long "
       . "  MSwitch_Startdelay:0,10,20,30,60,90,120"
       . "  MSwitch_Wait"
       . "  MSwitch_Sequenz:textField-long "
@@ -3386,6 +3302,42 @@ sub MSwitch_Attr(@) {
         delete $data{MSwitch}{devicecmds1};
         delete $data{MSwitch}{last_devicecmd_save};
     }
+	
+	   if ( $cmd eq 'set' && $aName eq 'MSwitch_Snippet' ) {
+        
+		
+		 delete $data{MSwitch}{$name}{snippet};
+		
+		my @snips = split( /\n/, $aVal );
+my $aktsnippetnumber;
+my $aktsnippet ="";
+        foreach my $line (@snips) 
+		{
+            
+			
+			
+
+			if ( $line =~ m/^\[Snippet:([\d]{1,3})\]$/ ) 
+				{
+					$aktsnippet ="";
+					$aktsnippetnumber =$1;
+					MSwitch_LOG( $name, 6, "FOUND Snipnumber: $aktsnippetnumber " . __LINE__ );
+					next;
+				}
+			
+			MSwitch_LOG( $name, 6, "snipline: $line " . __LINE__ );
+			
+            $data{MSwitch}{$name}{snippet}{$aktsnippetnumber} .= $line."\n";
+            
+        }
+		
+		MSwitch_LOG( $name, 6, $data{MSwitch}{$name}{snippet}{1});
+		MSwitch_LOG( $name, 6, $data{MSwitch}{$name}{snippet}{2});
+		return;
+    }
+	
+	
+	
 
     if ( $cmd eq 'set' && $aName eq 'MSwitch_Reset_EVT_CMD1_COUNT' ) {
         readingsSingleUpdate( $hash, "EVT_CMD1_COUNT", 0, 1 );
@@ -3499,6 +3451,7 @@ sub MSwitch_Attr(@) {
           . "  MSwitch_Mode:Full,Notify,Toggle,Dummy"
           . "  MSwitch_Selftrigger_always:0,1"
           . "  useSetExtensions:0,1"
+		  . "  MSwitch_Snippet:textField-long "
           . "  MSwitch_setList:textField-long "
           . "  setList:textField-long "
           . "  readingList:textField-long "
@@ -9437,6 +9390,52 @@ if ( $condition =~ m/"\$EVENT|\$EVTPART1|\$EVTPART2\|\$EVTPART3]|\$EVTFULL"/ )
 	
 	##################################
 	
+	
+	
+	
+	my $aktsnippet ="";
+	my $aktsnippetnumber ="";
+	if ( $condition =~ m/(.*)\[Snippet:([\d]{1,3})\](.*)/ ) 
+				{
+									
+		 my $firstpart = $1;
+		 my $snipppetnumber = $2;
+		 my $lastpart =$3;
+					
+		 MSwitch_LOG( $name, 6, "FOUND Snipnumber: $aktsnippetnumber " . __LINE__ );
+					
+			
+		         
+			my $snippet =	 $data{MSwitch}{$name}{snippet}{$snipppetnumber};
+				 
+				 
+				 $snippet =~ s/\n//g;
+				 $condition = $firstpart . $snippet . $lastpart;
+	
+	
+				
+				}
+	
+	MSwitch_LOG( $name, 6, "AFTER FOUND Snipnumber: $condition " . __LINE__ );
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	 $condition =~ s/\"\$EVENT\"/\$EVENT/g;
      $condition =~ s/\"\$EVTFULL\"/\$EVTFULL"/g;
      $condition =~ s/\"\$EVTPART1\"/\$EVTPART1/g;
@@ -10594,31 +10593,60 @@ sub MSwitch_Checkcond_day($$$$) {
 sub MSwitch_Createtimer($) {
     my ($hash) = @_;
     my $Name = $hash->{NAME};
+	my $x;
     delete( $hash->{helper}{wrongtimespec} );
 
     # keine timer vorhenden
     my $condition = ReadingsVal( $Name, '.Trigger_time', '' );
     $condition =~ s/#\[dp\]/:/g;
-    my $x = 0;
-	
-	
-
-	
+    
     my $lenght = length($condition);
-
-
-
 
 	MSwitch_LOG( $Name, 6, "Timer1: $condition" . __LINE__ );
 
     #remove all timers
     MSwitch_Clear_timer($hash);
-    if ( $lenght == 0 ) {
+    if ( $lenght == 0 ) 
+	{
         return;
     }
 
 
+my $we = AnalyzeCommand( 0, '{return $we}' );
 
+
+
+
+
+
+$x = 0;
+MSwitch_LOG( $Name, 6, "TESTE AUF SNIPPETS $condition " . __LINE__ );
+# suche Snippets 
+# Rückgabe muss ein string in akzeptierten timerformat sein HH:MM(ptional|1234567)
+################################################
+    while ( $condition =~ m/(.*)\[Snippet:([\d]{1,3})\](.*)/ ) {
+        $x++;    # notausstieg notausstieg
+        last if $x > 20;    # notausstieg notausstieg
+		my $firstpart = $1;
+		my $snipppetnumber = $2;
+		my $lastpart =$3;
+		MSwitch_LOG( $Name, 6, "FOUND SNIPPET: $snipppetnumber ");
+
+		my $ret=eval $data{MSwitch}{$Name}{snippet}{$snipppetnumber};
+
+        $condition = $firstpart . '['.$ret.']' . $lastpart;
+    }
+################################################
+MSwitch_LOG( $Name, 6, "TESTE AUF SNIPPETS ENDE  $condition " . __LINE__ );
+
+
+
+
+
+
+
+
+$x = 0;
 # suche nach setmagic 
 # Rückgabe muss ein string in akzeptierten timerformat sein HH:MM(ptional|1234567)
 ################################################
@@ -10637,23 +10665,17 @@ sub MSwitch_Createtimer($) {
     }
 ################################################
 
+
+
+
+
 # MSwitch_LOG( $Name, 6, "Timer nach setmagic: $condition" . __LINE__ );
 
-
-    # trenne timerfile
-	
 	my $key ;
-
-
-    #$condition =~ s/\$SELF/$Name/g;
     $x = 0;
-
     MSwitch_LOG( $Name, 6, "Timer: $condition" . __LINE__ );
 
-    # achtung perl 5.30
-	
-	
-	
+# suche nach perl
 ################################################	
 # Rückgabe muss ein string in akzeptierten timerformat sein HH:MM(ptional|1234567)
 	$x=0;
@@ -10665,21 +10687,15 @@ sub MSwitch_Createtimer($) {
             my $part1 = $1;
 			my $part2 =$2;
             my $part3 = $3;
-			
 			my $exec="my \$SELF='".$Name."';my \$return = ".$part2.";return \$return;";
-			
 			MSwitch_LOG( $Name, 6, "s2: $2" . __LINE__ );
-			
 			MSwitch_LOG( $Name, 6, "exec $exec" . __LINE__ );
             my $part2 = eval $exec;
 			MSwitch_LOG( $Name, 6, "ret $part2" . __LINE__ );	
-			
-			
             $condition = $part1 . $part2 . $part3;
         }
     }
 ################################################	
-	
 	
 	$condition =~ s/~offonly/~/ig;
 	$condition =~ s/~ononly/~/ig;
@@ -10687,15 +10703,7 @@ sub MSwitch_Createtimer($) {
     $condition =~ s/^on//ig;
 	$condition =~ s/~onoffonly/~/ig;
 	
-	
-	
-	
     $condition =~ s/\$name/$Name/g;
-	
-	
-	
-	
-	
 	MSwitch_LOG( $Name, 6, "Timer: $condition" . __LINE__ );
 	
 	
@@ -10751,10 +10759,8 @@ MSwitch_LOG( $Name, 6, "cmd2: $timer[2]" . __LINE__ );
     );
     $day = $daysforcondition{$day};    # enthält aktuellen tag
 	
-	
-	
-	# ausführung für jedes timerfeld
-	################################################
+# ausführung für jedes timerfeld
+################################################
     ## für jeden Timerfile ( 0 -4 )
     my $i  = 0;
     my $id = "";
@@ -10769,8 +10775,6 @@ MSwitch_LOG( $Name, 6, "cmd2: $timer[2]" . __LINE__ );
         $key = '\]';
         $option =~ s/$key//ig;
         my $y = 0;
-
-
 
         while ( $option =~m/(.*?)([0-9]{2}):([0-9]{2})\*([0-9]{2}:[0-9]{2})-([0-9]{2}:[0-9]{2})\|?([0-9!\$we]{0,7})(.*)?/)
         {
@@ -10830,7 +10834,7 @@ MSwitch_LOG( $Name, 6, "cmd2: $timer[2]" . __LINE__ );
 		
         my @optionarray = split / /, $option;
 
-        # für jede angabe eines files
+# für jede angabe eines files
       LOOP3: foreach my $option1 (@optionarray) {
             $id = "";
             next LOOP3 if $option1 eq "";
@@ -10857,7 +10861,7 @@ MSwitch_LOG( $Name, 6, "cmd2: $timer[2]" . __LINE__ );
             $time = '' if ( !defined $time );
             $days = '' if ( !defined $days );
             if ( $days eq '!$we' || $days eq '$we' ) {
-                my $we = AnalyzeCommand( 0, '{return $we}' );
+            #    my $we = AnalyzeCommand( 0, '{return $we}' );
                 if ( $days eq '$we'  && $we == 1 ) { $days = $day; }
                 if ( $days eq '!$we' && $we == 0 ) { $days = $day; }
             }
@@ -10899,6 +10903,7 @@ MSwitch_LOG( $Name, 6, "cmd2: $timer[2]" . __LINE__ );
             }
         }
     }
+
 
     # berechne zeit bis 23,59 und setze timer auf create timer
     my $newask = timelocal( '00', '59', '23', $date, $aktmonth, $aktyear );
@@ -12384,7 +12389,11 @@ sub MSwitch_LOG($$$) {
     {
         MSwitch_debug2( $hash, $cs );
         $cs = "[$name] " . $cs;
+		
     }
+	
+	return if $level eq "6";
+	
     $level = 5 if $level eq "6";
 
     my %UMLAUTE = (
@@ -12463,22 +12472,15 @@ sub MSwitch_dec($$) {
     my ( $hash, $todec ) = @_;
     my $name = $hash->{NAME};
 
-
-
-
 MSwitch_LOG( $name, 6,"Durchlauf todec $todec L:" . __LINE__ );
 MSwitch_LOG( $name, 6,"Durchlauf todecevent $hash->{helper}{aktevent} L:" . __LINE__ );
-
-
 
  my @evtparts;
  my $event;
     if ($hash->{helper}{aktevent}) {
 
-
 MSwitch_LOG( $name, 6,"todecevent $hash->{helper}{aktevent} L:" . __LINE__ );
 MSwitch_LOG( $name, 6,"evtparts $hash->{helper}{evtparts} L:" . __LINE__ );
-
 
         @evtparts = split( /:/, $hash->{helper}{aktevent},$hash->{helper}{evtparts} );
 		$event=$hash->{helper}{aktevent};
@@ -12488,10 +12490,7 @@ MSwitch_LOG( $name, 6,"evtparts $hash->{helper}{evtparts} L:" . __LINE__ );
         $evtparts[0] = "";
         $evtparts[1] = "";
         $evtparts[2] = "";
-
     }
-	
-	
 	
     my $evtsanzahl = @evtparts;
     if ( $evtsanzahl < 3 ) {
@@ -12502,72 +12501,37 @@ MSwitch_LOG( $name, 6,"evtparts $hash->{helper}{evtparts} L:" . __LINE__ );
     my $evtfull = join( ':', @evtparts );
     $evtparts[2] = '' if !defined $evtparts[2];
 
-	
-
-		$event       = "undef" if $event eq "";
-        $evtparts[0] = "undef" if $evtparts[0] eq "";
-        $evtparts[1] = "undef" if $evtparts[1] eq "";
-        $evtparts[2] = "undef" if $evtparts[2] eq "";
-		$evtfull   = "undef" if $evtfull eq "::";
-
-
+	$event       = "undef" if $event eq "";
+    $evtparts[0] = "undef" if $evtparts[0] eq "";
+    $evtparts[1] = "undef" if $evtparts[1] eq "";
+    $evtparts[2] = "undef" if $evtparts[2] eq "";
+	$evtfull   = "undef" if $evtfull eq "::";
 
     # ersetzungen direkt vor befehlsausführung
     # gilt für fhemcode, freecmdperl freecmd fhem
 
     if ( $todec =~ m/(\{)(.*)(\})/s ) {
-
         # ersetzung für perlcode
-
         $todec =~ s/\n//g;
         $todec =~ s/\[\$SELF:/[$name:/g;
 
     }
     else {
-		
-		#MSwitch_LOG( $name, 0,"FHEMCODE ERSETZUNG ERKANNT L:" . __LINE__ );
-		
+	
         # ersetzung für fhemcode
         $todec =~ s/\$NAME/$hash->{helper}{eventfrom}/g;
-		#$todec =~ s/\$NAME/$hash->{helper}{eventfrom}/g;
-		
-		
         $todec =~ s/\$SELF/$name/g;
         $todec =~ s/\n//g;
         $todec =~ s/#\[wa\]/|/g;
         $todec =~ s/#\[SR\]/|/g;
-
-        
         $todec =~ s/MSwitch_Self/$name/g;
         my $ersetzung;
-		
 		$todec =~ s/\$EVENT/$event/g;
-		
         $todec =~ s/\$EVTPART3/$evtparts[2]/g;
-       
         $todec =~ s/\$EVTPART2/$evtparts[1]/g;
-       
         $todec =~ s/\$EVTPART1/$evtparts[0]/g;
-       
         $todec =~ s/\$EVENT/$event/g;
-       
         $todec =~ s/\$EVTFULL/$evtfull/g;
-	
-		
-        # $ersetzung = ReadingsVal( $name, "EVTPART3", "" );
-        # $todec =~ s/\$EVTPART3/$ersetzung/g;
-        # $ersetzung = ReadingsVal( $name, "EVTPART2", "" );
-        # $todec =~ s/\$EVTPART2/$ersetzung/g;
-        # $ersetzung = ReadingsVal( $name, "EVTPART1", "" );
-        # $todec =~ s/\$EVTPART1/$ersetzung/g;
-        # $ersetzung = ReadingsVal( $name, "EVENT", "" );
-        # $todec =~ s/\$EVENT/$ersetzung/g;
-        # $ersetzung = ReadingsVal( $name, "EVENTFULL", "" );
-        # $todec =~ s/\$EVENTFULL/$ersetzung/g;
-   
-
-
-
    }
 
     # ersetzung für beide codes
@@ -12578,12 +12542,10 @@ MSwitch_LOG( $name, 6,"evtparts $hash->{helper}{evtparts} L:" . __LINE__ );
     {
         $x++;    # notausstieg notausstieg
         last if $x > 20;    # notausstieg notausstieg
-
         MSwitch_LOG( $name, 6, "TODEC : $todec" );
         MSwitch_LOG( $name, 6, "- found : $1" );
         MSwitch_LOG( $name, 6, "- found setmagic ersetzung: $2:$3" );
         MSwitch_LOG( $name, 6, "- found : $4" );
-
         my $firstpart   = $1;
         my $lastpart    = $4;
         my $readingname = $3;
@@ -12591,14 +12553,9 @@ MSwitch_LOG( $name, 6,"evtparts $hash->{helper}{evtparts} L:" . __LINE__ );
         $devname =~ s/\$SELF/$name/;
         my $setmagic = ReadingsVal( $devname, $readingname, 0 );
 
-        MSwitch_LOG( $name, 6,
-"- found setmagic ersetzung: ReadingsVal( \"$devname\", \"$readingname\", 0 )"
-        );
-
+        MSwitch_LOG( $name, 6,"- found setmagic ersetzung: ReadingsVal( \"$devname\", \"$readingname\", 0 )" );
         MSwitch_LOG( $name, 6, "- change setmagic ersetzung: $setmagic" );
-
         $todec = $firstpart . $setmagic . $lastpart;
-
     }
 
     $todec =~ s/\[FREECMD\]//g;
@@ -12611,8 +12568,8 @@ MSwitch_LOG( $name, 6,"evtparts $hash->{helper}{evtparts} L:" . __LINE__ );
         my $testgroups = $data{MSwitch}{$name}{groups};
         my @msgruppen  = ( keys %{$testgroups} );
 
-        foreach my $testgoup (@msgruppen) {
-
+        foreach my $testgoup (@msgruppen) 
+		{
             my $x = 0;
             while ( $todec =~ m/(.*)(.$testgoup.)(.*)/ ) {
                 $x++;
@@ -12624,7 +12581,6 @@ MSwitch_LOG( $name, 6,"evtparts $hash->{helper}{evtparts} L:" . __LINE__ );
             }
         }
     }
-
     return $todec;
 }
 
@@ -12639,9 +12595,8 @@ sub MSwitch_makefreecmdonly($$) {
     my $name = $hash->{NAME};
     if ( $cs =~ m/(.*)(\{)(.*)(\})/s ) {
 		
-		
-		my @evtparts;
- my $event;
+	my @evtparts;
+	my $event;
     if ($hash->{helper}{aktevent}) {
 
         @evtparts = split( /:/, $hash->{helper}{aktevent},$hash->{helper}{evtparts} );
@@ -12653,8 +12608,6 @@ sub MSwitch_makefreecmdonly($$) {
         $evtparts[2] = "";
 
     }
-	
-	
 	
     my $evtsanzahl = @evtparts;
     if ( $evtsanzahl < 3 ) {
@@ -12670,8 +12623,6 @@ sub MSwitch_makefreecmdonly($$) {
         $evtparts[2] = "undef" if $evtparts[2] eq "";
 		$evtfull   = "undef" if $evtfull eq "::";
 
-	
-	
         my $firstpart = $1;
         ## variablendeklaration für perlcode / wird anfangs eingefügt
 
