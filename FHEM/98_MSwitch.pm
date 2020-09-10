@@ -4529,36 +4529,63 @@ sub MSwitch_checkbridge($$$) {
     my $bridgemode = ReadingsVal( $name, '.Distributor', '0' );
     my $expertmode = AttrVal( $name, 'MSwitch_Expert', '0' );
 
-    MSwitch_LOG( $name, 6, "SUB BRIDGE bridgemode: $bridgemode L:" . __LINE__ );
+
+
+	my @bridge;
+	my $zweig;
+		
+		
+		
+    #MSwitch_LOG( $name, 6, "SUB BRIDGE bridgemode: $bridgemode L:" . __LINE__ );
     return "no_bridge" if $expertmode eq "0";
     return "no_bridge" if $bridgemode eq "0";
 
     my $foundkey = "undef";
     my $etikeys  = $hash->{helper}{eventtoid};
-    foreach my $a ( sort keys %{$etikeys} ) {
+	
+	
+    foreach my $a ( sort keys %{$etikeys} ) 
+	{
 
         MSwitch_LOG( $name, 6, "SUB BRIDGE KEY: $a L:" . __LINE__ );
 
         my $re = qr/$a/;
         $foundkey = $a if ( $event =~ /$re/ );
-
+		MSwitch_LOG( $name, 6, "SUB BRIDGE foundkey: $foundkey L:" . __LINE__ );
+		
+	##########################	
+	#	ausführen des gefundenen keys
+	#	
+		@bridge = split( / /, $hash->{helper}{eventtoid}{$foundkey} );
+		$zweig;
+		
+		$zweig = "on"  if $bridge[0] eq "cmd1";
+		$zweig = "off" if $bridge[0] eq "cmd2";
+		
+		
+		MSwitch_LOG( $name, 6,"ID Bridge gefunden: zweig: $bridge[0] , ID:$bridge[2]  L:" . __LINE__ );
+		MSwitch_Exec_Notif( $hash, $zweig, 'nocheck', $event, $bridge[2] );
+	
+	##########################	
+		
     }
 
     if ( !defined $hash->{helper}{eventtoid}{$foundkey} ) {
         return "NO BRIDGE FOUND !";
     }
-    my @bridge = split( / /, $hash->{helper}{eventtoid}{$foundkey} );
-    my $zweig;
+	
+	
+	
+	
+    #my @bridge = split( / /, $hash->{helper}{eventtoid}{$foundkey} );
+   # my $zweig;
 
-    $zweig = "on"  if $bridge[0] eq "cmd1";
-    $zweig = "off" if $bridge[0] eq "cmd2";
+    #$zweig = "on"  if $bridge[0] eq "cmd1";
+    #$zweig = "off" if $bridge[0] eq "cmd2";
 
-    MSwitch_LOG( $name, 6,
-            "ID Bridge gefunden: zweig $bridge[0] , $bridge[2] "
-          . @bridge . " L:"
-          . __LINE__ );
-	#$hash->{helper}{aktevent}=$event;
-    MSwitch_Exec_Notif( $hash, $zweig, 'nocheck', $event, $bridge[2] );
+    #MSwitch_LOG( $name, 6,"ID Bridge gefunden: zweig $bridge[0] , $bridge[2] ". @bridge . " L:" . __LINE__ );
+
+    #MSwitch_Exec_Notif( $hash, $zweig, 'nocheck', $event, $bridge[2] );
 
     return ( "bridge found", $zweig, $bridge[2] );
 }
