@@ -1,7 +1,3 @@
-Testversion V4.0
-geänderte Eventbehandlung conditions
-geänderte Eventbehandlung Befehlszweige
-attribut Switching_once
-set reset_Switching_once
-set writelog
-geänderte MSwitch_Extensions
+Testversion V4.40
+
+erweiterte bedingungen in den triggerpruefungen eingebaut
