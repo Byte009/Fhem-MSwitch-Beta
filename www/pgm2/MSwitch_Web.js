@@ -2,7 +2,7 @@
 // Autor:Byte09
 // #########################
 
-	var version = '1.1';
+	var version = '4.40';
 	var info = '';
 	var debug ='off';
 	
@@ -560,6 +560,39 @@ if (document.getElementById('trigcmdon'))
 	}
 	
 	
+	
+	
+	// teste auch showids
+    var cookie = getCookieValue("Mswitch_ids_"+devicename);
+	
+	
+	
+	
+	if (cookie == ""){
+		//alert("leeres cookie" );
+		
+	}
+	else{
+	//alert(cookie);
+	
+	document.getElementById('aw_showid1').value=cookie;
+	
+	$("[name=noshow]").css("display","none");
+	allids = cookie.split(",");
+	//alert(allids);
+	
+	
+	
+	for (i = 0; i < allids.length; i++) {
+	test ="[idnumber="+allids[i]+"]";
+	//alert(test);
+	$(test).css("display","block");
+	}
+	}
+	
+	
+	
+	
 return;
 } // ende startfunktionen
 
@@ -613,18 +646,17 @@ function savedistributor(){
 	if (debug == 'on'){ alert('savedistributor') };
 	
 	//alert('savedistributor')
-	
 	//alert(DISTRIBUTLINES);
 	var newidfile='';
 	for (i=0; i<DISTRIBUTLINES; i++)
 		{
 			aktline =  $("#ideventNR"+i).val();
-			
-			
+
 			//alert(aktline);
-			
-			
-			
+		
+		aktline = aktline.replace(/ /g,'[SP]');
+		
+		
 			if (aktline === undefined) { continue; }
 			if (aktline == 'undefined') { continue; }
 			aktcmd=  $("#ideventCMD"+i).val();
@@ -632,40 +664,17 @@ function savedistributor(){
 			newidfile +=aktline+"=>cmd"+aktcmd+"[SP]ID[SP]"+aktid+"[NL]";		
 		}
 		
-		
-		//alert(newidfile);
-		
-	//if 	(newidfile =="")
-	//{
-		
-		// alert('?cmd=deletereading '+devicename+' .Distributor&XHR=1');
-		
-		
-		// FW_cmd(FW_root+'?cmd=deletereading '+devicename+' .Distributor&XHR=1');
-	
-		//[ "aw_md","aw_trig","aw_md1","aw_md20","aw_addevent","aw_dev"].forEach (unlock,);
-		//randomdev.forEach (unlock);
-		
-	//}else{
-		
 
-	 // FW_cmd(FW_root+'?cmd=setreading '+devicename+' .Distributor '+newidfile+'&XHR=1');
-	
-	
-	// } 
-	
-	//alert(newidfile);
-	//return;
-	 
+//alert(newidfile);
+
+
 	FW_cmd(FW_root+'?cmd=set '+devicename+' setbridge '+newidfile+'&XHR=1');
+	
+	
+	
 	[ "aw_md","aw_trig","aw_md1","aw_md20","aw_addevent","aw_dev"].forEach (unlock,);
 	randomdev.forEach (unlock);
 	 
-	 
-	
-	//var nm = $(t).attr("nm");
-	//var  def = nm+" setbridge "+newidfile;
-	//location = location.pathname+"?detail="+devicename+"&cmd=set "+addcsrf(def);
 	
 	return;
 }
@@ -1004,6 +1013,24 @@ function activate(state,target,options,copytofield){
 function testcmd(field,devicename,opt){
 if (debug == 'on'){ alert('testcmd') };
 	comand = $("[name="+field+"]").val();
+	
+	
+	
+	comand=comand.trim();
+	
+	
+	
+			// var myRegEx = new RegExp('^{');  
+	// treffer = comand.match(myRegEx);
+					
+			// alert (treffer);	
+			
+			
+			
+	//alert(comand);
+	
+	
+	
  	if (comand == 'no_action')
 		{
 		return;
@@ -1018,12 +1045,25 @@ if (debug == 'on'){ alert('testcmd') };
 	if (devicename != 'FreeCmd')
 		{
 		cmd ='set '+devicename+' '+comand;
+		
+		
+		
+		
+		
 		FW_cmd(FW_root+'?cmd='+encodeURIComponent(cmd)+'&XHR=1');
 		FW_okDialog(EXECCMD+' '+cmd); // !!!
 		FW_errmsg(cmd, 5);
 		} 
 	 else
 		{
+			
+			
+			
+			
+			
+			
+			
+			
 			comand = comand.replace(/;;/g,'[DS]');
 			comand = comand.replace(/;/g,';;');
 			comand = comand.replace(/\\[DS\\]/g,';;');
@@ -1037,17 +1077,60 @@ if (debug == 'on'){ alert('testcmd') };
 				return;
 				}
 			
+			
+			
+	
+			showcomand = comand;
+			
+			
 			if (t0 == '{' && t1 == '}') 
 				{
+					
+					comand  = comand.substr(1, comand.length-1);
+					erweiterung  = "{my $SELF=\""+mswitchname+"\";;";
+					erweiterung += "my $NAME=\""+"\";;";
+					erweiterung += "my $EVTPART1=\""+"\";;";
+					erweiterung += "my $EVTPART2=\""+"\";;";
+					erweiterung += "my $EVTPART3=\""+"\";;";
+					erweiterung += "my $EVTFULL=\""+"\";;";
+					comand=erweiterung+comand;
+					//alert(erweiterung);
+					//alert(comand);
+					//alert(encodeURIComponent(comand));
+					
+					//showcomand = comand;
+		
 				}
 			else
 				{
-				comand = '{fhem("'+comand+'")}';
+					// alert(comand);
+			
+					erweiterung  = "{my $SELF=\""+mswitchname+"\";;";
+					erweiterung += "my $NAME=\""+"\";;";
+					erweiterung += "my $EVTPART1=\""+"\";;";
+					erweiterung += "my $EVTPART2=\""+"\";;";
+					erweiterung += "my $EVTPART3=\""+"\";;";
+					erweiterung += "my $EVTFULL=\""+"\";;";	
+					
+					
+				comand = erweiterung+'fhem("'+comand+'")}';
+				
+				
+				// alert(comand);
+				
+				
+				//showcomand = comand;
 				}
 			
 			cmd = comand;
+			
+			//alert(cmd);
+			
 			FW_cmd(FW_root+'?cmd='+encodeURIComponent(cmd)+'&XHR=1');
-			FW_okDialog(EXECCMD+' '+cmd);
+			
+			showcomand = showcomand.replace(/;;/g,';');
+			
+			FW_okDialog(EXECCMD+' '+showcomand);
 		} 
 	}
 
@@ -1404,6 +1487,13 @@ if (debug == 'on'){ alert('savesys') };
 	}
 
 // unbekannt
+
+function getCookieValue(a) {
+   const b = document.cookie.match('(^|;)\\s*' + a + '\\s*=\\s*([^;]+)');
+   return b ? b.pop() : '';
+}
+
+
 function showtextfield(newValue,copytofield,target)
 	{
 	if (debug == 'on'){ alert('showtextfield') };
@@ -1615,12 +1705,76 @@ if (debug == 'on'){ alert('checkcondition') }
 	location = location.pathname+"?detail="+devicename+"&cmd=set "+addcsrf(def);
 	}); 
 	
-//unbekannt
+//zeige versteckte geräte
 	$("#aw_show").click(function(){
 	if (debug == 'on'){ alert('#aw_show') };
 	$("[name=noshow]").css("display","block");
-	$("[name=noshowtask]").css("display","none");
+	
+	
+	var jetzt = new Date();
+	
+	var Auszeit = new Date(jetzt.getTime());
+	
+
+	document.cookie = "Mswitch_ids_"+devicename + "=" + "" + "; expires=" + Auszeit.toGMTString() + ";";
+	
+	document.getElementById('aw_showid1').value="";
+
+	$("#anzid").html('0');
+	
+	
+	//$("[idnumber=2]").css("display","block");
+	
+	// $("[name=noshowtask]").css("display","none");
 	});
+	
+	
+// zeige geräte mit ID
+	$("#aw_showid").click(function(){
+	if (debug == 'on'){ alert('#aw_show') };
+	//alert("ok");
+	showids = document.getElementById('aw_showid1').value;
+	
+	
+	
+	// cookie setzen
+	var jetzt = new Date();
+	var Verfall = 1000 * 60 * 60 *12;
+	var Auszeit = new Date(jetzt.getTime() + Verfall);
+	
+
+	document.cookie = "Mswitch_ids_"+devicename + "=" + showids + "; expires=" + Auszeit.toGMTString() + ";";
+	
+	if (showids == ""){return;}
+	
+	
+	
+	
+	
+	$("[name=noshow]").css("display","none");
+	allids = showids.split(",");
+	//alert(allids);
+	
+	
+	
+	for (i = 0; i < allids.length; i++) {
+	test ="[idnumber="+allids[i]+"]";
+	//alert(test);
+	$(test).css("display","block");
+	}
+	
+	
+	
+	allcmds=$("[name=noshow]:hidden").length;
+	//alert(allcmds);
+	
+	$("#anzid").html(allcmds);
+	
+	
+	});
+	
+	
+
 
 //unbekannt	
 	$("#aw_addevent").click(function(){
@@ -1684,6 +1838,23 @@ if (debug == 'on'){ alert('checkcondition') }
 	location = location.pathname+"?detail="+devicename+"&cmd=set "+addcsrf(def);
 	});
 	
+
+
+$("#undo").click(function(){
+
+//alert("undo");
+//alert(devicename);
+
+var nm = $(t).attr("nm");
+
+//alert(nm);
+
+	var  def = nm+" undo ";
+	location = location.pathname+"?detail="+devicename+"&cmd=set "+addcsrf(def);
+
+
+
+});
 
 
 function checklines(name)
