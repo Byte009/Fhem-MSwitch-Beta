@@ -66,7 +66,7 @@ my $helpfileeng = "www/MSwitch/MSwitch_Help_eng.txt";
 my $support =
 "Support Mail: Byte009\@web.de";
 my $autoupdate   = 'on';     	# off/on
-my $version      = '4.40';  	# version
+my $version      = '4.41';  	# version
 my $wizard       = 'on';     	# on/off
 my $importnotify = 'on';     	# on/off
 my $importat     = 'on';     	# on/off
@@ -87,6 +87,8 @@ my @doignore =
   qw(notify allowed at watchdog doif fhem2fhem telnet FileLog readingsGroup FHEMWEB autocreate eventtypes readingsproxy svg cul);
 my $startmode   = "Notify";    # Startmodus des Devices nach Define
 my $wizardreset = 3600;        #Timeout für Wizzard
+
+my $MSwitch_generate_Events ="0";
 
 # degug
 #my $ip = qx(hostname -I);
@@ -811,6 +813,9 @@ $hash->{NOTIFYDEV} = 'no_trigger';
             $attr{$Name}{MSwitch_Lock_Quickedit}      = '1';
             $attr{$Name}{MSwitch_Extensions}          = '0';
             $attr{$Name}{MSwitch_Mode}                = $startmode;
+			$attr{$Name}{MSwitch_generate_Events}     = $MSwitch_generate_Events;
+			
+			
             fhem("attr $Name room MSwitch_Devices");
         }
         ################
@@ -4902,8 +4907,38 @@ sub MSwitch_checkbridge($$$) {
 		MSwitch_LOG( $name, 6,"staris $staris  L:" . __LINE__ );
 		
 		my $newcondition = $eventbedingung;
-		MSwitch_LOG( $name, 6,"oldcondition  $newcondition  L:" . __LINE__ );
+		
+		
+		
+		
+			MSwitch_LOG( $name, 6,"oldcondition  $newcondition  L:" . __LINE__ );
+		
+		if ($staris =~ m/^-?\d+(?:[\.,]\d+)?$/)
+	{
+		MSwitch_LOG( $name, 6,"STARIS =  Zahl L:" . __LINE__ );
 		$newcondition =~ s/\*/$staris/g;
+	}
+	else
+	{
+		MSwitch_LOG( $name, 6,"STARIS =  String  L:" . __LINE__ );
+		$newcondition =~ s/\*/"$staris"/g;
+		# teste auf string/zahl vergleich
+		my $testccondition = $newcondition;
+		$testccondition =~ s/ //g;
+		MSwitch_LOG( $name, 6,"Testcondition $testccondition  L:" . __LINE__ );
+		if ($testccondition =~ m/(".*"(>|<)\d+)/)
+		{
+			MSwitch_LOG( $name, 6,"ABBRUCH STRING ZAHL Vergleich gefunden  L:" . __LINE__ );
+			return 'undef';
+		}
+	}
+		
+		
+		
+	
+		
+	
+	
 		MSwitch_LOG( $name, 6,"newcondition  $newcondition  L:" . __LINE__ );
 
 		
@@ -7072,12 +7107,12 @@ Repeats: <input type='text' id='repeatcount' name='repeatcount"
 				  
             }
 
-            if ( $devicenumber == 1 ) {
+            #if ( $devicenumber == 1 ) {
                 $ACTIONsatz =
                   "<input name='info' class=\"randomidclass\" id=\"add_action1_"
                   . rand(1000000)
                   . "\" type='button' value='add action for $add' onclick=\"javascript: addevice('$add')\">";
-            }
+           # }
 
             $ACTIONsatz .=
                 "&nbsp;<input name='info' id=\"del_action1_"
@@ -11028,7 +11063,13 @@ MSwitch_LOG( $name, 6, "COND4 $condition L:" . __LINE__ );
     }
 
     if ($@) {
-        MSwitch_LOG( $name, 1, "$name EERROR: $@ " . __LINE__ );
+		
+		MSwitch_LOG( $name, 1, "############# " . __LINE__ );
+        MSwitch_LOG( $name, 1, "$name EERROR: $@ ");
+		MSwitch_LOG( $name, 1, "Finalstring: $finalstring");
+		MSwitch_LOG( $name, 1, "Event: $event");
+		MSwitch_LOG( $name, 1, "############# \n" );
+		
         $hash->{helper}{conditionerror} = $@;
         return 'false';
     }
@@ -12178,7 +12219,37 @@ sub MSwitch_checktrigger(@) {
 	MSwitch_LOG( $ownName, 6,"staris $staris  L:" . __LINE__ );
 	my $newcondition = $eventbedingung;
 	MSwitch_LOG( $ownName, 6,"oldcondition  $newcondition  L:" . __LINE__ );
-	$newcondition =~ s/\*/$staris/g;
+	
+	
+	
+	
+	if ($staris =~ m/^-?\d+(?:[\.,]\d+)?$/)
+	{
+		MSwitch_LOG( $ownName, 6,"STARIS =  Zahl L:" . __LINE__ );
+		$newcondition =~ s/\*/$staris/g;
+	}
+	else
+	{
+		MSwitch_LOG( $ownName, 6,"STARIS =  String  L:" . __LINE__ );
+		$newcondition =~ s/\*/"$staris"/g;
+		# teste auf string/zahl vergleich
+		my $testccondition = $newcondition;
+		$testccondition =~ s/ //g;
+		MSwitch_LOG( $ownName, 6,"Testcondition $testccondition  L:" . __LINE__ );
+		if ($testccondition =~ m/(".*"(>|<)\d+)/)
+		{
+			MSwitch_LOG( $ownName, 6,"ABBRUCH STRING ZAHL Vergleich gefunden  L:" . __LINE__ );
+			return 'undef';
+		}
+	}
+	
+	
+	
+	
+	
+	
+	
+	#$newcondition =~ s/\*/$staris/g;
 	MSwitch_LOG( $ownName, 6,"newcondition  $newcondition  L:" . __LINE__ );
     my $ret = MSwitch_checkcondition($newcondition,$ownName,$eventcopy);
 	MSwitch_LOG( $ownName, 6,"bedingungsprüfung  $ret  L:" . __LINE__ );
