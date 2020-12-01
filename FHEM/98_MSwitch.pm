@@ -66,7 +66,7 @@ my $helpfileeng = "www/MSwitch/MSwitch_Help_eng.txt";
 my $support =
 "Support Mail: Byte009\@web.de";
 my $autoupdate   = 'on';     	# off/on
-my $version      = '4.41';  	# version
+my $version      = '4.42';  	# version
 my $wizard       = 'on';     	# on/off
 my $importnotify = 'on';     	# on/off
 my $importat     = 'on';     	# on/off
@@ -5362,6 +5362,36 @@ sub MSwitch_fhemwebFn($$$$) {
     my $info       = '';
     #systemintegration
     my $system = ReadingsVal( $Name, '.sysconf', '' );
+	
+	
+	
+	
+	
+	my @affecteddevices = split( /,/, ReadingsVal( $Name, '.Device_Affected', 'no_device' ) );
+	
+	
+	
+	
+	my $affectednames =  ReadingsVal( $Name, '.Device_Affected', 'no_device' );
+	$affectednames =~ s/-AbsCmd[1-9]{1,3}//g;
+	$affectednames =~ s/MSwitch_Self/$Name/g;
+	my @affectedklartext = split( /,/,$affectednames );
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
     if ( $system ne '' ) {
 
@@ -5786,11 +5816,46 @@ sub MSwitch_fhemwebFn($$$$) {
           "<option  value=\"MSwitch_Self\">MSwitch_Self ($Name)</option>";
     }
 
-    my $affecteddevices = ReadingsVal( $Name, '.Device_Affected', 'no_device' );
 
-    # affected devices to hash
-    my %usedevices;
-    my @deftoarray = split( /,/, $affecteddevices );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+################# achtung doppelsplit
+
+
+
+
+
+
+
+
+
+
+
+
+
+   my $affecteddevices = ReadingsVal( $Name, '.Device_Affected', 'no_device' );
+
+   # affected devices to hash
+   my %usedevices;
+   my @deftoarray = split( /,/, $affecteddevices );
+	
+	#my @deftoarray = @affecteddevices;
+	
+	
     my $anzahl     = @deftoarray;
     my $anzahl1    = @deftoarray;
     my $anzahl3    = @deftoarray;
@@ -5950,6 +6015,12 @@ sub MSwitch_fhemwebFn($$$$) {
       AttrVal( $Name, 'MSwitch_DeleteCMDs', $deletesavedcmdsstandart );
 
   LOOP9: for my $name ( sort @found_devices ) {
+	  
+	 my @gefischt = grep( /$name/, @affectedklartext  ); 
+	 next LOOP9 if @gefischt <1; 
+	  
+	  
+	  
         my $selectedtrigger = '';
         my $devicealias = AttrVal( $name, 'alias', "" );
         my $devicewebcmd =
@@ -6123,21 +6194,13 @@ show IDs->zeige Befehlszweige mit der ID
 execute and exit if applies->Abbruch nach Ausführung
 Repeats:->Befehlswiederholungen:
 Repeatdelay in sec:->Wiederholungsverzögerung in Sekunden:
-
-
-
-
-
 delay with Cond-check immediately and delayed:->Verzögerung mit Bedingungsprüfung sofort und vor Ausführung:
 delay with Cond-check immediately only:->Verzögerung mit Bedingungsprüfung sofort:
 delay with Cond-check delayed only:->Verzögerung mit Bedingungsprüfung vor Ausführung:
 at with Cond-check immediately and delayed:->Ausführungszeit mit Bedingungsprüfung sofort und vor Ausführung:
 at with Cond-check immediately only:->Ausführungszeit mit Bedingungsprüfung sofort:
 at with Cond-check delayed only->Ausführungszeit mit Bedingungsprüfung vor Ausführung:
-
 with Cond-check->Schaltbedingung vor jeder Ausführung prüfen
-
-
 check condition->Bedingung testen
 with->mit
 modify Actions->Befehle speichern
@@ -6263,7 +6326,24 @@ MS-HELPdelay
 
 ";
 
+
+
+
     $controlhtml = AttrVal( $Name, 'MSwitch_Develop_Affected', $controlhtml );
+	
+	
+	
+	
+	
+	
+	
+	   
+	
+	
+	
+	
+	
+	
     #### extrakt ersetzung
     my $extrakt = $controlhtml;
     $extrakt =~ s/\n/#/g;
@@ -6291,6 +6371,29 @@ MS-HELPdelay
         $extrakt =~ s/.$//;
         @translate = split( /#/, $extrakt );
     }
+
+
+
+
+
+  # foreach (@translate) {
+	  
+	  
+	  
+ # MSwitch_LOG( $Name, 0,"$_ " .time);
+	  
+	  
+                 # my ( $wert1, $wert2 ) = split( /->/, $_ );
+                 # $controlhtml =~ s/$wert1/$wert2/g;
+             # }
+	
+
+
+#MSwitch_LOG( $Name, 0,"$controlhtml " .time);
+
+
+
+
 
     $controlhtml =~ m/MS-cellhigh=(.*);/;
     my $cellhight       = $1 . "px";
@@ -7190,11 +7293,41 @@ Repeats: <input type='text' id='repeatcount' name='repeatcount"
             $controlhtmldevice =~ s/MS-HELPexeccmd/$HELPexeccmd/g;
             $controlhtmldevice =~ s/MS-HELPdelay/$HELPdelay/g;
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             # textersetzung
-            foreach (@translate) {
-                my ( $wert1, $wert2 ) = split( /->/, $_ );
-                $controlhtmldevice =~ s/$wert1/$wert2/g;
-            }
+            # foreach (@translate) {
+                # my ( $wert1, $wert2 ) = split( /->/, $_ );
+                # $controlhtmldevice =~ s/$wert1/$wert2/g;
+            # }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             my $aktpriority = $savedetails{ $aktdevice . '_showreihe' };
 			my $aktid = $savedetails{ $aktdevice . '_id' };
@@ -7320,14 +7453,51 @@ Repeats: <input type='text' id='repeatcount' name='repeatcount"
 			" . $modify;
        # }
 
-        foreach (@translate) {
-            my ( $wert1, $wert2 ) = split( /->/, $_ );
-            $modify =~ s/$wert1/$wert2/g;
-        }
+      #   foreach (@translate) {
+      #       my ( $wert1, $wert2 ) = split( /->/, $_ );
+       #     $modify =~ s/$wert1/$wert2/g;
+       #  }
 
 
         $detailhtml .= $modify;
     }
+
+   #textersetzung
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+    MSwitch_LOG( $Name, 0,"STARTE TEXTERSETZUNG " .time); 
+               foreach (@translate) {
+                   my ( $wert1, $wert2 ) = split( /->/, $_ );
+                   $detailhtml=~ s/$wert1/$wert2/g;
+               }
+
+ MSwitch_LOG( $Name, 0,"BEENDE TEXTERSETZUNG " .time); 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     # ende kommandofelder
 ####################
