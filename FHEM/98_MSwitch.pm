@@ -6017,7 +6017,7 @@ sub MSwitch_fhemwebFn($$$$) {
   LOOP9: for my $name ( sort @found_devices ) {
 	  
 	 my @gefischt = grep( /$name/, @affectedklartext  ); 
-	 next LOOP9 if @gefischt <1; 
+	 # next LOOP9 if @gefischt <1;
 	  
 	  
 	  
@@ -6041,7 +6041,7 @@ sub MSwitch_fhemwebFn($$$$) {
         if ( $name eq '' ) { next LOOP9; }
 
         # abfrage und auswertung befehlssatz
-        if ( $MSwitchIncludeDevicecmds eq '1' and $hash->{INIT} ne "define" ) {
+        if ( $MSwitchIncludeDevicecmds eq '1' and $hash->{INIT} ne "define"  and  @gefischt > 0) {
             if ( exists $data{MSwitch}{devicecmds1}{$name}
                 && $savecmds ne "nosave" )
 
