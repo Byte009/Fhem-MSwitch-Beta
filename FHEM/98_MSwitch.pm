@@ -7475,13 +7475,13 @@ Repeats: <input type='text' id='repeatcount' name='repeatcount"
    
    
    
-    MSwitch_LOG( $Name, 0,"STARTE TEXTERSETZUNG " .time); 
+    #MSwitch_LOG( $Name, 0,"STARTE TEXTERSETZUNG " .time); 
                foreach (@translate) {
                    my ( $wert1, $wert2 ) = split( /->/, $_ );
                    $detailhtml=~ s/$wert1/$wert2/g;
                }
 
- MSwitch_LOG( $Name, 0,"BEENDE TEXTERSETZUNG " .time); 
+# MSwitch_LOG( $Name, 0,"BEENDE TEXTERSETZUNG " .time); 
 
 
 
