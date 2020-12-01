@@ -5393,7 +5393,7 @@ sub MSwitch_fhemwebFn($$$$) {
 	
 	
 
-    if ( $system ne '' ) {
+    if ( $system ne '' && $system ne 'undef') {
 
         $system =
             "<script type=\"text/javascript\">var nameself ='"
@@ -7625,7 +7625,7 @@ Repeats: <input type='text' id='repeatcount' name='repeatcount"
 
     # einblendung system
 
-    if ( $system ne '' ) {
+    if ( $system ne '' && $system ne 'undef' ) {
         $ret .= $system;
 
     }
