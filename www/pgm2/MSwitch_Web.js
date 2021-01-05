@@ -2,7 +2,37 @@
 // Autor:Byte09
 // #########################
 
-	var version = '4.40';
+
+// ##############################################
+// gesetzt aus perl
+	// var logging ='off';
+	// var devices = " . $devstring . ";
+	// var cmds = " . $cmds . ";
+	// var i;
+	// var len = devices.length;
+	// var o = new Object();
+	// var devicename= '" . $Name . "';
+	// var mVersion= '" . $version . "';
+	// var MSDATAVERSION = '" . $vupdate . "';
+	// var MSDATAVERSIONDIGIT = " . $vupdatedigit . ";
+	// var notify = " . $notify . ";
+	// var at = " . $at . ";
+	// var templatesel ='" . $hash->{helper}{template} . "';
+
+// ###############################################
+
+
+
+
+
+
+
+
+
+
+
+
+	var version = '4.60';
 	var info = '';
 	var debug ='off';
 	
@@ -230,31 +260,31 @@ $("#helptext").css("display","none");
 	observer.observe(target, config);
 	} 
 	 */
+	 
+	
+ 	// var olddest;
+	// // init reaktion auf auf Änderungen der INFORMID
+	// $("body").on('DOMSubtreeModified', "div[informId|='"+devicename+"-Debug']", function() {
+	// var test = $( "div[informId='"+devicename+"-Debug']" ).text();
+	
+	// //alert(test);
+	// //test= test.substring(0, test.length - 19);
 	
 	
- 	var olddest;
-	// init reaktion auf auf Änderungen der INFORMID
-	$("body").on('DOMSubtreeModified', "div[informId|='"+devicename+"-Debug']", function() {
-	var test = $( "div[informId='"+devicename+"-Debug']" ).text();
-	
-	//alert(test);
-	//test= test.substring(0, test.length - 19);
-	
-	
-	var old = document.getElementById("log").value;
-	if (olddest != test)
-		{
-		olddest = test;
-		document.getElementById("log").value=old+'\n'+test;
-		var textarea = document.getElementById('log');
-		testautoscroll = $("[name=autoscroll]").prop("checked") ? "ja":"nein";
-		if (testautoscroll == 'ja')
-			{
-			textarea.scrollTop = textarea.scrollHeight;
-			}
-		}
-	return;
-	}) 
+	// var old = document.getElementById("log").value;
+	// if (olddest != test)
+		// {
+		// olddest = test;
+		// document.getElementById("log").value=old+'\n'+test;
+		// var textarea = document.getElementById('log');
+		// testautoscroll = $("[name=autoscroll]").prop("checked") ? "ja":"nein";
+		// if (testautoscroll == 'ja')
+			// {
+			// textarea.scrollTop = textarea.scrollHeight;
+			// }
+		// }
+	// return;
+	// }) 
 	
 
 	var x = document.getElementsByClassName('randomidclass');
@@ -295,12 +325,12 @@ $("#helptext").css("display","none");
 	if( changedetails != globaldetails)
 		{
 		globallock =' unsaved device actions';
-		[ "aw_dist1","aw_dist2","aw_dist","aw_trig","aw_md1","aw_md20","aw_addevent","aw_dev"].forEach (lock,);
+		[ "aw_dist1","aw_dist2","aw_dist","aw_trig","aw_md20","aw_addevent","aw_dev"].forEach (lock,);
 		randomdev.forEach (lock);
 		}
 	if( changedetails == globaldetails)
 		{
-		[ "aw_dist1","aw_dist2","aw_dist","aw_trig","aw_md1","aw_md20","aw_addevent","aw_dev"].forEach (unlock,);
+		[ "aw_dist1","aw_dist2","aw_dist","aw_trig","aw_md20","aw_addevent","aw_dev"].forEach (unlock,);
 			randomdev.forEach (unlock);
 		}
 	}
@@ -322,12 +352,12 @@ if ( DEVICETYP != 'dummy')
 	if (trigdev != TRIGGERDEVICEHTML)
 		{
 		globallock =' unsaved trigger';
-		["aw_md1","aw_md20","aw_md","aw_dist1","aw_dist2","aw_dist","aw_dev", "aw_det"].forEach (lock);
+		["aw_md20","aw_md","aw_dist1","aw_dist2","aw_dist","aw_dev", "aw_det"].forEach (lock);
 		randomdev.forEach (lock,);
 		}
 	else
 		{	
-		["aw_md1","aw_md20","aw_md","aw_dist1","aw_dist2","aw_dist","aw_dev", "aw_det"].forEach (lock);
+		["aw_md20","aw_md","aw_dist1","aw_dist2","aw_dist","aw_dev", "aw_det"].forEach (lock);
 		randomdev.forEach (unlock);
 		document.getElementById('MSwitchWebTRDT').innerHTML = triggerdetails;	
 		}
@@ -420,7 +450,7 @@ if (document.getElementById('trigcmdon'))
 	var atriwaaray = { SCRIPTTRIGGERS };
 
 	// init reaktion auf Änderungen der INFORMID
-	$("body").on('DOMSubtreeModified', "div[informId|='"+devicename+"-EVENT']", function() {
+	$("body").on('DOMSubtreeModified', "div[informId|='"+devicename+"-EVTFULL']", function() {
 	
 	// abbruch wenn checkbox nicht aktiv
 	
@@ -434,7 +464,7 @@ if (document.getElementById('trigcmdon'))
 		}
 
 	// neustes event aus html extrahieren
-	var test = $( "div[informId|='"+devicename+"-EVENT']" ).text();
+	var test = $( "div[informId|='"+devicename+"-EVTFULL']" ).text();
  
 	// datum entfernen
 	test= test.substring(0, test.length - 19);
@@ -520,14 +550,14 @@ if (document.getElementById('trigcmdon'))
 			if (UNLOCK == '1')
 			{
 				globallock =' this device is locked !';
-				["aw_dist1","aw_dist2", "aw_dist","aw_dev","aw_det","aw_trig","aw_md","aw_md1","aw_md20","aw_addevent"].forEach (lock,);
+				["aw_dist1","aw_dist2", "aw_dist","aw_dev","aw_det","aw_trig","aw_md","aw_md20","aw_addevent"].forEach (lock,);
 				randomdev.forEach (lock);
 			}
 			
 			if (UNLOCK == '2')
 			{
 				globallock =' only trigger is changeable';
-				[ "aw_dist1","aw_dist2","aw_dist","aw_dev","aw_det","aw_md","aw_md1","aw_md20","aw_addevent"].forEach (lock,);
+				[ "aw_dist1","aw_dist2","aw_dist","aw_dev","aw_det","aw_md","aw_md20","aw_addevent"].forEach (lock,);
 				randomdev.forEach (lock);
 			}
 			
@@ -548,12 +578,12 @@ if (document.getElementById('trigcmdon'))
 			if (actaffected != globalaffected)
 				{
 				globallock =' unsaved affected device';
-				[ "aw_dist1","aw_dist2","aw_dist","aw_det","aw_trig","aw_md","aw_md1","aw_md20","aw_addevent"].forEach (lock,);
+				[ "aw_dist1","aw_dist2","aw_dist","aw_det","aw_trig","aw_md","aw_md20","aw_addevent"].forEach (lock,);
 				randomdev.forEach (lock);
 				}
 			else
 				{
-				[ "aw_dist1","aw_dist2","aw_dist","aw_det","aw_trig","aw_md","aw_md1","aw_md20","aw_addevent"].forEach (unlock,);
+				[ "aw_dist1","aw_dist2","aw_dist","aw_det","aw_trig","aw_md","aw_md20","aw_addevent"].forEach (unlock,);
 				randomdev.forEach (unlock);
 				}
 		}	 
@@ -595,6 +625,29 @@ if (document.getElementById('trigcmdon'))
 	
 return;
 } // ende startfunktionen
+
+
+
+
+function writedebug(line){
+	//alert(line);
+	
+	encodedline = decodeURIComponent(line);
+	
+	var old = document.getElementById("log").value;
+	 var textarea = document.getElementById('log');
+	 document.getElementById("log").value=old+'\n'+encodedline;
+	 testautoscroll = $("[name=autoscroll]").prop("checked") ? "ja":"nein";
+	 if (testautoscroll == 'ja')
+		 {
+		 textarea.scrollTop = textarea.scrollHeight;
+	 }
+	
+	
+	return;
+	
+	
+}
 
 
 //#####################################################################################################
@@ -644,35 +697,22 @@ function adddistributor(){
 
 function savedistributor(){
 	if (debug == 'on'){ alert('savedistributor') };
-	
-	//alert('savedistributor')
-	//alert(DISTRIBUTLINES);
+
 	var newidfile='';
 	for (i=0; i<DISTRIBUTLINES; i++)
 		{
 			aktline =  $("#ideventNR"+i).val();
-
-			//alert(aktline);
-		
-		aktline = aktline.replace(/ /g,'[SP]');
-		
-		
 			if (aktline === undefined) { continue; }
 			if (aktline == 'undefined') { continue; }
+			aktline = aktline.replace(/ /g,'[SP]');
 			aktcmd=  $("#ideventCMD"+i).val();
 			aktid=  $("#ideventID"+i).val();
 			newidfile +=aktline+"=>cmd"+aktcmd+"[SP]ID[SP]"+aktid+"[NL]";		
 		}
-		
-
-//alert(newidfile);
-
 
 	FW_cmd(FW_root+'?cmd=set '+devicename+' setbridge '+newidfile+'&XHR=1');
 	
-	
-	
-	[ "aw_md","aw_trig","aw_md1","aw_md20","aw_addevent","aw_dev"].forEach (unlock,);
+	[ "aw_md","aw_trig","aw_md20","aw_addevent","aw_dev"].forEach (unlock,);
 	randomdev.forEach (unlock);
 	 
 	
@@ -697,13 +737,13 @@ function checkdistricode(){
 	//if (CHECKdistricode != ORGdistricode){
 		//alert('ungleich');
 				globallock =' unsaved disributor ';
-				[ "aw_md","aw_trig","aw_md1","aw_md20","aw_addevent","aw_dev"].forEach (lock,);
+				[ "aw_md","aw_trig","aw_md20","aw_addevent","aw_dev"].forEach (lock,);
 				randomdev.forEach (lock);
 	/*	}
 	 	else
 			{
 				alert('gleich');
-			[ "aw_md","aw_trig","aw_md1","aw_md20","aw_addevent","aw_dev"].forEach (unlock,);
+			[ "aw_md","aw_trig","aw_md20","aw_addevent","aw_dev"].forEach (unlock,);
 					randomdev.forEach (unlock);
 			} */
 			
@@ -817,12 +857,8 @@ function noaction(target,copytofield){
 	if (debug == 'on'){ alert('slider') };
 	var selected =document.getElementById(copytofield).value;
 	//var selectfield = "<input type='text' id='" + target +"_opt' size='3' value='' readonly>&nbsp;&nbsp;&nbsp;" + first +"<input type='range' min='" + first +"' max='" + last + "' value='" + selected +"' step='" + step + "' onchange=\"javascript: showValue(this.value,'" + copytofield + "','" + target + "')\">" + last  ;
-	
 	var selectfield = "<div class='col3'><div class='fhemWidget' cmd='pct' reading='state' dev='webtestdummy' arg='slider,1,10,100' current='farbe test1'></div></div>";
-	
-	
 	document.getElementById(target).innerHTML = selectfield + '<br>';
-	
 	FW_replaceWidgets();
 	//var opt = target + '_opt';
 	//document.getElementById(opt).value=selected;
@@ -830,23 +866,12 @@ function noaction(target,copytofield){
 	}  
 	
 	
-	
-	
-	
-	
-	
 
  function colorpicker(aktuell,target,copytofield){
 	if (debug == 'on'){ alert('slider') };
 	var selected =document.getElementById(copytofield).value;
-	
-	
 	//var selectfield = "<input type='text' id='" + target +"_opt' size='3' value='' readonly>&nbsp;&nbsp;&nbsp;" + first +"<input type='range' min='" + first +"' max='" + last + "' value='" + selected +"' step='" + step + "' onchange=\"javascript: showValue(this.value,'" + copytofield + "','" + target + "')\">" + last  ;
-	
-	
-	
 	var selectfield = "<input type='color' id='favcolor' name='favcolor' value='#ff0000'>";
-	
 	document.getElementById(target).innerHTML = selectfield + '<br>';
 	//var opt = target + '_opt';
 	//document.getElementById(opt).value=selected;
@@ -940,12 +965,12 @@ function activate(state,target,options,copytofield){
 		if (globaldetails3 != globaldetails2)
 			{
 			globallock =' unsaved device actions';
-				[ "aw_dist1","aw_dist2","aw_dist","aw_trig","aw_md1","aw_md20","aw_addevent","aw_dev"].forEach (lock,);
+				[ "aw_dist1","aw_dist2","aw_dist","aw_trig","aw_md20","aw_addevent","aw_dev"].forEach (lock,);
 				randomdev.forEach (lock);
 			}
 		else
 			{
-			[ "aw_dist1","aw_dist2","aw_dist","aw_trig","aw_md1","aw_md20","aw_addevent","aw_dev"].forEach (unlock,);
+			[ "aw_dist1","aw_dist2","aw_dist","aw_trig","aw_md20","aw_addevent","aw_dev"].forEach (unlock,);
 					randomdev.forEach (unlock);
 			}
 		}
@@ -977,7 +1002,12 @@ function activate(state,target,options,copytofield){
 	
 	
 	
-	//alert(devicecmd[0]);
+	// alert(devicecmd[0]);
+	 
+	 
+	 
+	 
+	 
 	if (devicecmd[0] == 'noArg')
 		{
 		noarg(target,copytofield);
@@ -999,35 +1029,11 @@ function activate(state,target,options,copytofield){
 	return;
 	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
-function testcmd(field,devicename,opt){
-if (debug == 'on'){ alert('testcmd') };
+// ###############################################
+function testcmd(field,cmdname,opt,eventfield){
+	if (debug == 'on'){ alert('testcmd') };
 	comand = $("[name="+field+"]").val();
-	
-	
-	
 	comand=comand.trim();
-	
-	
-	
-			// var myRegEx = new RegExp('^{');  
-	// treffer = comand.match(myRegEx);
-					
-			// alert (treffer);	
-			
-			
-			
-	//alert(comand);
 	
 	
 	
@@ -1035,101 +1041,102 @@ if (debug == 'on'){ alert('testcmd') };
 		{
 		return;
 		}
+		
+	// if (cmdname != 'FreeCmd')
+		// {
+		
+		// }
+		
+	if (cmdname != 'FreeCmd')
+		{
+		comand1 = $("[name="+opt+"]").val();
+		//alert(opt);
+		//alert(comand1);
+		comand =comand+" "+comand1;
+		comand = comand.replace(/ /g,'#[sp]');
+		comand =comand+" "+eventfield;
+		cmd ='get '+devicename+' extcmd '+cmdname+' '+encodeURIComponent(comand);
+		FW_cmd(FW_root+'?cmd='+cmd+'&XHR=1', function(resp){FW_okDialog(resp);});
+		} 
+	else
+		{
+		comand = comand.replace(/ /g,'#[sp]')
+		comand = comand.replace(/;/g,'#[se]')
+		comand = comand.replace(/\n/g,'#[nl]')
+		comand =comand+" "+eventfield;
+		cmd ='get '+devicename+' extcmd '+cmdname+' '+encodeURIComponent(comand);
+		FW_cmd(FW_root+'?cmd='+cmd+'&XHR=1', function(resp){FW_okDialog(resp);});
+		} 
+	return;	
+	}
+	
+// ###############################################
+function testcmd_OLD_notinuse(field,devicename,opt){
+	if (debug == 'on'){ alert('testcmd') };
+	comand = $("[name="+field+"]").val();
+	comand=comand.trim();
+
+ 	if (comand == 'no_action')
+		{
+		return;
+		}
+		
 	comand1 = $("[name="+opt+"]").val()
 	if (devicename != 'FreeCmd')
 		{
 		comand =comand+" "+comand1;
 		}
 	comand = comand.replace(/$SELF/g, devicename); // !!!!
-	//alert(comand);
 	if (devicename != 'FreeCmd')
 		{
-		cmd ='set '+devicename+' '+comand;
-		
-		
-		
-		
-		
-		FW_cmd(FW_root+'?cmd='+encodeURIComponent(cmd)+'&XHR=1');
-		FW_okDialog(EXECCMD+' '+cmd); // !!!
-		FW_errmsg(cmd, 5);
+			cmd ='set '+devicename+' '+comand;
+			FW_cmd(FW_root+'?cmd='+encodeURIComponent(cmd)+'&XHR=1');
+			FW_okDialog(EXECCMD+' '+cmd); // !!!
+			FW_errmsg(cmd, 5);
 		} 
-	 else
+	else
 		{
-			
-			
-			
-			
-			
-			
-			
-			
 			comand = comand.replace(/;;/g,'[DS]');
 			comand = comand.replace(/;/g,';;');
 			comand = comand.replace(/\\[DS\\]/g,';;');
 			var t0 = comand.substr(0, 1);
 			var t1 = comand.substr(comand.length-1,1 );
 			if (t1 == ' ')
-				{
+			{
 				var space = '".$NOSPACE."'; // !!!
 				var textfinal = "<div style ='font-size: medium;'>"+space+"</div>";
 				FW_okDialog(textfinal);
 				return;
-				}
-			
-			
-			
-	
-			showcomand = comand;
-			
-			
-			if (t0 == '{' && t1 == '}') 
-				{
-					
-					comand  = comand.substr(1, comand.length-1);
-					erweiterung  = "{my $SELF=\""+mswitchname+"\";;";
-					erweiterung += "my $NAME=\""+"\";;";
-					erweiterung += "my $EVTPART1=\""+"\";;";
-					erweiterung += "my $EVTPART2=\""+"\";;";
-					erweiterung += "my $EVTPART3=\""+"\";;";
-					erweiterung += "my $EVTFULL=\""+"\";;";
-					comand=erweiterung+comand;
-					//alert(erweiterung);
-					//alert(comand);
-					//alert(encodeURIComponent(comand));
-					
-					//showcomand = comand;
+			}
 		
-				}
-			else
-				{
-					// alert(comand);
+		showcomand = comand;
 			
-					erweiterung  = "{my $SELF=\""+mswitchname+"\";;";
-					erweiterung += "my $NAME=\""+"\";;";
-					erweiterung += "my $EVTPART1=\""+"\";;";
-					erweiterung += "my $EVTPART2=\""+"\";;";
-					erweiterung += "my $EVTPART3=\""+"\";;";
-					erweiterung += "my $EVTFULL=\""+"\";;";	
-					
-					
+		if (t0 == '{' && t1 == '}') 
+			{
+						
+				comand  = comand.substr(1, comand.length-1);
+				erweiterung  = "{my $SELF=\""+mswitchname+"\";;";
+				erweiterung += "my $NAME=\""+"\";;";
+				erweiterung += "my $EVTPART1=\""+"\";;";
+				erweiterung += "my $EVTPART2=\""+"\";;";
+				erweiterung += "my $EVTPART3=\""+"\";;";
+				erweiterung += "my $EVTFULL=\""+"\";;";
+				comand=erweiterung+comand;
+			}
+		else
+			{
+				erweiterung  = "{my $SELF=\""+mswitchname+"\";;";
+				erweiterung += "my $NAME=\""+"\";;";
+				erweiterung += "my $EVTPART1=\""+"\";;";
+				erweiterung += "my $EVTPART2=\""+"\";;";
+				erweiterung += "my $EVTPART3=\""+"\";;";
+				erweiterung += "my $EVTFULL=\""+"\";;";		
 				comand = erweiterung+'fhem("'+comand+'")}';
+			}
 				
-				
-				// alert(comand);
-				
-				
-				//showcomand = comand;
-				}
-			
 			cmd = comand;
-			
-			//alert(cmd);
-			
 			FW_cmd(FW_root+'?cmd='+encodeURIComponent(cmd)+'&XHR=1');
-			
-			showcomand = showcomand.replace(/;;/g,';');
-			
+			showcomand = showcomand.replace(/;;/g,';');	
 			FW_okDialog(EXECCMD+' '+showcomand);
 		} 
 	}
@@ -1170,13 +1177,13 @@ function  switchlock()
 function closetrigger(){
 	if (debug == 'on'){ alert('closetrigger') }
 			globallock =' unsaved trigger details';
-			["aw_dist1","aw_dist2","aw_dist","aw_dev", "aw_det","aw_trig","aw_md1","aw_md20","aw_addevent"].forEach (lock,);
+			["aw_dist1","aw_dist2","aw_dist","aw_dev", "aw_det","aw_trig","aw_md20","aw_addevent"].forEach (lock,);
 			randomdev.forEach (lock);
 	}
 	
 function opentrigger(){
 	if (debug == 'on'){ alert('opentrigger') }
-			["aw_dist1","aw_dist2","aw_dist", "aw_dev","aw_det","aw_trig","aw_md1","aw_md20","aw_addevent"].forEach (unlock,);
+			["aw_dist1","aw_dist2","aw_dist", "aw_dev","aw_det","aw_trig","aw_md20","aw_addevent"].forEach (unlock,);
 			randomdev.forEach (unlock);
 	}
 
@@ -1264,7 +1271,6 @@ if(typeof fromsc == 'undefined'){
 	fromsc = "noweb";
 }
 
-
 	targetval =document.getElementById(targetid).value;
 	
 	targetval = targetval.replace(/\u2424/g,'\n');
@@ -1279,8 +1285,10 @@ if(typeof fromsc == 'undefined'){
 
 
 function bigwindowformat(targetid,fromsc){
-	//return;
-	// alert(fromsc);
+	
+
+	
+	if (debug == 'on'){ alert('bigwindowformat') };
 	var value = document.getElementById('valtrans').value
 	
 	if (fromsc == "web"){
@@ -1660,7 +1668,7 @@ if (debug == 'on'){ alert('checkcondition') }
 	if (debug == 'on'){ alert('#eventsave') };
 	
 	trigsave = $("[name=aw_save]").prop("checked") ? "on":"off";
-	FW_cmd(FW_root+'?cmd=setreading '+devicename+' Trigger_log '+trigsave+'&XHR=1');
+	FW_cmd(FW_root+'?cmd=setreading '+devicename+' .Trigger_log '+trigsave+'&XHR=1');
 	
 	
 	    return;
@@ -1791,35 +1799,57 @@ if (debug == 'on'){ alert('checkcondition') }
 	location = location.pathname+"?detail="+devicename+"&cmd=set "+addcsrf(def);
 	});
 	
-//aplly filter to trigger
-	$("#aw_md1").click(function(){
-	if (debug == 'on'){ alert('#aw_md1') };	
-	var nm = $(t).attr("nm");
-	var  def = nm+" filter_trigger ";
-	location = location.pathname+"?detail="+devicename+"&cmd=set "+addcsrf(def);
-	});
 
-//unbekannt
+
+
+//Timer und Trigger speichern
 	$("#aw_trig").click(function(){
 	if (debug == 'on'){ alert('#aw_trig') };	
 	var nm = $(t).attr("nm");
 	trigdev = $("[name=trigdev]").val();
+	
+	
 	timeon =  $("[name=timeon]").val();
+	if(typeof(timeon)=="undefined"){timeon="NoTimer"};
+	if(timeon==""){timeon="NoTimer"};
+	
+	
 	timeoff =  $("[name=timeoff]").val();
+	if(typeof(timeoff)=="undefined"){timeoff="NoTimer"};
+	if(timeoff==""){timeoff="NoTimer"};
+	
 	timeononly =  $("[name=timeononly]").val();
+	if(typeof(timeononly)=="undefined"){timeononly="NoTimer"};
+	if(timeononly==""){timeononly="NoTimer"};
+	
+	
 	timeoffonly =  $("[name=timeoffonly]").val();
-	if(typeof(timeoffonly)=="undefined"){timeoffonly=""}
+	if(typeof(timeoffonly)=="undefined"){timeoffonly="NoTimer"};
+	if(timeoffonly==""){timeoffonly="NoTimer"};
+	
 	timeonoffonly =  $("[name=timeonoffonly]").val();
-	if(typeof(timeonoffonly)=="undefined"){timeonoffonly=""}
+	if(typeof(timeonoffonly)=="undefined"){timeonoffonly="NoTimer"};
+	if(timeonoffonly==""){timeonoffonly="NoTimer"};
+	
+	
+	
 	trigdevcond = $("[name=triggercondition]").val();
+	if(typeof(trigdevcond)=="undefined"){trigdevcond="NoCondition"};
+	if(trigdevcond==""){trigdevcond="NoCondition"};
+	
+	
+	
 	trigdevcond = trigdevcond.replace(/\\./g,'#[pt]');
 	trigdevcond = trigdevcond.replace(/:/g,'#[dp]');
 	trigdevcond= trigdevcond.replace(/~/g,'#[ti]');
 	trigdevcond = trigdevcond.replace(/ /g,'#[sp]');
-	trigdevcond = trigdevcond+':';
-	timeon = timeon.replace(/ /g, '');
+	//trigdevcond = trigdevcond+':';
+	
+	
+	
+/*	timeon = timeon.replace(/ /g, '');
 	timeoff = timeoff.replace(/ /g, '');
-	timeononly = timeononly.replace(/ /g, '');
+ 	timeononly = timeononly.replace(/ /g, '');
 	timeoffonly = timeoffonly.replace(/ /g, '');
 	timeonoffonly = timeonoffonly.replace(/ /g, '');
 	timeon = timeon.replace(/:/g, '#[dp]');
@@ -1831,10 +1861,23 @@ if (debug == 'on'){ alert('checkcondition') }
 	timeoff = timeoff+':';
 	timeononly = timeononly+':';
 	timeoffonly = timeoffonly+':';
-	timeonoffonly = timeonoffonly+':';
+	timeonoffonly = timeonoffonly+':'; */
+	
+	
+	
+	
 	trigwhite = $("[name=triggerwhitelist]").val();
 	var  def = nm+" set_trigger  "+trigdev+" "+timeon+" "+timeoff+" "+timeononly+" "+timeoffonly+" "+timeonoffonly+" "+trigdevcond+" "+trigwhite+" " ;
+	//alert(def);
+	def = def.replace(/\n/g, '[NEXTTIMER]');
+	def = def.replace(/\u2424/g,'[NEXTTIMER]');
+
+	
 	def =  encodeURIComponent(def);
+	
+	
+	
+	
 	location = location.pathname+"?detail="+devicename+"&cmd=set "+addcsrf(def);
 	});
 	
