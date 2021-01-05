@@ -67,7 +67,7 @@ my $helpfileeng = "www/MSwitch/MSwitch_Help_eng.txt";
 my $backupfile 	= "backup/MSwitch/";
 
 my $support = "Support Mail: Byte009\@web.de";
-my $autoupdate   = 'on';     				# off/on
+my $autoupdate   = 'off';     				# off/on
 my $version      = '5.0';  					# version
 my $wizard       = 'on';     				# on/off   - not in use
 my $importnotify = 'on';     				# on/off   - not in use
@@ -3860,7 +3860,7 @@ sub MSwitch_Notify($$) {
     {
         # reaktion auf eigenes notify start / define / modify
 		
-		
+		#Log3("test",0,"found init 1");
 			
 	# versionscheck
     if ( ReadingsVal( $ownName, '.V_Check', $vupdate ) ne $vupdate ) 
@@ -3876,7 +3876,7 @@ sub MSwitch_Notify($$) {
     }
 # nur abfragen für eigenes Notify ENDE
     
-
+#Log3("test",0,"nach init 1");
 # Return without any further action if the module is disabled
 	return "" if ( IsDisabled($ownName) );
 	
@@ -3899,15 +3899,23 @@ sub MSwitch_Notify($$) {
         return if ( !$own_hash->{NOTIFYDEV} && ReadingsVal( $ownName, '.Trigger_device', 'no_trigger' ) ne "all_events" );
     }
 
-
+#Log3("test",0,"nach init 1a");
 # startverzögerung abwarten
     my $diff = int(time) - $fhem_started;
-    if ( $diff < $startdelay )
+	
+	#Log3("test",0,int(time)." - ".$fhem_started);
+	
+	#Log3("test",0,"startdelay: $startdelay");
+	#Log3("test",0,"diff: $diff");
+	
+	
+	
+    if ( $diff < $startdelay && $startdelay > 0 )
 	{
         MSwitch_LOG( $ownName, 6,"Event blockiert - Startverzögerung $diff " );
         return;
     }
-
+#Log3("test",0,"nach init 1b");
 
 
 # test wait attribut
@@ -3999,14 +4007,14 @@ sub MSwitch_Notify($$) {
     }
 
     $own_hash->{helper}{eventfrom} = $devName;
-
+#Log3("test",0,"nach init 2");
 	return if ($incommingdevice ne $triggerdevice
 				&& $triggerdevice ne "all_events"
 				&& $triggerdevice ne "MSwitch_Self"
 				&& $incommingdevice ne "MSwitch_Self" );	
 
 	
-
+#Log3("test",0,"nach init 3");
 #### alte sequenzen löschen
 	my $sequenzarrayfull = AttrVal( $ownName, 'MSwitch_Sequenz', 'undef' );
 	my @sequenzall = split( /\//, $sequenzarrayfull );
@@ -4045,10 +4053,14 @@ sub MSwitch_Notify($$) {
 #Log3("test",0,"for loop $events");
 
 
-
+#Log3("test",0,"nach init 4");
       EVENT: foreach my $event (@eventscopy)
 		{
 		MSwitch_LOG( $ownName, 6, "bearbeitetes Event -> $event  " );
+		
+		
+		#Log3("test",0,"aktuelles event: $event  ");
+		
 		
 # ausstieg bei jason
         if ( $event =~ m/^.*:.\{.*\}?/ )
@@ -4074,6 +4086,12 @@ sub MSwitch_Notify($$) {
         $event =~ s/: /:/s;
 
 ####################################
+
+
+#Log3("test",0,"$devName:$eventcopy");
+
+
+
 		$eventcopy = "$devName:$eventcopy";
 
 ##################################################################
@@ -4084,11 +4102,37 @@ sub MSwitch_Notify($$) {
 		# setze eingehendes Event :
 		 
 		delete( $own_hash->{helper}{evtparts});
+		
+		
+		#Log3("test",0,"eventcopy ".$eventcopy);
+		
+		
+		
 		my @eventteile   = split( /:/, $eventcopy );
 			
 			
 		next EVENT if @eventteile > 3;	# keine 4 stelligen events zulassen
 		#hier kann optiona eine zusammenfassung eingebaut werde ( zusammenfassung nach der 3 stelle
+		
+		
+#Log3("test",0,"parts ".@eventteile);		
+		
+		
+		 if (@eventteile == 2 && $eventteile[0] eq "global")
+		 {
+			 unshift (@eventteile,"global");
+			 $eventcopy = join(":",@eventteile);
+			
+			
+			 #Log3("test",0,"parts ".@eventteile);		
+
+
+
+		 }
+		
+		
+		
+		
 			
 		if (!defined $eventteile[0]){ $eventteile[0]="";}
 		if (!defined $eventteile[1] ){$eventteile[1]="";}
@@ -10809,6 +10853,17 @@ sub MSwitch_checktrigger_new(@) {
    
 
  my @triggerarray =split (/:/,$triggerfield);
+
+#global:INITIALIZED
+
+
+ if (@triggerarray == 1 && ($triggerarray[0] eq "INITIALIZED" || $triggerarray[0] eq "SHUTDOWN" || $triggerarray[0] eq "ATTR")){
+	unshift(@triggerarray,"global");
+	unshift(@triggerarray,"global");
+	$triggerfield = join ":",@triggerarray;
+ }
+
+
 
  if (@triggerarray == 2)
  {
