@@ -15,8 +15,6 @@
 # Todo's:  
 #          	CommandSet() statt fhem()
 #          	del_repeats mehrfach - in sub auslager
-#          	READING TRIGGERLOG UMSTELLEN AUF .TRIGGERLOG
-#
 #			event EVENTFULL nur nach aktivierung im frontend auf 1 setzen
 #
 #################################################################
@@ -151,15 +149,12 @@ delete $data{MSwitch}{Widget};
 			}
 		close(HELP);
 		$startmessage.="     -> widgetfile ($widgetfile) loaded - Widgets on\n";
-		
 		$startmessage.="     -> verfuegbare Widgets: ";
-		
 		my $inhalt1 = $data{MSwitch}{Widget};
 		foreach my $a ( sort keys %{$inhalt1} )
 		{
 			$startmessage.="[$a],";
 		}
-		
 		chop($startmessage);
 		$startmessage.="\n";
 		}
@@ -217,24 +212,9 @@ delete $data{MSwitch}{Widget};
 		{
 		$startmessage.="!!!  -> helpfile eng ($helpfileeng) not found - Help off\n";
 		}
-		
-		# if ( open( BACKUPDATEI, "<./$backupfile" ))
-		# {
-		# $startmessage.="     -> backupfile ($backupfile) found - backups avaible\n";
-		# close(BACKUPDATEI);
-		# }
-		# else
-		# {
-		# $startmessage.="!!!  -> backupfile ($backupfile) not found - no backups avaible\n";
-		# }
-		
-	$startmessage.="     -> autoupdate devices status: $autoupdate \n";		
-	$startmessage.="     -> $support\n";
-		
-		
-
-	
-
+			
+$startmessage.="     -> autoupdate devices status: $autoupdate \n";		
+$startmessage.="     -> $support\n";
 $startmessage.="     -> Mswitch initializing ready\n";
 
 Log3("MSwitch",1,"Messages collected while initializing MSwitch-System:\n$startmessage");
@@ -305,16 +285,16 @@ sub MSwitch_savetemplate($$$);
 ##############################
 
 my $attrdummy ="  disable:0,1"
-          . "  MSwitch_Language:EN,DE"
-          . "  MSwitch_Debug:0,1"
-          . "  disabledForIntervals"
-          . "  MSwitch_Inforoom"
-          . "  MSwitch_Mode:Full,Notify,Toggle,Dummy"
-          . "  MSwitch_Selftrigger_always:0,1"
-          . "  useSetExtensions:0,1"
-		  . "  setList:textField-long "
-          . "  readingList:textField-long "
-		  . $readingFnAttributes;
+. "  MSwitch_Language:EN,DE"
+. "  MSwitch_Debug:0,1"
+. "  disabledForIntervals"
+. "  MSwitch_Inforoom"
+. "  MSwitch_Mode:Full,Notify,Toggle,Dummy"
+. "  MSwitch_Selftrigger_always:0,1"
+. "  useSetExtensions:0,1"
+. "  setList:textField-long "
+. "  readingList:textField-long "
+. $readingFnAttributes;
 
 
 my $attractivedummy = "  disable:0,1"
@@ -323,6 +303,7 @@ my $attractivedummy = "  disable:0,1"
 . "  disabledForIntervals"
 . "  MSwitch_Expert:0,1"
 . "  MSwitch_Modul_Mode:0,1"
+. "  MSwitch_Readings:textField-long"
 . "  stateFormat:textField-long"
 . "  MSwitch_Eventhistory:0,10"
 . "  MSwitch_Delete_Delays:0,1,2,3"
@@ -353,6 +334,7 @@ my $attrresetlist =
 . "  MSwitch_Read_Log:0,1"
 . "  MSwitch_Hidecmds"
 . "  MSwitch_Help:0,1"
+. "  MSwitch_Readings:textField-long"
 . "  MSwitch_Debug:0,1,2,3"
 . "  MSwitch_Expert:0,1"
 . "  MSwitch_Delete_Delays:0,1,2,3,4"
@@ -470,10 +452,6 @@ sub MSwitch_Initialize($) {
     $hash->{FW_summaryFn}      = "MSwitch_summary";
     $hash->{NotifyOrderPrefix} = "45-";
 	$hash->{AttrList} = $attrresetlist;
-	
-	
-
-	
 	
 }
 ####################
@@ -2076,6 +2054,13 @@ sub MSwitch_Set_OnOff($@)
 	{	
 	my ( $ic,$showevents,$devicemode,$delaymode,$hash, $name, $cmd, @args ) = @_;
 	readingsSingleUpdate( $hash, "state", $cmd, 1 );
+	
+	
+	delete $hash->{helper}{evtparts};
+	delete $hash->{helper}{evtparts}{event};
+	delete $hash->{helper}{aktevent};
+	
+	MSwitch_Readings($hash,$name);
     if ( $devicemode eq "Dummy" && AttrVal( $name, "MSwitch_Selftrigger_always", 0 ) eq "0" )
         {
             return;
@@ -3053,15 +3038,6 @@ sub MSwitch_Attr(@) {
 ### Debug
 if (defined $aVal && $aVal ne "" && $aName eq 'MSwitch_Debug')
 {
-    # if (( $aVal == 2 || $aVal == 3 ) ) 
-	# {
-        # readingsSingleUpdate( $hash, "Debug", 'Start_Debug', 1 );
-    # }
-    # else 
-	# {
-        # delete( $hash->{READINGS}{Debug} );
-    # }
-
     if (( $aVal == 0 || $aVal == 1 || $aVal == 2 || $aVal == 3 ) )
     {
         delete( $hash->{READINGS}{Bulkfrom} );
@@ -3127,6 +3103,46 @@ if (defined $aVal && $aVal ne "" && $aName eq 'MSwitch_Debug')
         delete $data{MSwitch}{$name}{groups};
         return;
     }
+
+
+## Readings
+
+		# Log3("test",0,"$aVal");
+		# Log3("test",0,"s1: $1");
+		# Log3("test",0,"s2: $2");
+		# Log3("test",0,"s3: $4");
+		# Log3("test",0,"s4: $4");
+		# Log3("test",0,"$readings");
+
+		# Log3("test",0,"FOUND: $first");
+		
+		# Log3("test",0,"REST: $readings");
+#######
+	if ( $cmd eq 'set' && $aName eq 'MSwitch_Readings' ) 
+	{
+		delete $data{MSwitch}{$name}{Readings};
+		my $readings = $aVal.",";
+		$readings =~ s/\n//g;
+		my $x          = 0; # exit
+        while ( $readings =~ m/(.*?\})(,)(.*)/ )
+		{
+            $x++; 
+			last if $x > 10;
+			my $first = $1;
+			$readings = $3;
+			chop $first;
+			my ($key,$inhalt)=split(/{/,$first);
+			$key=~ s/ //g;
+		#Log3("test",0,"key: $key");
+		
+			$data{MSwitch}{$name}{Readings}{$key}=$inhalt;
+			
+			#Log3("test",0,"inhalt: ".$data{MSwitch}{$name}{Readings}{$key});
+			
+		}
+		return;
+	}
+
 
 ## EventWait
     if ( $cmd eq 'set' && $aName eq 'MSwitch_Event_Wait' ) {
@@ -4101,7 +4117,13 @@ sub MSwitch_Notify($$) {
 		# temporär
 		# setze eingehendes Event :
 		 
-		delete( $own_hash->{helper}{evtparts});
+		delete $own_hash->{helper}{evtparts};
+		delete $own_hash->{helper}{evtparts}{event};
+		delete $own_hash->{helper}{aktevent};
+		
+		
+		
+		
 		
 		
 		#Log3("test",0,"eventcopy ".$eventcopy);
@@ -4122,18 +4144,8 @@ sub MSwitch_Notify($$) {
 		 {
 			 unshift (@eventteile,"global");
 			 $eventcopy = join(":",@eventteile);
-			
-			
-			 #Log3("test",0,"parts ".@eventteile);		
-
-
-
 		 }
 		
-		
-		
-		
-			
 		if (!defined $eventteile[0]){ $eventteile[0]="";}
 		if (!defined $eventteile[1] ){$eventteile[1]="";}
 		if (!defined $eventteile[2]){ $eventteile[2]="";}
@@ -4145,10 +4157,11 @@ sub MSwitch_Notify($$) {
 		$own_hash->{helper}{evtparts}{evtpart3}	=$eventteile[2];
 		$own_hash->{helper}{evtparts}{evtfull}	=$eventcopy;
 		$own_hash->{helper}{evtparts}{event}	=$eventteile[1].":".$eventteile[2];
-		
 		$own_hash->{helper}{aktevent}=$eventcopy;
 		
+# teste auf mswitch-reading - evtl umsetzen -> nach triggercondition		
 		
+	MSwitch_Readings($own_hash,$ownName);	
 # Teste auf einhaltung Triggercondition für ausführung zweig 1 und zweig 2
 # kann ggf an den anfang der routine gesetzt werden ? test erforderlich
         
@@ -4619,6 +4632,25 @@ delete( $own_hash->{helper}{history} ) ; # lösche historyberechnung verschieben
  #  }
 }
 #########################
+
+
+sub MSwitch_Readings(@)
+{
+	my ( $hash, $name ) = @_;
+	my $keyhash = $data{MSwitch}{$name}{Readings};
+    foreach my $reading ( keys %{$keyhash} )
+	{
+	my $cs = "{".$data{MSwitch}{$name}{Readings}{$reading}."}";
+	$cs = MSwitch_dec( $hash, $cs );
+	$cs = MSwitch_makefreecmd( $hash, $cs );
+	my $result = eval($cs);
+	readingsSingleUpdate( $hash, $reading, $result, 1 );
+	}
+return;
+}
+
+
+###############################
 sub MSwitch_checkbridge($$$) {
     my ( $hash, $name, $event ) = @_;
     MSwitch_LOG( $name, 6, "SUB BRIDGE EVENT: $event L:" . __LINE__ );
@@ -9092,7 +9124,7 @@ sub MSwitch_Exec_Notif($$$$$) {
                     $cs = MSwitch_dec( $hash, $cs );
 					delete( $hash->{helper}{aktevent} );
 					
-					if ( $cs =~ m/(^set.*)({.*})/ )
+					if ( $cs =~ m/(^set.*)(\{.*\})/ )
 					{
 						my $exec = $2;
 						{
@@ -10956,15 +10988,8 @@ sub MSwitch_checktrigger_new(@) {
 		return 'undef' if $ret ne "true";;
 	}
 
-
-
-	#Log3("test",0,"eventcopy: $eventcopy ".__LINE__);
-	#Log3("test",0,"triggerfield: $triggerfield ".__LINE__);
-	
-	
-	
 	# trigger enthält perl
-    if ( $triggerfield =~ m/(.*?){(.*)}/ )
+    if ( $triggerfield =~ m/(.*?)\{(.*)\}/ )
 	{
         my $SELF = $ownName;
         my $exec = "\$triggerfield = " . $2;
@@ -10981,7 +11006,6 @@ sub MSwitch_checktrigger_new(@) {
          $triggerfield = ".*:.*:.*";
      }
 	
-
 ################
     if ( $eventcopy =~ m/^$triggerfield/ )
 	{
