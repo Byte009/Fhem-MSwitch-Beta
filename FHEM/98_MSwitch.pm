@@ -8408,8 +8408,8 @@ end:textersetzung:eng
 
     if ( $Helpmode eq '1' ) 
 	{
-		if ( $language eq "EN" ) {$Help = $germanhelp;}
-		else {$Help = $englischhelp;}
+		if ( $language eq "EN" ) {$Help = $englischhelp;}
+		else {$Help = $germanhelp;}
 	}	
 
     if ( $affecteddevices[0] ne 'no_device' and $hash->{INIT} ne 'define' )
