@@ -17,7 +17,7 @@
   
   
   
-	var version = 'V4.50';
+	var version = 'V5.0';
 	var jump="nojump";
 	const Devices = [];
 	const WIZARDVARS = [];
@@ -55,16 +55,16 @@
 	
 	var configstart = [
 	'#V Version',
-	'#VS V4.00',
+	'#VS V5.00',
 	'#S .First_init -> done',
 	'#S .Trigger_off -> no_trigger',
 	'#S .Trigger_cmd_off -> no_trigger',
-	'#S Trigger_device -> no_trigger',
-	'#S Trigger_log -> off',
+	'#S .Trigger_device -> no_trigger',
+	'#S .Trigger_log -> off',
 	'#S .Trigger_on -> no_trigger',
 	'#S .Trigger_cmd_on -> no_trigger',
 	'#S .Trigger_condition -> ',
-	'#S .V_Check -> V4.0',
+	'#S .V_Check -> V5.0',
 	'#S .Device_Events -> no_trigger',
 	'#S .Device_Affected -> no_device',
 	'#S .Trigger_time_1 -> ',
@@ -92,16 +92,16 @@
 
 	var configtemplate = [
 	'#V Version',
-	'#VS V4.0',
+	'#VS V5.0',
 	'#S .First_init -> done',
 	'#S .Trigger_off -> no_trigger',
 	'#S .Trigger_cmd_off -> no_trigger',
-	'#S Trigger_device -> no_trigger',
-	'#S Trigger_log -> off',
+	'#S .Trigger_device -> no_trigger',
+	'#S .Trigger_log -> off',
 	'#S .Trigger_on -> no_trigger',
 	'#S .Trigger_cmd_on -> no_trigger',
 	'#S .Trigger_condition -> ',
-	'#S .V_Check -> V4.0',
+	'#S .V_Check -> V5.0',
 	'#S .Device_Events -> no_trigger',
 	'#S .Device_Affected -> no_device',
 	'#S .Trigger_time_1 -> ',
@@ -397,7 +397,7 @@ function XXXmakeconfig(){
 
 	if (document.getElementById('first').value == 'event'){
 		// ändere config für triggerevent
-		configstart[5] ='#S Trigger_device -> '+ document.getElementById('3').value;
+		configstart[5] ='#S .Trigger_device -> '+ document.getElementById('3').value;
 		configstart[8] ='#S .Trigger_cmd_on -> '+ document.getElementById('5').value;
 	}
 	
@@ -1063,7 +1063,7 @@ function savenot(){
 	
 	
 	
-	configstart[5] ='#S Trigger_device -> '+ document.getElementById('trigdev').value;
+	configstart[5] ='#S .Trigger_device -> '+ document.getElementById('trigdev').value;
 	
 	
 	
@@ -2588,11 +2588,11 @@ if (typa == "A" ){
 	
 		if (newinhalt =="GLOBAL")
 		{ 
-	configuration[5] = "#S Trigger_device -> all_events";
+	configuration[5] = "#S .Trigger_device -> all_events";
 	document.getElementById('bank1').value = 'all_events';
 	}else{
 		
-		configuration[5] = "#S Trigger_device -> "+newinhalt;
+		configuration[5] = "#S .Trigger_device -> "+newinhalt;
 		
 		document.getElementById('bank1').value = newinhalt;
 	}
