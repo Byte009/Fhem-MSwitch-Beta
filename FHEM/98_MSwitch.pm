@@ -304,6 +304,7 @@ my $attractivedummy = "  disable:0,1"
 . "  MSwitch_Expert:0,1"
 . "  MSwitch_Modul_Mode:0,1"
 . "  MSwitch_Readings:textField-long"
+. "  MSwitch_EventMap:textField-long"
 . "  stateFormat:textField-long"
 . "  MSwitch_Eventhistory:0,10"
 . "  MSwitch_Delete_Delays:0,1,2,3"
@@ -335,6 +336,7 @@ my $attrresetlist =
 . "  MSwitch_Hidecmds"
 . "  MSwitch_Help:0,1"
 . "  MSwitch_Readings:textField-long"
+. "  MSwitch_EventMap:textField-long"
 . "  MSwitch_Debug:0,1,2,3"
 . "  MSwitch_Expert:0,1"
 . "  MSwitch_Delete_Delays:0,1,2,3,4"
@@ -3107,17 +3109,6 @@ if (defined $aVal && $aVal ne "" && $aName eq 'MSwitch_Debug')
 
 ## Readings
 
-		# Log3("test",0,"$aVal");
-		# Log3("test",0,"s1: $1");
-		# Log3("test",0,"s2: $2");
-		# Log3("test",0,"s3: $4");
-		# Log3("test",0,"s4: $4");
-		# Log3("test",0,"$readings");
-
-		# Log3("test",0,"FOUND: $first");
-		
-		# Log3("test",0,"REST: $readings");
-#######
 	if ( $cmd eq 'set' && $aName eq 'MSwitch_Readings' ) 
 	{
 		delete $data{MSwitch}{$name}{Readings};
@@ -3136,14 +3127,35 @@ if (defined $aVal && $aVal ne "" && $aName eq 'MSwitch_Debug')
 		#Log3("test",0,"key: $key");
 		
 			$data{MSwitch}{$name}{Readings}{$key}=$inhalt;
-			
-			#Log3("test",0,"inhalt: ".$data{MSwitch}{$name}{Readings}{$key});
-			
+
 		}
 		return;
 	}
-
-
+	
+################################	
+	
+	if ( $cmd eq 'set' && $aName eq 'MSwitch_EventMap' ) 
+	{
+		delete $data{MSwitch}{$name}{Eventmap};
+		my $evantmaps = $aVal;
+		my $trenner =" ";
+		# suche trennzeichen
+		if ( $evantmaps =~ m/^([^a-zA_Z])(.*)/ )
+		{
+			$trenner = $1;
+			$evantmaps = $2;
+		}
+		my @mappaare = split(/$trenner/,$evantmaps);
+		for my $paar (@mappaare) 
+		{
+			my ($key,$inhalt)=split(/:/,$paar);
+			$data{MSwitch}{$name}{Eventmap}{$key}=$inhalt;
+		}
+		return;
+	}
+	
+###################################
+	
 ## EventWait
     if ( $cmd eq 'set' && $aName eq 'MSwitch_Event_Wait' ) {
 
@@ -3422,9 +3434,22 @@ if ( $aName eq 'MSwitch_Mode' && $aVal eq 'Notify' )
 		
 ## ATTR DELETE FUNKTOIONEN
 
-    if ( $cmd eq 'del' ) 
+	if ( $cmd eq 'del' ) 
 	{
-        my $testarg = $aName;
+	my $testarg = $aName;
+			if ( $testarg eq 'MSwitch_Readings' )
+			{
+				my $keyhash = $data{MSwitch}{$name}{Readings};
+				foreach my $reading ( keys %{$keyhash} )
+				{
+					delete( $hash->{READINGS}{$reading} );
+				}
+				delete $data{MSwitch}{$name}{Readings};
+			return;
+			}
+			
+			
+		
         if ( $testarg eq 'MSwitch_Inforoom' )
 		{
           LOOP21:foreach my $testdevices ( keys %{ $modules{MSwitch}{defptr} } )
@@ -3432,6 +3457,7 @@ if ( $aName eq 'MSwitch_Mode' && $aVal eq 'Notify' )
                 if ( $testdevices eq $name ) { next LOOP21; }
                 delete( $attr{$testdevices}{MSwitch_Inforoom} );
             }
+		return;
         }
 
         if ( $testarg eq 'disable' )
@@ -3440,28 +3466,32 @@ if ( $aName eq 'MSwitch_Mode' && $aVal eq 'Notify' )
             MSwitch_Clear_timer($hash);
             delete( $hash->{helper}{savemodeblock} );
             delete( $hash->{READINGS}{Safemode} );
+			return;
         }
 
 		if ( $testarg eq 'MSwitch_SysExtension' )
 		{
             delete $data{MSwitch}{$name}{activeWidgets};
+			return;
         }
 
         if ( $testarg eq 'MSwitch_Reset_EVT_CMD1_COUNT' )
 		{
             delete( $hash->{READINGS}{EVT_CMD1_COUNT} );
-
+			return;
         }
 
         if ( $testarg eq 'MSwitch_Reset_EVT_CMD2_COUNT' )
 		{
             delete( $hash->{READINGS}{EVT_CMD2_COUNT} );
+			return;
         }
 
         if ( $testarg eq 'MSwitch_DeleteCMDs' )
 		{
             delete $data{MSwitch}{devicecmds1};
             delete $data{MSwitch}{last_devicecmd_save};
+			return;
         }
     }
 
@@ -3757,16 +3787,12 @@ sub MSwitch_Notify($$) {
     $devName = $dev_hash->{NAME};
     my $events = deviceEvents( $dev_hash, 1 );
 	
-	
-	
 	# prüfe debugmodes 	
 	if (!exists $data{MSwitch}{warning}{debug})
 	{
 	MSwitch_Initcheck();
 	}
 	
-	
-
 ### checke auf aktive wizard	
     if ( exists $own_hash->{helper}{mode} and $own_hash->{helper}{mode} eq "absorb" )
     {
@@ -4103,16 +4129,14 @@ sub MSwitch_Notify($$) {
 
 ####################################
 
-
-#Log3("test",0,"$devName:$eventcopy");
-
-
-
 		$eventcopy = "$devName:$eventcopy";
 
 ##################################################################
 # eventcopy  enthätl die arbeitskopie von event : immer 3 teilg ##
 ##################################################################
+
+# teste auf mswitch-eventmap  -> vor triggercondition				
+	$eventcopy = MSwitch_Eventmap($own_hash,$ownName,$eventcopy);	
 
 		# temporär
 		# setze eingehendes Event :
@@ -4121,14 +4145,7 @@ sub MSwitch_Notify($$) {
 		delete $own_hash->{helper}{evtparts}{event};
 		delete $own_hash->{helper}{aktevent};
 		
-		
-		
-		
-		
-		
 		#Log3("test",0,"eventcopy ".$eventcopy);
-		
-		
 		
 		my @eventteile   = split( /:/, $eventcopy );
 			
@@ -4159,8 +4176,7 @@ sub MSwitch_Notify($$) {
 		$own_hash->{helper}{evtparts}{event}	=$eventteile[1].":".$eventteile[2];
 		$own_hash->{helper}{aktevent}=$eventcopy;
 		
-# teste auf mswitch-reading - evtl umsetzen -> nach triggercondition		
-		
+# teste auf mswitch-reading - evtl umsetzen -> nach triggercondition				
 	MSwitch_Readings($own_hash,$ownName);	
 # Teste auf einhaltung Triggercondition für ausführung zweig 1 und zweig 2
 # kann ggf an den anfang der routine gesetzt werden ? test erforderlich
@@ -4631,12 +4647,30 @@ delete( $own_hash->{helper}{history} ) ; # lösche historyberechnung verschieben
         return;
  #  }
 }
+
+#########################
+
+sub	MSwitch_Eventmap(@){	
+	my ( $hash, $name ,$eventcopy) = @_;
+	return if !exists $data{MSwitch}{$name}{Eventmap};
+	readingsSingleUpdate( $hash, 'EVENT_ORG',$eventcopy,0 );
+	my $maphash = $data{MSwitch}{$name}{Eventmap};
+    foreach my $key ( keys %{$maphash} )
+	{
+	my $inhalt = $data{MSwitch}{$name}{Eventmap}{$key};
+	$eventcopy =~ s/$key/$inhalt/g;
+	}
+return $eventcopy;
+}
+
 #########################
 
 
 sub MSwitch_Readings(@)
 {
+	
 	my ( $hash, $name ) = @_;
+	return if !exists $data{MSwitch}{$name}{Readings};
 	my $keyhash = $data{MSwitch}{$name}{Readings};
     foreach my $reading ( keys %{$keyhash} )
 	{
@@ -10496,11 +10530,11 @@ sub MSwitch_Execute_Timer($) {
     }
     my $extime = POSIX::strftime( "%H:%M", localtime );
     readingsBeginUpdate($hash);
-    readingsBulkUpdate( $hash, "EVENT",$Name . ":execute_timer_P" . $param . ":" . $extime );
-    readingsBulkUpdate( $hash, "EVTFULL", $Name . ":execute_timer_P" . $param . ":" . $extime );
-    readingsBulkUpdate( $hash, "EVTPART1", $Name );
-    readingsBulkUpdate( $hash, "EVTPART2", "execute_timer_P" . $param );
-    readingsBulkUpdate( $hash, "EVTPART3", $extime );
+    readingsBulkUpdate( $hash, "EVENT",$Name . ":execute_timer_P" . $param . ":" . $extime ,$showevents);
+    readingsBulkUpdate( $hash, "EVTFULL", $Name . ":execute_timer_P" . $param . ":" . $extime ,$showevents);
+    readingsBulkUpdate( $hash, "EVTPART1", $Name ,$showevents);
+    readingsBulkUpdate( $hash, "EVTPART2", "execute_timer_P" . $param ,$showevents);
+    readingsBulkUpdate( $hash, "EVTPART3", $extime ,$showevents );
     readingsEndUpdate( $hash, $showevents );
 
     if ( $param eq '1' )
