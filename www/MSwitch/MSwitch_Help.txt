@@ -1138,14 +1138,23 @@ Nimmt den errechneten Differenzwert an, der zwischen dem aktuellen und dem vorhe
 </small>
 
 <strong>MSwitch_Readings</strong>
-
 MSwitch_Readings sind in sowohl in der Funktion, als auch im Format analog den Fhem Userreadings.
 Der gravierende Unterschied ist, das diese Readings im Gegensatz zu den Userreadings direkt bei Eingang eines Events und/oder Schaltvorganges - vor der Ausführung der Schaltbefehle - gesetzt werden.
 Somit besteht direkt im ausführenden Befehlsteil die Möglichkeit , diese MSwitch_Reading dort an jeder Stelle einzubauen und zu verwenden (Befehle, Bedingungen, etc.).
 
 In den MSwitch_Readings besteht in bekanntem Umfang Zugriff auf Systemvariablen ($NAME,$EVENT, etc.)
 
+<strong>MSwitch_EventMap</strong>
+MSwitch_EventMap ist in sowohl in der Funktion, als auch im Format analog zu dem FhemAttribut Eventmap.
+Der gravierende Unterschied ist, das dieses Eventmap nur für eingehende Events greift. Alle ausgehenden Events und/oder Statusmeldungen
+bleiben hiervon unberührt.
+
+Es wird ein weiteres Reading (EVENT_ORG) angelegt. Dieses enthält immer das original eingehende Event.
+Ein Event wird durch dieses Reading nicht ausgelöst, es steht aber im aktuellen Durchlauf zur Verfügung.
+
+Wenn diese Funktion aktiviert ist müssen sich alle internen Aktionen (Bedingungen,Befehle etc.) nach diesem gemappten Event richten.
+
+
 <strong></strong>
 <hr>
 ->
-
