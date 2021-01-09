@@ -73,7 +73,7 @@ my $importat     = 'on';     				# on/off   - not in use
 my $vupdate      = 'V5.0';					# versionsnummer der datenstruktur . änderung der nummer löst MSwitch_VersionUpdate aus .
 my $undotime = 60;							# Standarzeit in der ein Undo angeboten wird
 
-
+my $startsafemode=2;
 my $savecount = 20;							# anzahl der zugriff im zeitraum zur auslösung des safemodes. kann durch attribut überschrieben werden .
 my $savemodetime       = 3;    		        # Zeit für Zugriffe im Safemode ( 100000 = 1 sec )
 
@@ -293,7 +293,7 @@ my $attrdummy ="  disable:0,1"
 . "  MSwitch_Debug:0,1"
 . "  disabledForIntervals"
 . "  MSwitch_Inforoom"
-. "  MSwitch_Safemode:0,1"
+. "  MSwitch_Safemode:0,1,2"
 . "  MSwitch_Readings:textField-long"
 . "  MSwitch_Mode:Full,Notify,Toggle,Dummy"
 . "  MSwitch_Selftrigger_always:0,1"
@@ -318,7 +318,7 @@ my $attractivedummy = "  disable:0,1"
 . "  MSwitch_Ignore_Types:textField-long "
 . "  MSwitch_Extensions:0,1"
 . "  MSwitch_Inforoom"
-. "  MSwitch_Safemode:0,1"
+. "  MSwitch_Safemode:0,1,2"
 . "  MSwitch_DeleteCMDs:manually,automatic,nosave"
 . "  MSwitch_Mode:Full,Notify,Toggle,Dummy"
 . "  MSwitch_Selftrigger_always:0,1"
@@ -365,7 +365,7 @@ my $attrresetlist =
 . "  MSwitch_Selftrigger_always:0,1"
 . "  MSwitch_RandomTime"
 . "  MSwitch_RandomNumber"
-. "  MSwitch_Safemode:0,1"
+. "  MSwitch_Safemode:0,1,2"
 . "  MSwitch_Snippet:textField-long "			  
 . "  MSwitch_Startdelay:0,10,20,30,60,90,120"
 . "  MSwitch_Wait"
@@ -936,7 +936,7 @@ sub MSwitch_LoadHelper($) {
 		{
             #setze alle attrs
             $attr{$Name}{MSwitch_Eventhistory}        = '0';
-            $attr{$Name}{MSwitch_Safemode}            = '1';
+            $attr{$Name}{MSwitch_Safemode}            = $startsafemode;
             $attr{$Name}{MSwitch_Help}                = '0';
             $attr{$Name}{MSwitch_Debug}               = '0';
             $attr{$Name}{MSwitch_Expert}              = '0';
@@ -1924,7 +1924,7 @@ sub MSwitch_Set_ResetDevice($@)
 				setDevAttrList( $name, $attrresetlist );
 				$hash->{NOTIFYDEV}                        = 'no_trigger';
 				$attr{$name}{MSwitch_Eventhistory}        = '0';
-				$attr{$name}{MSwitch_Safemode}            = '1';
+				$attr{$name}{MSwitch_Safemode}            = $startsafemode;
 				$attr{$name}{MSwitch_Help}                = '0';
 				$attr{$name}{MSwitch_Debug}               = '0';
 				$attr{$name}{MSwitch_Expert}              = '0';
@@ -3428,7 +3428,7 @@ if (defined $aVal && $aVal ne "" && $aName eq 'MSwitch_Debug')
 		fhem( "deleteattr $name MSwitch_Include_Webcmds");
         fhem( "deleteattr $name MSwitch_Include_MSwitchcmds");
         fhem( "deleteattr $name MSwitch_Include_Devicecmds");
-        #fhem( "deleteattr $name MSwitch_Safemode");
+        fhem( "deleteattr $name MSwitch_Safemode");
         fhem( "deleteattr $name MSwitch_Extensions");
         fhem( "deleteattr $name MSwitch_Lock_Quickedit");
         fhem( "deleteattr $name MSwitch_Delete_Delays");
@@ -3479,7 +3479,7 @@ if (defined $aVal && $aVal ne "" && $aName eq 'MSwitch_Debug')
 			fhem( "deleteattr $name MSwitch_Include_Webcmds");
 			fhem( "deleteattr $name MSwitch_Include_MSwitchcmds");
 			fhem( "deleteattr $name MSwitch_Include_Devicecmds");
-			#fhem( "deleteattr $name MSwitch_Safemode");
+			fhem( "deleteattr $name MSwitch_Safemode");
 			fhem( "deleteattr $name MSwitch_Extensions");
 			fhem( "deleteattr $name MSwitch_Lock_Quickedit");
 			fhem( "deleteattr $name MSwitch_Delete_Delays");
@@ -12713,9 +12713,11 @@ sub MSwitch_Safemode($) {
     my ($hash) = @_;
     my $Name = $hash->{NAME};
 
-    return if ( AttrVal( $Name, 'MSwitch_Safemode', '0' ) == 0 );
+    my $aktmode = AttrVal( $Name, 'MSwitch_Safemode', $startsafemode );
+
+    return if $aktmode == 0 ;
 	
-	
+	#  readingsSingleUpdate( $own_hash, "waiting", ( time + $mswait ),0 );
 
     my $time1 = gettimeofday();
 	
@@ -12741,19 +12743,28 @@ sub MSwitch_Safemode($) {
     $hash->{helper}{savemode}{$time1} = $time1;
 	
 	
-    if ( $count > $savecount ) {
-        MSwitch_LOG( $Name, 1,
+    if ( $count > $savecount && $aktmode  == 1 ) {
+       
+	   
+		 MSwitch_LOG( $Name, 1,
                 "Das Device "
               . $Name
-              . " wurde automatisch deaktiviert ( Safemode )" );
+              . " wurde automatisch deaktiviert ( Safemode 1 )" );
         $hash->{helper}{savemodeblock}{blocking} = 'on';
         readingsSingleUpdate( $hash, "Safemode", 'on', 0 );
-		
-        # foreach my $a ( keys %{$timehash} ) {
-            # delete( $hash->{helper}{savemode}{$a} );
-        # }
         $attr{$Name}{disable} = '1';
     }
+	
+	 if ( $count > $savecount && $aktmode == 2 ) {
+         MSwitch_LOG( $Name, 1,
+                "Das Device "
+              . $Name
+              . " wurde automatisch für 30 sekunden blockiert ( Safemode 2 )" );
+        readingsSingleUpdate( $hash, "waiting", ( time + 30 ),0 );
+        $attr{$Name}{disable} = '1';
+    }
+	
+	
     return;
 }
 
