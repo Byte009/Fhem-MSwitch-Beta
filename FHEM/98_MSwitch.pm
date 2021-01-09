@@ -293,6 +293,7 @@ my $attrdummy ="  disable:0,1"
 . "  MSwitch_Debug:0,1"
 . "  disabledForIntervals"
 . "  MSwitch_Inforoom"
+. "  MSwitch_Safemode:0,1"
 . "  MSwitch_Readings:textField-long"
 . "  MSwitch_Mode:Full,Notify,Toggle,Dummy"
 . "  MSwitch_Selftrigger_always:0,1"
@@ -2357,7 +2358,7 @@ if ( $cmd ne "?" && $cmd ne "clearlog" && $cmd ne "writelog")
         MSwitch_LOG( $name, 6,"eingehender Setbefehl: $cmd @args ");
 		
 		
-   Log3( $name, 0,"eingehender Setbefehl: $cmd @args ");	
+   #Log3( $name, 0,"eingehender Setbefehl: $cmd @args ");	
     }
 	
 	
@@ -4358,8 +4359,8 @@ if (exists $own_hash->{helper}{testevent_device})
 
 ### doppelte eigentriggerung vermeiden 
 
-Log3("test",0,"#################################");
-Log3("test",0,"eventcopy vor exit ".$eventcopy);
+#Log3("test",0,"#################################");
+#Log3("test",0,"eventcopy vor exit ".$eventcopy);
 if ( AttrVal( $ownName, "MSwitch_Selftrigger_always", 0 ) eq "1" ) 
 {
 		my $testevent = $eventcopy;
