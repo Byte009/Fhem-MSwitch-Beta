@@ -73,13 +73,13 @@ my $importat     = 'on';     				# on/off   - not in use
 my $vupdate      = 'V5.0';					# versionsnummer der datenstruktur . änderung der nummer löst MSwitch_VersionUpdate aus .
 my $undotime = 60;							# Standarzeit in der ein Undo angeboten wird
 
-my $startsafemode=2;
+my $startsafemode=0;
 my $savecount = 20;							# anzahl der zugriff im zeitraum zur auslösung des safemodes. kann durch attribut überschrieben werden .
 my $savemodetime       = 3;    		        # Zeit für Zugriffe im Safemode ( 100000 = 1 sec )
-
+my $savemode2block       = 60;
 
 my $rename             = "off";        		# on/off rename in der FW_summary möglich
-my $standartstartdelay = 5;					# zeitraum nach fhemstart , in dem alle aktionen geblockt werden. kann durch attribut überschrieben werden .
+my $standartstartdelay = 120;				# zeitraum nach fhemstart , in dem alle aktionen geblockt werden. kann durch attribut überschrieben werden .
 #my $eventset = '0';
 my $deletesavedcmds = 1800; 				# zeitraum nachdem gespeicherte devicecmds gelöscht werden ( beschleunigung des webinterfaces )
 my $deletesavedcmdsstandart = "nosave" ; 	# standartverhalten des attributes "MSwitch_DeleteCMDs" <manually,nosave,automatic>
@@ -2343,12 +2343,17 @@ sub MSwitch_Set($@) {
 	my $special = '';
 	my $setwidget ="";
 
+
+
+#Log3( $name, 0,"\n### SUB_Set:$name ###  $cmd, @args");
+
+
 	return "" if ( IsDisabled($name) && ( $cmd eq 'on' || $cmd eq 'off' ) );    # Return without any further action if the module is disabled
 
-	return "" if ( IsDisabled($name));
+	#return "" if ( IsDisabled($name));
 	
-	
-	MSwitch_Safemode($hash);
+	 
+	#MSwitch_Safemode($hash);
 
 
 #################################
@@ -3440,11 +3445,13 @@ if (defined $aVal && $aVal ne "" && $aName eq 'MSwitch_Debug')
 		fhem( "deleteattr $name MSwitch_Help");
 		
 		delete( $hash->{eventsave} );
-        #delete( $hash->{NOTIFYDEV} );
+        delete( $hash->{NOTIFYDEV} );
         delete( $hash->{NTFY_ORDER} );
 		
-		#my $delete =".Trigger_device";
-        #delete( $hash->{READINGS}{$delete} );
+		my $delete =".Trigger_device";
+        delete( $hash->{READINGS}{$delete} );
+		
+		
         delete( $hash->{IncommingHandle} );
         delete( $hash->{READINGS}{EVENT} );
         delete( $hash->{READINGS}{EVTFULL} );
@@ -3457,9 +3464,9 @@ if (defined $aVal && $aVal ne "" && $aName eq 'MSwitch_Debug')
 		delete( $hash->{READINGS}{last_cmd} );
 		delete( $hash->{READINGS}{MSwitch_generate_Events} );
 		
-		$hash->{NOTIFYDEV} = 'no_trigger';
+		#$hash->{NOTIFYDEV} = 'no_trigger';
 		
-		readingsSingleUpdate( $hash, ".Trigger_device", "no_trigger", 0 ) ;
+		#readingsSingleUpdate( $hash, ".Trigger_device", "no_trigger", 0 ) ;
 		setDevAttrList( $name, $attrdummy );
 		}
 	}
@@ -3473,7 +3480,7 @@ if (defined $aVal && $aVal ne "" && $aName eq 'MSwitch_Debug')
         #$hash->{NOTIFYDEV} 	= 'no_trigger';
         $hash->{MODEL}     	= 'Dummy' . " " . $version;
 		$hash->{DEF}     	= $name;
-		$hash->{NOTIFYDEV} = 'no_trigger';
+		#$hash->{NOTIFYDEV} = 'no_trigger';
 		if ($init_done) 
 		{
 			fhem( "deleteattr $name MSwitch_Include_Webcmds");
@@ -3491,7 +3498,7 @@ if (defined $aVal && $aVal ne "" && $aName eq 'MSwitch_Debug')
 			fhem( "deleteattr $name MSwitch_Help");
 
 			delete( $hash->{eventsave} );
-			#delete( $hash->{NOTIFYDEV} );
+			delete( $hash->{NOTIFYDEV} );
 			delete( $hash->{NTFY_ORDER} );
 			my $delete =".Trigger_device";
 			delete( $hash->{READINGS}{$delete} );
@@ -3509,7 +3516,7 @@ if (defined $aVal && $aVal ne "" && $aName eq 'MSwitch_Debug')
 			
 			
 			
-			readingsSingleUpdate( $hash, ".Trigger_device", "no_trigger", 0 ) ;
+			#readingsSingleUpdate( $hash, ".Trigger_device", "no_trigger", 0 ) ;
 
 			
 			
@@ -3940,7 +3947,7 @@ sub MSwitch_Notify($$) {
 	
 
 
-
+#Log3( $ownName, 0,"\n### SUB_NOT:$ownName ### ");
 
 
 
@@ -9967,7 +9974,7 @@ sub MSwitch_checkcondition($$$) {
     # $event = $evtparts[1].":".$evtparts[2];
 	
 	my $evtfull=$hash->{helper}{evtparts}{evtfull};
-	my $event=$hash->{helper}{evtparts}{event};
+	 $event=$hash->{helper}{evtparts}{event};
 	my $evtparts1=$hash->{helper}{evtparts}{evtpart1};
 	my $evtparts2=$hash->{helper}{evtparts}{evtpart2};
 	my $evtparts3=$hash->{helper}{evtparts}{evtpart3};
@@ -12759,9 +12766,8 @@ sub MSwitch_Safemode($) {
          MSwitch_LOG( $Name, 1,
                 "Das Device "
               . $Name
-              . " wurde automatisch für 30 sekunden blockiert ( Safemode 2 )" );
-        readingsSingleUpdate( $hash, "waiting", ( time + 30 ),0 );
-        $attr{$Name}{disable} = '1';
+              . " wurde automatisch für $savemode2block sekunden blockiert ( Safemode 2 )" );
+        readingsSingleUpdate( $hash, "waiting", ( time + $savemode2block ),0 );
     }
 	
 	
@@ -12814,14 +12820,14 @@ sub MSwitch_EventBulk($$$$) {
     if ( $hash eq "" ) { return; }
     MSwitch_LOG( $name, 6, "+++ +++ aktualisiere Eventreadings L:" . __LINE__ );
 	#$event=$hash->{helper}{evtparts}{eventfull};
-	my $evtfull=$hash->{helper}{evtparts}{evtfull};
+	#my $evtfull=$hash->{helper}{evtparts}{evtfull};
 	
 	
 # Log3( $name, 0, "evtfull $evtfull L:" . __LINE__ );
  #$event = $evtfull;
 	
 	my $evtfull=$hash->{helper}{evtparts}{evtfull};
-	my $event=$hash->{helper}{evtparts}{event};
+	 $event=$hash->{helper}{evtparts}{event};
 	my $evtparts1=$hash->{helper}{evtparts}{evtpart1};
 	my $evtparts2=$hash->{helper}{evtparts}{evtpart2};
 	my $evtparts3=$hash->{helper}{evtparts}{evtpart3};
