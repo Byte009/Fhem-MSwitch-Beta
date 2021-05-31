@@ -1213,8 +1213,8 @@ sub MSwitch_Define($$) {
 	{
 			
 			
-	MSwitch_LOG( $name, 0,"### Aufruf Error auslöser ###");	
-	MSwitch_LOG( $name, 0,"### $name ###");		
+	#MSwitch_LOG( $name, 0,"### Aufruf Error auslöser ###");	
+	#MSwitch_LOG( $name, 0,"### $name ###");		
 		   my @found_devices = devspec2array("TYPE=MSwitch:FILTER=.msconfig=1");
 
         ##############
