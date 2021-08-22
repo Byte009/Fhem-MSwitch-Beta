@@ -18,7 +18,7 @@
 	// var templatesel ='" . $hash->{helper}{template} . "';
 // ###############################################
 
-	var version = '5.21';
+	var version = '6.0';
 	var info = '';
 	var debug ='off';
 	var datatarget ='undef';
@@ -113,11 +113,180 @@ $('#sel_attr'+devicename).change(function(){
 	return;
 	}); 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function teststart(){
 // alle startfunktionen ausführen 
 // funktion rename aktivieren
 if (debug == 'on'){ alert(devicename+' Debug MSwitchweb an') };
 //alert(RENAME);
+
+
+
+
+
+
+// selectfelder füllen
+
+
+/* 	var ALLDEVICES=['"."$alldevices"."'];
+	var ALLDEVICESALIAS=['"."$alldevicesalias"."'];
+	var ALLDEVICESTYPE=['"."$alldevicestype"."'];
+	var ALLDEVICESSELECTED=['"."$alldevicesselected"."']; */
+
+
+// affected_second_devices
+
+
+
+ /* <select id="selectElement" size="5"></select>
+  <script>
+    var selectElement = document.getElementById('selectElement');
+ 
+    for(var i=0;i<5;i++){
+      var option = new Option('Text '+i, i);
+      selectElement.options[i] = option;
+    }
+  </script> */
+  
+  
+  ALLDEVICESALIAS.unshift("");
+  
+  
+  // doubletten entfernen
+  //var ACTIVEMOD =[];
+  
+  
+  
+  
+   const ACTIVEMOD = ALLDEVICESTYPE.filter(function(ele , pos)
+		{
+		return ALLDEVICESTYPE.indexOf(ele) == pos;
+		})  	
+		
+		//alert(ACTIVEMOD);
+		
+		
+	ACTIVEMOD.unshift(".*");	
+		
+		
+	var selectElement = document.getElementById('modtype');
+	
+	
+	
+	for (var key in ACTIVEMOD) {
+		
+	if (ACTIVEMOD[key] == ""){continue;}	
+		
+    //alert (ALLDEVICESSELECTED[key]);
+	var option = new Option(ACTIVEMOD[key], ACTIVEMOD[key]);
+    selectElement.options[key] = option;
+	// 
+	
+	
+	}
+		
+		
+		
+		
+		
+		
+		
+		
+  
+
+
+
+   //
+	var selectElement = document.getElementById('affected_third_devices');
+	for (var key in ALLDEVICESSELECTED) {
+		
+	if (ALLDEVICESSELECTED[key] == ""){continue;}	
+		
+    //alert (ALLDEVICESSELECTED[key]);
+	var option = new Option(ALLDEVICESSELECTED[key], ALLDEVICESSELECTED[key]);
+    selectElement.options[key] = option;
+	// 
+	
+	
+	}
+
+
+//var longest = 0;
+	var selectElement = document.getElementById('affected_second_devices');
+	for (var key in ALLDEVICES) {
+    //alert (ALLDEVICESSELECTED[key]);
+	
+	
+	if (ALLDEVICESALIAS[key]!=""){
+	var option = new Option(ALLDEVICES[key]+" (a:"+ALLDEVICESALIAS[key]+")", ALLDEVICES[key]);
+	}
+	else{
+		var option = new Option(ALLDEVICES[key], ALLDEVICES[key]);
+	}
+	
+	
+	
+    selectElement.options[key] = option;
+	var string = ALLDEVICESSELECTED[key]+" (a:"+ALLDEVICESALIAS[key]+")";
+	var stringlenght = string.length;
+	
+	/* if (stringlenght > longest)
+	{
+		longest = stringlenght;
+	} */
+
+	}
+//alert(longest);
+//document.getElementById('affected_second_devices').length = 10;
+
+//document.getElementById("affected_second_devices").style.widht="3";
+    
+
+
+
+
+
+	var select = document.getElementById('affected_third_devices');	
+	var length = select.options.length;	
+	//var pos=select.options[0]
+		
+		//alert(length);
+		//alert ("-> "+pos.value);
+		
+		if (length < 1)
+		{
+			$(affected_third_devices).css("width","175px");	
+		}
+		
+		
+	
+
+
+
+
+
+
+
 
 if (RENAME == 'on'){
 	//alert("RENAME");
@@ -134,11 +303,11 @@ if (RENAME == 'on'){
 
 
 // quickedit anpassen
-if (QUICKEDIT == '0'){
+/* if (QUICKEDIT == '0'){
 	$("#devices").prop("disabled", false);
 	document.getElementById('aw_great').value='schow greater list';
 	document.getElementById('lockedit').checked = false  ;
-	}
+	} */
 	
 // definiere hilfe fürbigwindow
 
@@ -154,12 +323,9 @@ if (QUICKEDIT == '0'){
 	varinf = varinf+'</tr>';
 	varinf = varinf+'</table>';
 	
-varinf = varinf+'<table  id="vars" border ="0" width="100%" style="display:none">';
-varinf = varinf+'<tr>';
-varinf = varinf+'<td>';
-	
-	
-	
+	varinf = varinf+'<table  id="vars" border ="0" width="100%" style="display:none">';
+	varinf = varinf+'<tr>';
+	varinf = varinf+'<td>';
 	
 	varinf = varinf+'<table border ="1">';
 
@@ -217,14 +383,11 @@ varinf = varinf+'<td>';
 	varinf = varinf+'<td><small>enthält den eigenen Namen</td>';
 	varinf = varinf+'</tr>';
 	
-	
-	
 	varinf = varinf+'</table>';
 
-varinf = varinf+'</td>';
-varinf = varinf+'<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>';
-varinf = varinf+'<td>';
-
+	varinf = varinf+'</td>';
+	varinf = varinf+'<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>';
+	varinf = varinf+'<td>';
 
 	varinf = varinf+'<table border ="1">';
 	
@@ -247,7 +410,6 @@ varinf = varinf+'<td>';
 	varinf = varinf+'</tr>';
 	
 	varinf = varinf+'</table>';
-	
 	
 	varinf = varinf+'<br>';
 	
@@ -278,9 +440,9 @@ varinf = varinf+'<td>';
 	varinf = varinf+'</tr>';
 	
 	varinf = varinf+'</table>';
-varinf = varinf+'</td>';
-varinf = varinf+'<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>';
-varinf = varinf+'<td>';
+	varinf = varinf+'</td>';
+	varinf = varinf+'<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>';
+	varinf = varinf+'<td>';
 
 	varinf = varinf+'<table border ="1">';
 	
@@ -326,9 +488,7 @@ varinf = varinf+'<td>';
 	varinf = varinf+'<td><small> Zugriff auf Internal</td>';
 	varinf = varinf+'</tr>';	
 	
-	
 	varinf = varinf+'</table>';
-
 
 	varinf = varinf+'</td>';
 	varinf = varinf+'</tr>';
@@ -601,6 +761,12 @@ if (document.getElementById('trigcmdon'))
 
 // next   ##################################################
 	
+	
+	
+	/* 
+	
+	
+	
 	if (HASHINIT != 'define')
 	{
 		
@@ -653,7 +819,11 @@ if (document.getElementById('trigcmdon'))
 				randomdev.forEach (unlock);
 				}
 		}	 
-	}
+	} */
+	
+	
+	
+	
 	
 	// teste auch showids
     var cookie = getCookieValue("Mswitch_ids_"+devicename);
@@ -1194,7 +1364,7 @@ function testcmd(field,cmdname,opt,eventfield){
 	}
 	
 // ###############################################
-function testcmd_OLD_notinuse(field,devicename,opt){
+/* function testcmd_OLD_notinuse(field,devicename,opt){
 	if (debug == 'on'){ alert('testcmd') };
 	comand = $("[name="+field+"]").val();
 	comand=comand.trim();
@@ -1264,9 +1434,9 @@ function testcmd_OLD_notinuse(field,devicename,opt){
 		} 
 	}
 
+ */
 
-
-function  switchlock()
+/* function  switchlock()
 {	
 	if (debug == 'on'){ alert('switchlock') };
 	test = document.getElementById('lockedit').checked ;	
@@ -1295,7 +1465,7 @@ function  switchlock()
 				}
 		}
 }
-	
+	 */
 
 function closetrigger(){
 	if (debug == 'on'){ alert('closetrigger') }
@@ -1330,7 +1500,15 @@ if (debug == 'on'){ alert('newname') }
 	} 
 	
 
+
+
+
+
+// sperrt eingabefelder
 function lock(elem, text){
+	
+	return;
+	
 if (debug == 'on'){ alert('lock') }
 	if (document.getElementById(elem)){
 	document.getElementById(elem).style.backgroundColor = "#ADADAD";
@@ -1344,6 +1522,8 @@ if (debug == 'on'){ alert('lock') }
 	}
 
 function unlock(elem, index){
+	
+	return;
 if (debug == 'on'){ alert('unlock') }
 	if (document.getElementById(elem)){
 	document.getElementById(elem).style.backgroundColor = "";
@@ -1399,10 +1579,16 @@ if(typeof type == 'undefined'){
 	sel = sel+'</div>';
 	
 
-	if (FUTURELEVEL == "1" && type===1)
+	// if (FUTURELEVEL == "1" && type===1)
+	// {
+	// sel = sel+varinf;
+	// }
+
+	if (type===1)
 	{
 	sel = sel+varinf;
 	}
+
 
 	FW_okDialog(sel,''); 
 	}	
@@ -1436,7 +1622,7 @@ function bigwindowformat(targetid,fromsc){
 }
 
 // Deviceauswahl
-function  deviceselect(){
+/* function  deviceselect(){
 if (debug == 'on'){ alert('deviceselect') };
 	sel ='<div style="white-space:nowrap;"><br>';
 	var ausw=document.getElementById('devices');
@@ -1460,7 +1646,7 @@ if (debug == 'on'){ alert('deviceselect') };
 	cmd ='set '+devicename+' showgroup '+group;
 	FW_cmd(FW_root+'?cmd='+encodeURIComponent(cmd)+'&XHR=1');
 		 return;
-	 }
+	 } */
 	  
 // lösche log
 function deletelog() {
@@ -1510,6 +1696,245 @@ if (debug == 'on'){ alert('reset') };
 	location = location.pathname+"?detail="+devicename+"&cmd=set "+addcsrf(def);
 	return;
 	}	
+	
+	
+	
+// geräteauswahl
+function selectdevices(){
+	var ausw=document.getElementById('affected_second_devices');
+	for (i=0; i<ausw.options.length; i++)
+		{
+		var pos=ausw.options[i];
+			if(pos.selected)
+			{
+				if (ALLDEVICESSELECTED.includes(pos.value))
+				{
+					continue;
+				}
+				
+				
+				
+				ALLDEVICESSELECTED.unshift(pos.value);
+				
+				
+			}
+			
+			
+		// prüfe auf doubletten
+		const filteredArray = ALLDEVICESSELECTED
+		/* const filteredArray = ALLDEVICESSELECTED.filter(function(ele , pos)
+		{
+		return ALLDEVICESSELECTED.indexOf(ele) == pos;
+		})  */	
+			
+		var selectElement = document.getElementById('affected_third_devices');
+		for (var key in filteredArray) 
+			{
+				
+				
+				if (filteredArray[key] != ""){
+			var option = new Option(filteredArray[key], filteredArray[key]);
+			selectElement.options[key] = option;
+			
+				}
+			
+			}
+		}		
+		return;
+}
+	
+	
+	/* 
+	
+// geräteauswahl
+function selectdevices(){
+	var ausw=document.getElementById('affected_second_devices');
+	for (i=0; i<ausw.options.length; i++)
+		{
+		var pos=ausw.options[i];
+			if(pos.selected)
+			{
+				if (ALLDEVICESSELECTED.includes(pos.value))
+				{
+					continue;
+				}
+				ALLDEVICESSELECTED.unshift(pos.value);
+			}
+			
+			
+		// prüfe auf doubletten
+		const filteredArray = ALLDEVICESSELECTED
+		
+		
+		/* const filteredArray = ALLDEVICESSELECTED.filter(function(ele , pos)
+		{
+		return ALLDEVICESSELECTED.indexOf(ele) == pos;
+		})  */	
+		
+/*		
+		var selectElement = document.getElementById('affected_third_devices');
+		for (var key in filteredArray) 
+			{
+			var option = new Option(filteredArray[key], filteredArray[key]);
+			selectElement.options[key] = option;
+			}
+		}		
+		
+		
+		var select = document.getElementById("affected_third_devices");
+		var length = select.options.length;	
+		if (length < 1){
+		$(affected_third_devices).css("width","175px");	
+		}
+		else{
+			
+			$(affected_third_devices).css("width","");	
+		}
+		return;
+		
+}	
+	 */
+	
+	
+	
+	
+	
+	// geräteauswahl entfernen
+function deletedevices(){
+	
+	var NEWLIST=[];
+	var ausw=document.getElementById('affected_third_devices');
+	for (i=0; i<ausw.options.length; i++)
+		{
+		var pos=ausw.options[i];
+			if(pos.selected)
+			{
+			continue;
+			}
+		NEWLIST.unshift(pos.value);	
+		}
+			
+			
+			
+var select = document.getElementById("affected_third_devices");
+
+var length = select.options.length;
+
+for (i = length-1; i >= 0; i--) {
+  select.options[i] = null;
+}
+			
+			
+			
+		var selectElement = document.getElementById('affected_third_devices');
+		for (var key in NEWLIST) 
+			{
+			var option = new Option(NEWLIST[key], NEWLIST[key]);
+			selectElement.options[key] = option;
+			}
+				
+			
+			ALLDEVICESSELECTED=NEWLIST;
+			
+		//selectElement = document.getElementById('affected_third_devices');	
+		var length = select.options.length;	
+		if (length < 1){
+		$(affected_third_devices).css("width","175px");	
+		}
+		else{
+			
+			$(affected_third_devices).css("width","");	
+		}
+		return;
+}	
+	
+	// events from monitor to edit
+	function searchdevice(){
+		
+	//
+	var value = document.getElementById('searchstring').value;
+	//alert(ALLDEVICES.indexOf(value));
+	var akttype = document.getElementById('modtype').value;
+	
+	var regex = new RegExp(value, 'gi');
+	
+	var NEWLIST=[];
+	var NEWLISTALIAS=[];
+	var NEWLISTTYPES=[];
+	
+	//alert(value);
+	//alert(akttype);
+	
+	for (var key in ALLDEVICES) {
+		
+		
+		
+		var testdevice = ALLDEVICES[key]+"(a:"+ALLDEVICESALIAS[key]+")";
+		treffer = testdevice.match(regex);
+		
+		
+		
+		
+		if (treffer === null)
+		{
+		}
+		else
+		{
+			
+			//alert (treffer);|| ALLDEVICES[key] !=""
+			 
+			if ( akttype ==".*" || akttype == ALLDEVICESTYPE[key] )
+			{
+			NEWLIST.unshift(ALLDEVICES[key]);	
+			NEWLISTALIAS.unshift(ALLDEVICESALIAS[key]);
+			NEWLISTTYPES.unshift(ALLDEVICESTYPE[key]);
+			}
+		}
+		
+		
+		}
+	
+	
+	var select = document.getElementById("affected_second_devices");
+
+var length = select.options.length;
+
+for (i = length-1; i >= 0; i--) {
+  select.options[i] = null;
+}
+	
+	
+	
+	
+	
+	var selectElement = document.getElementById('affected_second_devices');
+	
+	if (value =="" && akttype ==".*")
+	{
+		NEWLIST=ALLDEVICES;
+		NEWLISTALIAS=ALLDEVICESALIAS;
+		}
+	
+	
+	for (var key in NEWLIST) {
+		
+	if (NEWLIST[key] == ""){continue;}	
+		
+    //alert (ALLDEVICESSELECTED[key]);
+	var option = new Option(NEWLIST[key], NEWLIST[key]);
+	var option = new Option(NEWLIST[key]+" (a:"+NEWLISTALIAS[key]+")", NEWLIST[key]);
+	
+	
+    selectElement.options[key] = option;
+	}
+	
+	
+	
+	
+	return;
+	}
+	
+	
 	
 // events from monitor to edit
 function transferevent(){
@@ -1765,12 +2190,60 @@ if (debug == 'on'){ alert('checkcondition') }
 	location = location.pathname+"?detail="+devicename+"&cmd=set "+addcsrf(def);
 	});	
 	
-// unbekannt
+// geräteauswahl speichern
 	$("#aw_dev").click(function(){
 	if (debug == 'on'){ alert('#aw_dev') };
 	var nm = $(t).attr("nm");
 	devices = $("[name=affected_devices]").val();
+	
+	
+	//alert ("-"+devices+"-");
+	//return;
+	
+	
+	
 	var  def = nm+" devices "+devices+" ";
+	location = location.pathname+"?detail="+devicename+"&cmd=set "+addcsrf(def);
+	}); 
+	
+	
+	
+	// geräteauswahl speichern neu
+	$("#aw_new_dev").click(function(){
+	if (debug == 'on'){ alert('#aw_dev') };
+	var nm = $(t).attr("nm");
+	
+	
+	
+	var NEWLIST=[];
+	var ausw=document.getElementById('affected_third_devices');
+	
+	//alert ("-"+ausw.options.length+"-");
+	
+	if (ausw.options.length >  0)
+	{
+	
+	for (i=0; i<ausw.options.length; i++)
+		{
+		var pos=ausw.options[i];
+		
+		if (pos.value !=""){
+		NEWLIST.unshift(pos.value);
+		}
+		
+		}
+	}
+	else{
+		NEWLIST="null";
+	}
+	
+	
+	//alert ("-"+NEWLIST+"-");
+	//return;
+	
+	
+	
+	var  def = nm+" devices "+NEWLIST+" ";
 	location = location.pathname+"?detail="+devicename+"&cmd=set "+addcsrf(def);
 	}); 
 	
