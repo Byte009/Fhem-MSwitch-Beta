@@ -102,12 +102,20 @@ $('#sel_attr'+devicename).change(function(){
 	text = text.replace(/#\[LINE\]/gi,"<br>");
 	text = text.replace(/#\[A\]/gi,"'");
 	text = text.replace(/#\[DA\]/gi,"\"");
-	var myRegEx = new RegExp('<strong>'+inhalt+'(.*?)</strong>(.*?)(<strong)');  
+	//var myRegEx = new RegExp('<strong>'+inhalt+'[^_](.*?)</strong>(.*?)(<strong)');  
+	
+	var myRegEx = new RegExp('<strong>'+inhalt+'</strong>(.*?)(<strong)');  
+	
+	
 	treffer = text.match(myRegEx);
+	
+	//alert (inhalt);
+	//alert (treffer[1]);
+	
 	if( treffer == null){
 	out = inhalt+" - dieser Hilfetext ist nicht vorhanden";
 	}else{
-	out = treffer[2];	
+	out = treffer[1];	
 	}
 	$( "[name=attrhelp]" ).html(out);
 	return;
@@ -138,156 +146,65 @@ function teststart(){
 // alle startfunktionen ausführen 
 // funktion rename aktivieren
 if (debug == 'on'){ alert(devicename+' Debug MSwitchweb an') };
-//alert(RENAME);
 
 
-
-
-
-
-// selectfelder füllen
-
-
-/* 	var ALLDEVICES=['"."$alldevices"."'];
-	var ALLDEVICESALIAS=['"."$alldevicesalias"."'];
-	var ALLDEVICESTYPE=['"."$alldevicestype"."'];
-	var ALLDEVICESSELECTED=['"."$alldevicesselected"."']; */
-
-
-// affected_second_devices
-
-
-
- /* <select id="selectElement" size="5"></select>
-  <script>
-    var selectElement = document.getElementById('selectElement');
- 
-    for(var i=0;i<5;i++){
-      var option = new Option('Text '+i, i);
-      selectElement.options[i] = option;
-    }
-  </script> */
-  
-  
   ALLDEVICESALIAS.unshift("");
   
-  
   // doubletten entfernen
-  //var ACTIVEMOD =[];
-  
-  
-  
-  
    const ACTIVEMOD = ALLDEVICESTYPE.filter(function(ele , pos)
 		{
 		return ALLDEVICESTYPE.indexOf(ele) == pos;
-		})  	
-		
-		//alert(ACTIVEMOD);
-		
-		
+		})  		
 	ACTIVEMOD.unshift(".*");	
-		
-		
 	var selectElement = document.getElementById('modtype');
-	
-	
-	
 	for (var key in ACTIVEMOD) {
-		
 	if (ACTIVEMOD[key] == ""){continue;}	
-		
-    //alert (ALLDEVICESSELECTED[key]);
 	var option = new Option(ACTIVEMOD[key], ACTIVEMOD[key]);
     selectElement.options[key] = option;
-	// 
-	
-	
 	}
 		
-		
-		
-		
-		
-		
-		
-		
-  
 
-
-
-   //
 	var selectElement = document.getElementById('affected_third_devices');
 	for (var key in ALLDEVICESSELECTED) {
-		
 	if (ALLDEVICESSELECTED[key] == ""){continue;}	
-		
-    //alert (ALLDEVICESSELECTED[key]);
 	var option = new Option(ALLDEVICESSELECTED[key], ALLDEVICESSELECTED[key]);
     selectElement.options[key] = option;
-	// 
-	
-	
 	}
 
-
-//var longest = 0;
 	var selectElement = document.getElementById('affected_second_devices');
 	for (var key in ALLDEVICES) {
-    //alert (ALLDEVICESSELECTED[key]);
-	
-	
+ 
 	if (ALLDEVICESALIAS[key]!=""){
 	var option = new Option(ALLDEVICES[key]+" (a:"+ALLDEVICESALIAS[key]+")", ALLDEVICES[key]);
 	}
 	else{
 		var option = new Option(ALLDEVICES[key], ALLDEVICES[key]);
 	}
-	
-	
-	
+
     selectElement.options[key] = option;
-	var string = ALLDEVICESSELECTED[key]+" (a:"+ALLDEVICESALIAS[key]+")";
-	var stringlenght = string.length;
-	
-	/* if (stringlenght > longest)
-	{
-		longest = stringlenght;
-	} */
-
 	}
-//alert(longest);
-//document.getElementById('affected_second_devices').length = 10;
-
-//document.getElementById("affected_second_devices").style.widht="3";
-    
-
-
-
-
-
 	var select = document.getElementById('affected_third_devices');	
 	var length = select.options.length;	
-	//var pos=select.options[0]
-		
-		//alert(length);
-		//alert ("-> "+pos.value);
-		
 		if (length < 1)
 		{
 			$(affected_third_devices).css("width","175px");	
 		}
 		
-		
 	
 
+//alert(DEVICETOTRIGGERSELECT);
+var selectElement = document.getElementById('trigdevnew');
+	for (var key in ALLDEVICESTOTRIGGER) {
+	if (ALLDEVICESTOTRIGGER[key] == ""){continue;}	
+	var option = new Option(ALLDEVICESTOTRIGGERZUSATZ[key], ALLDEVICESTOTRIGGER[key]);
+    selectElement.options[key] = option;
+	if (ALLDEVICESTOTRIGGER[key] == DEVICETOTRIGGERSELECT){
+	selectElement.options[key].selected = true;}
+	}
 
 
 
-
-
-
-
+// devicerename
 if (RENAME == 'on'){
 	//alert("RENAME");
 	
@@ -301,14 +218,6 @@ if (RENAME == 'on'){
 }
 
 
-
-// quickedit anpassen
-/* if (QUICKEDIT == '0'){
-	$("#devices").prop("disabled", false);
-	document.getElementById('aw_great').value='schow greater list';
-	document.getElementById('lockedit').checked = false  ;
-	} */
-	
 // definiere hilfe fürbigwindow
 
 	varinf = '<table id="t1" width="100%">';
@@ -375,6 +284,12 @@ if (RENAME == 'on'){
 	varinf = varinf+'<td><small>\$hms </td>';
 	varinf = varinf+'<td><small>&nbsp;-&nbsp;</td>';
 	varinf = varinf+'<td><small>aktuelle Zeit (hh:mm:ss)</td>';
+	varinf = varinf+'</tr>';
+	
+	varinf = varinf+'<tr>';
+	varinf = varinf+'<td><small>\$timestamp </td>';
+	varinf = varinf+'<td><small>&nbsp;-&nbsp;</td>';
+	varinf = varinf+'<td><small>aktuelle Zeit als Zeitstempel (unix)</td>';
 	varinf = varinf+'</tr>';
 	
 	varinf = varinf+'<tr>';
@@ -495,7 +410,6 @@ if (RENAME == 'on'){
 	varinf = varinf+'</table>';	
 
 
-	
 // devhelp ersetzen
 
 r3 = $('<a href=\"javascript: reset(\'check\')\">Reset this device ('+devicename+')</a>&nbsp;&nbsp;<a href=\"javascript: fullhelp()\">Device specific help</a>');
@@ -609,7 +523,7 @@ if ( DEVICETYP != 'dummy')
 {
 	var triggerdetails = document.getElementById('MSwitchWebTRDT').innerHTML;
 	var saveddevice = TRIGGERDEVICEHTML;
-	var sel = document.getElementById('trigdev');
+	var sel = document.getElementById('trigdevnew');
 	sel.onchange = function() 
 	{
 	trigdev = this.value;
@@ -823,11 +737,8 @@ if (document.getElementById('trigcmdon'))
 	
 	
 	
-	
-	
 	// teste auch showids
     var cookie = getCookieValue("Mswitch_ids_"+devicename);
-	
 	if (cookie == ""){
 	}
 	else{
@@ -846,18 +757,7 @@ return;
 
 
 
-
-// function formsubmit(){
-	
-	// alert('test');
-	// return;
-	
-	
-// }
-
-
 function writedebug(line){
-
 	encodedline = decodeURIComponent(line);
 	var old = document.getElementById("log").value;
 	 var textarea = document.getElementById('log');
@@ -1122,11 +1022,9 @@ function makewidget(copytofield,target,werte){
 	
 	retoption1 ="<table border ='0'>";
 	retoption1 +="<tr>";
-	
 	retoption1 +="<td>";
 	retoption1 +="<div class='fhemWidget' type='set "+devicename+" wizardcont1 "+copytofield+" ' cmd='' reading='container' dev='' arg='"+werte+"' current='"+selected+"'></div>";
 	retoption1 +="</td>";
-	
 	retoption1 +="</tr>";
 	retoption1 +="</table>";
 
@@ -1135,9 +1033,7 @@ function makewidget(copytofield,target,werte){
 	$("#"+target+"").css("display","none");
 
 	var datatarget =target;
-	
 	return;
-	
 }
 
 
@@ -1192,8 +1088,6 @@ function activate(state,target,options,copytofield){
 	debug += 'options: '+options+'<br>';
 	debug += 'copytofield: '+copytofield+'<br>';
 	
-
-	
 	var globaldetails3='undefined';
 	var x = document.getElementsByClassName('devdetails2');
     for (var i = 0; i < x.length; i++) 
@@ -1247,11 +1141,6 @@ function activate(state,target,options,copytofield){
 		}	
 	devicecmd = werte[state].split(",");
 	
-	
-	//alert (devicecmd[0]);
-	
-	
-	
 	if (devicecmd[0] == 'noArg'){noarg(target,copytofield);}
 	else if (devicecmd[0] == 'no_Action')
 	{
@@ -1259,17 +1148,6 @@ function activate(state,target,options,copytofield){
 	}
 	
 	else if (devicecmd[0] == 'textfieldLong'){textfieldlong(copytofield,target);}
-	
-	
-	
-	//else if (devicecmd[0] == 'select') {selectfield(werte[state],target,copytofield);}
-//	else if (devicecmd[0] == 'slider'){textfield(copytofield,target);}
-/* 	else if (devicecmd[0] == 'undefined'){textfield(copytofield,target);}
-	else if (devicecmd[0] == 'textField'){textfield(copytofield,target);}
-	else if (devicecmd[0] == 'colorpicker'){textfield(copytofield,target);}
-	else if (devicecmd[0] == 'RGB'){textfield(copytofield,target);}
-	 */
-	
 	else {textfield(copytofield,target);}
 	
 	if (webwidget == 1 && state != '[FREECMD]' && devicecmd[0] != "noArg" && devicecmd[0] != "textField" )
@@ -1363,109 +1241,7 @@ function testcmd(field,cmdname,opt,eventfield){
 	return;	
 	}
 	
-// ###############################################
-/* function testcmd_OLD_notinuse(field,devicename,opt){
-	if (debug == 'on'){ alert('testcmd') };
-	comand = $("[name="+field+"]").val();
-	comand=comand.trim();
 
- 	if (comand == 'no_action')
-		{
-		return;
-		}
-		
-	comand1 = $("[name="+opt+"]").val()
-	if (devicename != 'FreeCmd')
-		{
-		comand =comand+" "+comand1;
-		}
-	comand = comand.replace(/$SELF/g, devicename); // !!!!
-	if (devicename != 'FreeCmd')
-		{
-			cmd ='set '+devicename+' '+comand;
-			FW_cmd(FW_root+'?cmd='+encodeURIComponent(cmd)+'&XHR=1');
-			FW_okDialog(EXECCMD+' '+cmd); // !!!
-			FW_errmsg(cmd, 5);
-		} 
-	else
-		{
-			comand = comand.replace(/;;/g,'[DS]');
-			comand = comand.replace(/;/g,';;');
-			comand = comand.replace(/\\[DS\\]/g,';;');
-			var t0 = comand.substr(0, 1);
-			var t1 = comand.substr(comand.length-1,1 );
-			if (t1 == ' ')
-			{
-				var space = '".$NOSPACE."'; // !!!
-				var textfinal = "<div style ='font-size: medium;'>"+space+"</div>";
-				FW_okDialog(textfinal);
-				return;
-			}
-		
-		showcomand = comand;
-			
-		if (t0 == '{' && t1 == '}') 
-			{
-						
-				comand  = comand.substr(1, comand.length-1);
-				erweiterung  = "{my $SELF=\""+mswitchname+"\";;";
-				erweiterung += "my $NAME=\""+"\";;";
-				erweiterung += "my $EVTPART1=\""+"\";;";
-				erweiterung += "my $EVTPART2=\""+"\";;";
-				erweiterung += "my $EVTPART3=\""+"\";;";
-				erweiterung += "my $EVTFULL=\""+"\";;";
-				comand=erweiterung+comand;
-			}
-		else
-			{
-				erweiterung  = "{my $SELF=\""+mswitchname+"\";;";
-				erweiterung += "my $NAME=\""+"\";;";
-				erweiterung += "my $EVTPART1=\""+"\";;";
-				erweiterung += "my $EVTPART2=\""+"\";;";
-				erweiterung += "my $EVTPART3=\""+"\";;";
-				erweiterung += "my $EVTFULL=\""+"\";;";		
-				comand = erweiterung+'fhem("'+comand+'")}';
-			}
-				
-			cmd = comand;
-			FW_cmd(FW_root+'?cmd='+encodeURIComponent(cmd)+'&XHR=1');
-			showcomand = showcomand.replace(/;;/g,';');	
-			FW_okDialog(EXECCMD+' '+showcomand);
-		} 
-	}
-
- */
-
-/* function  switchlock()
-{	
-	if (debug == 'on'){ alert('switchlock') };
-	test = document.getElementById('lockedit').checked ;	
-	if (test)
-		{
-		$("#devices").prop("disabled", 'disabled');
-			if (LANGUAGE == 'DE')
-				{
-				document.getElementById('aw_great').value='Liste editieren';
-				}
-			else
-				{
-				document.getElementById('aw_great').value='edit list';
-				}
-		}
-	else
-		{
-		$("#devices").prop("disabled", false);
-			if (LANGUAGE == 'DE')
-				{
-				document.getElementById('aw_great').value='öffne grosse Liste';
-				}
-			else
-				{
-				document.getElementById('aw_great').value='schow greater list';
-				}
-		}
-}
-	 */
 
 function closetrigger(){
 	if (debug == 'on'){ alert('closetrigger') }
@@ -1499,10 +1275,6 @@ if (debug == 'on'){ alert('newname') }
 	window.location.href="/fhem?cmd=rename "+devicename+" "+newname+"&detail="+newname+""+CSRF;
 	} 
 	
-
-
-
-
 
 // sperrt eingabefelder
 function lock(elem, text){
@@ -1571,19 +1343,12 @@ if(typeof type == 'undefined'){
 	type = 0;
 }
 
-//alert(type);	
 	targetval =document.getElementById(targetid).value;
 	targetval = targetval.replace(/\u2424/g,'\n');
 	sel ='<div style="white-space:nowrap;"><br>';
 	sel = sel+'<textarea id="valtrans" cols="130" name="TextArea1" rows="10" onChange="bigwindowformat(\''+targetid+'\',\''+fromsc+'\')">'+targetval+'</textarea>';
 	sel = sel+'</div>';
 	
-
-	// if (FUTURELEVEL == "1" && type===1)
-	// {
-	// sel = sel+varinf;
-	// }
-
 	if (type===1)
 	{
 	sel = sel+varinf;
@@ -1621,32 +1386,13 @@ function bigwindowformat(targetid,fromsc){
  
 }
 
-// Deviceauswahl
-/* function  deviceselect(){
-if (debug == 'on'){ alert('deviceselect') };
-	sel ='<div style="white-space:nowrap;"><br>';
-	var ausw=document.getElementById('devices');
-	for (i=0; i<ausw.options.length; i++)
-		{
-		var pos=ausw.options[i];
-			if(pos.selected)
-			{
-			sel = sel+'<input id ="Checkbox-'+i+'" checked="checked" name="Checkbox-'+i+'" type="checkbox" value="test" /> '+pos.value+'<br />';
-			}
-			else 
-			{
-			sel = sel+'<input id ="Checkbox-'+i+'" name="Checkbox-'+i+'" type="checkbox" /> '+pos.value+'<br />';
-			}
-		} 
-	sel = sel+'</div>';
-	FW_okDialog(sel,'',removeFn) ; 
-	}
-	
+
+	// gruppen anzeigen
 	function  showgroup(group){
 	cmd ='set '+devicename+' showgroup '+group;
 	FW_cmd(FW_root+'?cmd='+encodeURIComponent(cmd)+'&XHR=1');
 		 return;
-	 } */
+	 } 
 	  
 // lösche log
 function deletelog() {
@@ -1721,12 +1467,7 @@ function selectdevices(){
 			
 			
 		// prüfe auf doubletten
-		const filteredArray = ALLDEVICESSELECTED
-		/* const filteredArray = ALLDEVICESSELECTED.filter(function(ele , pos)
-		{
-		return ALLDEVICESSELECTED.indexOf(ele) == pos;
-		})  */	
-			
+		const filteredArray = ALLDEVICESSELECTED	
 		var selectElement = document.getElementById('affected_third_devices');
 		for (var key in filteredArray) 
 			{
@@ -1744,60 +1485,7 @@ function selectdevices(){
 }
 	
 	
-	/* 
-	
-// geräteauswahl
-function selectdevices(){
-	var ausw=document.getElementById('affected_second_devices');
-	for (i=0; i<ausw.options.length; i++)
-		{
-		var pos=ausw.options[i];
-			if(pos.selected)
-			{
-				if (ALLDEVICESSELECTED.includes(pos.value))
-				{
-					continue;
-				}
-				ALLDEVICESSELECTED.unshift(pos.value);
-			}
-			
-			
-		// prüfe auf doubletten
-		const filteredArray = ALLDEVICESSELECTED
-		
-		
-		/* const filteredArray = ALLDEVICESSELECTED.filter(function(ele , pos)
-		{
-		return ALLDEVICESSELECTED.indexOf(ele) == pos;
-		})  */	
-		
-/*		
-		var selectElement = document.getElementById('affected_third_devices');
-		for (var key in filteredArray) 
-			{
-			var option = new Option(filteredArray[key], filteredArray[key]);
-			selectElement.options[key] = option;
-			}
-		}		
-		
-		
-		var select = document.getElementById("affected_third_devices");
-		var length = select.options.length;	
-		if (length < 1){
-		$(affected_third_devices).css("width","175px");	
-		}
-		else{
-			
-			$(affected_third_devices).css("width","");	
-		}
-		return;
-		
-}	
-	 */
-	
-	
-	
-	
+
 	
 	// geräteauswahl entfernen
 function deletedevices(){
@@ -1813,30 +1501,21 @@ function deletedevices(){
 			}
 		NEWLIST.unshift(pos.value);	
 		}
-			
-			
-			
+				
 var select = document.getElementById("affected_third_devices");
-
 var length = select.options.length;
-
 for (i = length-1; i >= 0; i--) {
   select.options[i] = null;
 }
 			
-			
-			
+	
 		var selectElement = document.getElementById('affected_third_devices');
 		for (var key in NEWLIST) 
 			{
 			var option = new Option(NEWLIST[key], NEWLIST[key]);
 			selectElement.options[key] = option;
 			}
-				
-			
 			ALLDEVICESSELECTED=NEWLIST;
-			
-		//selectElement = document.getElementById('affected_third_devices');	
 		var length = select.options.length;	
 		if (length < 1){
 		$(affected_third_devices).css("width","175px");	
@@ -1848,67 +1527,45 @@ for (i = length-1; i >= 0; i--) {
 		return;
 }	
 	
-	// events from monitor to edit
-	function searchdevice(){
-		
-	//
+
+
+function searchdevice(){
 	var value = document.getElementById('searchstring').value;
-	//alert(ALLDEVICES.indexOf(value));
 	var akttype = document.getElementById('modtype').value;
-	
 	var regex = new RegExp(value, 'gi');
-	
 	var NEWLIST=[];
 	var NEWLISTALIAS=[];
 	var NEWLISTTYPES=[];
-	
-	//alert(value);
-	//alert(akttype);
-	
-	for (var key in ALLDEVICES) {
-		
-		
-		
+	for (var key in ALLDEVICES)
+	{
 		var testdevice = ALLDEVICES[key]+"(a:"+ALLDEVICESALIAS[key]+")";
 		treffer = testdevice.match(regex);
-		
-		
-		
 		
 		if (treffer === null)
 		{
 		}
 		else
 		{
-			
-			//alert (treffer);|| ALLDEVICES[key] !=""
-			 
 			if ( akttype ==".*" || akttype == ALLDEVICESTYPE[key] )
 			{
-			NEWLIST.unshift(ALLDEVICES[key]);	
-			NEWLISTALIAS.unshift(ALLDEVICESALIAS[key]);
-			NEWLISTTYPES.unshift(ALLDEVICESTYPE[key]);
+				NEWLIST.push(ALLDEVICES[key]);	
+				NEWLISTALIAS.push(ALLDEVICESALIAS[key]);
+				NEWLISTTYPES.push(ALLDEVICESTYPE[key]);
 			}
 		}
-		
-		
-		}
+	}
 	
 	
 	var select = document.getElementById("affected_second_devices");
+	var length = select.options.length;
 
-var length = select.options.length;
-
-for (i = length-1; i >= 0; i--) {
-  select.options[i] = null;
-}
-	
-	
-	
-	
+	for (i = length-1; i >= 0; i--) 
+	{
+	  select.options[i] = null;
+	}
 	
 	var selectElement = document.getElementById('affected_second_devices');
-	
+
 	if (value =="" && akttype ==".*")
 	{
 		NEWLIST=ALLDEVICES;
@@ -1916,24 +1573,68 @@ for (i = length-1; i >= 0; i--) {
 		}
 	
 	
-	for (var key in NEWLIST) {
-		
-	if (NEWLIST[key] == ""){continue;}	
-		
-    //alert (ALLDEVICESSELECTED[key]);
-	var option = new Option(NEWLIST[key], NEWLIST[key]);
-	var option = new Option(NEWLIST[key]+" (a:"+NEWLISTALIAS[key]+")", NEWLIST[key]);
-	
-	
-    selectElement.options[key] = option;
+	for (var key in NEWLIST)
+	{	
+		if (NEWLIST[key] == ""){continue;}	
+		var option = new Option(NEWLIST[key], NEWLIST[key]);
+		var option = new Option(NEWLIST[key]+" (a:"+NEWLISTALIAS[key]+")", NEWLIST[key]);
+		selectElement.options[key] = option;
 	}
-	
-	
-	
-	
 	return;
 	}
 	
+	
+	
+	
+function searchtriggerdevice(){
+	var value = document.getElementById('searchstringtrigger').value;
+	var selectElement = document.getElementById('trigdevnew');
+	var regex = new RegExp(value, 'gi');
+	var NEWLIST=[];
+	var NEWLISTALIAS=[];
+
+	for (var key in ALLDEVICESTOTRIGGERZUSATZ)
+	{
+		var testdevice = ALLDEVICESTOTRIGGERZUSATZ[key];
+		treffer = testdevice.match(regex);
+		
+		if (treffer === null)
+		{
+		}
+		else
+		{
+				NEWLISTALIAS.push(ALLDEVICESTOTRIGGERZUSATZ[key]);	
+				NEWLIST.push(ALLDEVICESTOTRIGGER[key]);
+			
+		}
+	}
+	
+	var length = selectElement.options.length;
+
+	for (i = length-1; i >= 0; i--) 
+	{
+	  selectElement.options[i] = null;
+	}
+	
+	for (var key in NEWLIST)
+	{	
+		if (NEWLIST[key] == ""){continue;}	
+		var option = new Option(NEWLISTALIAS[key], NEWLIST[key]);
+		selectElement.options[key] = option;
+		
+		if (NEWLIST[key] == DEVICETOTRIGGERSELECT){
+		selectElement.options[key].selected = true;}
+	}
+	
+	if ( NEWLIST.length < 10)
+	{
+		selectElement.size = NEWLIST.length;
+	}
+	else
+	{
+		selectElement.size = "1";
+	}
+	}
 	
 	
 // events from monitor to edit
@@ -2237,12 +1938,7 @@ if (debug == 'on'){ alert('checkcondition') }
 		NEWLIST="null";
 	}
 	
-	
-	//alert ("-"+NEWLIST+"-");
-	//return;
-	
-	
-	
+
 	var  def = nm+" devices "+NEWLIST+" ";
 	location = location.pathname+"?detail="+devicename+"&cmd=set "+addcsrf(def);
 	}); 
@@ -2300,7 +1996,7 @@ if (debug == 'on'){ alert('checkcondition') }
 	$("#aw_trig").click(function(){
 	if (debug == 'on'){ alert('#aw_trig') };	
 	var nm = $(t).attr("nm");
-	trigdev = $("[name=trigdev]").val();
+	trigdev = $("[name=trigdevnew]").val();
 	
 	timeon =  $("[name=timeon]").val();
 	if(typeof(timeon)=="undefined"){timeon="NoTimer"};

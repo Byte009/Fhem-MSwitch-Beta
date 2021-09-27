@@ -41,7 +41,7 @@
 
 	var configstart = [
 	'#V Version',
-	'#VS V5.0',
+	'#VS V6.0',
 	'#S .First_init -> done',
 	'#S .Trigger_off -> no_trigger',
 	'#S .Trigger_cmd_off -> no_trigger',
@@ -50,7 +50,7 @@
 	'#S .Trigger_on -> no_trigger',
 	'#S .Trigger_cmd_on -> no_trigger',
 	'#S .Trigger_condition -> ',
-	'#S .V_Check -> V5.0',
+	'#S .V_Check -> V6.0',
 	'#S .Device_Events -> no_trigger',
 	'#S .Device_Affected -> no_device',
 	'#S .Trigger_time_1 -> ',
@@ -75,7 +75,7 @@
 
 	var configtemplate = [
 	'#V Version',
-	'#VS V5.0',
+	'#VS V6.0',
 	'#S .First_init -> done',
 	'#S .Trigger_off -> no_trigger',
 	'#S .Trigger_cmd_off -> no_trigger',
@@ -84,7 +84,7 @@
 	'#S .Trigger_on -> no_trigger',
 	'#S .Trigger_cmd_on -> no_trigger',
 	'#S .Trigger_condition -> ',
-	'#S .V_Check -> V5.0',
+	'#S .V_Check -> V6.0',
 	'#S .Device_Events -> no_trigger',
 	'#S .Device_Affected -> no_device',
 	'#S .Trigger_time_1 -> ',
@@ -955,6 +955,7 @@ function decode(){
 	second = second.replace(/,/g,'#[ko]');
 	second = second.replace(/\|/g,'#[wa]');
 	second = second.replace(/\|/g,'#[wa]');
+	second = second.replace(/'/g,'#[st]');
 	document.getElementById('decode1').value = second;
 	return;
 }
@@ -971,6 +972,7 @@ function encode(){
 	 second = second.replace(/#\[bs\]/g,'\\');
 	 second = second.replace(/#\[ko\]/g,',');
 	 second = second.replace(/#\[wa\]/g,'|');
+	 second = second.replace(/#\[st\]/g,'\'');
 	document.getElementById('decode1').value = second;
 	return;
 }
@@ -1277,7 +1279,7 @@ function testline(line,newtemplate){
 	
 	var cmdsatz = line.split(">>");
 	if (cmdsatz[0] == "" || cmdsatz[0] == " " ){return;}
-	if (cmdsatz[0] != "IF" && cmdsatz[0] != "INCSELECT" && cmdsatz[0] != "MSwitch_Device_Groups" && cmdsatz[0] != "VARDEC" &&  cmdsatz[0] != "VARINC" && cmdsatz[0] != "DEBUG" && cmdsatz[0] != "MINIMAL" && cmdsatz[0] != "GOTO" && cmdsatz[0] != "TEXT" && cmdsatz[0] != "EXIT" && cmdsatz[0] != "PREASSIGMENT" && cmdsatz[0] != "VAREVENT" &&  cmdsatz[0] != "VARREADING" &&  cmdsatz[0] != "VARSET" && cmdsatz[0] != "VARDEVICES" && cmdsatz[0] != "VARASK" && cmdsatz[0] != "REPEAT" && cmdsatz[0] != "EVENT" && cmdsatz[0] != "ASK" && cmdsatz[0] != "OPT" && cmdsatz[0] != "ATTR" && cmdsatz[0] != "SET" && cmdsatz[0] != "SELECT" && cmdsatz[0] != "INQ"  ){
+	if (cmdsatz[0] != "IF" && cmdsatz[0] != "INCSELECT" && cmdsatz[0] != "MSwitch_Device_Groups" && cmdsatz[0] != "VARDEC" &&  cmdsatz[0] != "VARINC" && cmdsatz[0] != "DEBUG" && cmdsatz[0] != "MINIMAL" && cmdsatz[0] != "GOTO" && cmdsatz[0] != "TEXT" && cmdsatz[0] != "EXIT" && cmdsatz[0] != "PREASSIGMENT" && cmdsatz[0] != "VAREVENT" &&  cmdsatz[0] != "VARREADING" &&  cmdsatz[0] != "VARSET" && cmdsatz[0] != "VARADD" && cmdsatz[0] != "VARDEVICES" && cmdsatz[0] != "VARASK" && cmdsatz[0] != "REPEAT" && cmdsatz[0] != "EVENT" && cmdsatz[0] != "ASK" && cmdsatz[0] != "OPT" && cmdsatz[0] != "ATTR" && cmdsatz[0] != "SET" && cmdsatz[0] != "SELECT" && cmdsatz[0] != "INQ"  ){
 
 		if (INQ[cmdsatz[0]]== "1")
 		{
@@ -1504,6 +1506,11 @@ if (cmdsatz[0] == "VARSET"){
 	alert("ERROR: Variablen müssen mit einem einleitenden $ deklariert werden .");
 	}
 }
+
+// VARADD
+
+
+
 
 
 // VARDEVICES>>VARNAME>>VARTEXT
