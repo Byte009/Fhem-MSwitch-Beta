@@ -103,7 +103,6 @@ $('#sel_attr'+devicename).change(function(){
 	text = text.replace(/#\[A\]/gi,"'");
 	text = text.replace(/#\[DA\]/gi,"\"");
 	//var myRegEx = new RegExp('<strong>'+inhalt+'[^_](.*?)</strong>(.*?)(<strong)');  
-	
 	var myRegEx = new RegExp('<strong>'+inhalt+'</strong>(.*?)(<strong)');  
 	
 	
@@ -878,6 +877,33 @@ $("#helptext").html(text);
 return;
 }
 
+
+
+/* 
+function hilfeconfig(field){
+	if (debug == 'on'){ alert('hilfe') };
+	var text = HELP;
+	text = text.replace(/#\[LINE\]/gi,"<br>");
+	text = text.replace(/#\[A\]/gi,"'");
+	text = text.replace(/#\[DA\]/gi,"\"");
+	var myRegEx = new RegExp('<strong>'+field+'</strong>(.*?)(<strong)');  
+	// <strong>MSwitch_Expert</strong>
+	//alert(myRegEx);
+	//alert(HELP);
+	treffer = text.match(myRegEx);
+	
+	if( treffer == null){
+	out = "dieser Hilfetext ist nicht vorhanden";
+	}else{
+	out = treffer[1];	
+	}
+	var textfinal ="<div style ='font-size: small;'>Hilfe "+field+":<br>"+ out +"</div>";
+	FW_okDialog(textfinal);
+	return;
+	
+	
+} */
+
 function hilfe(field){
 
 	
@@ -887,6 +913,9 @@ function hilfe(field){
 	text = text.replace(/#\[A\]/gi,"'");
 	text = text.replace(/#\[DA\]/gi,"\"");
 	var myRegEx = new RegExp('<-.'+field+'-(.*?)(->)');  
+	// <strong>MSwitch_Expert</strong>
+	//alert(myRegEx);
+	//alert(HELP);
 	treffer = text.match(myRegEx);
 	
 	if( treffer == null){

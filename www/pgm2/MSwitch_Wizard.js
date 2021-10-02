@@ -371,11 +371,22 @@ function fillconfig(name){
 
 function saveconfig(name,mode){
 	if (mode == 'wizard'){
-	makeconfig();
+	// makeconfig();
 	}
 
 	conf = document.getElementById(name).value;
+	
+	
+	//alert(conf);
+	
+	
+	//return;
+	
+	
 	conf = conf.replace(/\n/g,'#[EOL]');
+	
+	
+	
 	conf = conf.replace(/#\[REGEXN\]/g,'\\n');
 	conf = conf.replace(/:/g,'#c[dp]');
 	conf = conf.replace(/;/g,'#c[se]');
@@ -383,6 +394,11 @@ function saveconfig(name,mode){
 	conf = changevar(conf);
 	// alert(conf);
 
+
+//alert(conf);
+
+
+//return;
 	var nm = devicename;
 	var def = nm+' saveconfig '+encodeURIComponent(conf);
 	location = location.pathname+'?detail='+devicename+'&cmd=set '+addcsrf(def);
@@ -937,8 +953,50 @@ function setpreconf(name){
 // #################
 
 function savepreconf(name){
+	
+	
+	
+	var html='';
+	html+='<table width=\"100%\" border=\"0\">';
+	
+	html+='<tr>';
+	html+='<td width=\"100%\" style=\"vertical-align: top;\">';
+	html+='<center>Das Device wird importiert. Dieser Vorgang kann einen Moment dauern ...';
+	html+='</td>';
+	html+='</tr>';
+	
+		
+	html+='<tr>';
+	html+='<td width=\"100%\" style=\"vertical-align: top;\">';
+	html+='<center>&nbsp;';
+	html+='</td>';
+	html+='</tr>';
+	
+	html+='';
+	
+	
+	html+='<tr>';
+	html+='<td width=\"100%\" style=\"vertical-align: top;\">';
+	html+='<center>Seite wird nach erfolgtem Import automatisch mit der Detailansicht des Devices neu geladen.';
+	html+='</td>';
+	html+='</tr>';
+	
+	html+='';
+	
+	html+='<tr>';
+	html+='<td width=\"100%\" style=\"vertical-align: top;\">';
+	html+='<center>&nbsp;';
+	html+='</td>';
+	html+='</tr>';
+	
+	html+='</table>';
+	
+	
+	
+	//return;
 	mode = 'preconf';
 	saveconfig('rawconfig4',mode);
+	document.getElementById('importPRECONF').innerHTML = html;;
 	return;
 }
 
