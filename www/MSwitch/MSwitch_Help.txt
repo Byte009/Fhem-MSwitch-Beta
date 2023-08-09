@@ -24,6 +24,42 @@ keine Berücksichtigung.
 
 <hr>
 ->
+
+
+
+#################################################################################################
+<- whitelist-
+<hr>
+
+Bei der Triggereinstellung GLOBAL kann hier eine Einschraenkun der Trigger vorgenommen werden.
+Dieses hat direkten Einfluss auf die NOTIFYDEF.
+
+Die Geräte können in folgenden Formen hinterlegt werden:
+- Gerätenamen, getrennt mit "|" 
+Beispiel: Gerät1|Gerät2|Gerät3
+
+- Regex und Devspec
+Beispiel: Alle Geräte die im Namen Rollo behinahlten
+Rollo
+Beispiel2: Alle geräte vom Typ echodevice mit deaktiviertem Mute
+TYPE=echodevice:FILTER=mute=off
+
+- Als Reading
+Hier können $SELF Readings hinterlegt werden. Diese müssen über entsprechende setList Einträge angegeben werden oder direkt über setreading.
+Beispiel für einen möglichen setList-Eintrag:
+thermometer:textField
+Dies würde das Reading thermometer mit entsprechendem Text füllen. Damit ist es möglich gewisse Geräte einfach via Reading zu ersetzen. 
+Das Format sieht wie folgt aus:
+[$SELF:READING]
+Um das Beispiel auf zu greifen:
+[$SELF:thermometer]
+
+Hinweise: Das Reading muss ein Reading des eigenen Devices sein, damit die NOTIFYDEF bei Aenderung des Readings automatisch aktualisiert wird.
+Es können auch mehrere Readings angegeben werden. Die Liste dieser muss durch Kommata getrennt werden
+
+<hr>
+->
+
 #################################################################################################
 <- cmd2on-
 <hr>
@@ -220,6 +256,21 @@ Verzögerung mit Bedingungsprüfung sofort:
 Verzögerung mit Bedingungsprüfung vor Ausführung:
  - die ggf. angegebene Bedingung wird nur vor Ausführung geprüft
  
+Das Fekd readingname(ident)steht nur im Expertenmodus zur Verfügung.
+Hiier kann für entprechendes Delay ein Name angelegt werden . Dieser wird bei aktivem Delay
+alsReading genutzt , um verschiedene Informationen zu generieren.
+
+Folgende Readings werden bei Auslösung des Delay angelegt:
+
+lastsetting_delay_cmd - Auslösezweig ( z.B cmd_1 )
+lastsetting_delay_ident - Name des Delays ( entspricht dem angegebenen Namen )
+lastsetting_delay_time - Laufzeit des Delays
+
+In Abhängigkeit mit dem Attribut MSwitch_Delay_Count kann ein Reading angelegt haben , welches in Echtzeit
+die Restlaufzeit des Delays anzeigt.Doeses Reading trägt den Namen des Delays.
+
+Die Ausgabeformatierung kann mit dem Attribut MSwitch_Format_Lastdelay beeinflusst werden.
+ 
 <hr>
 ->
 #################################################################################################
@@ -278,6 +329,7 @@ Verfügbare Variablen und Ausdrücke:
 - $EVTPART3
 - $SELF
 - $hms
+- $ARG
 
 Je nach Attributeinstellunge kann auf historische Events zugegriffen werden:
 
@@ -496,6 +548,11 @@ Befehle werden nur zu angegebenem Datum ausgeführt
 Hierbei können Teile der Angabe Wildcarts enthalten :
 z.B DATE=01.01.* ( schaltet in jedem Jahr am ersten Dezember )
 
+ARG=text,zahl etc.
+das uebergebene Argument steht bei der ausfuzehrung des entsprechenden Timers in den Bedingungen und Befehlen als $ARG zur verfuegung.
+
+
+
 Alle Zeitangaben können durch einsatz von {} durch Perlcode ersetzt werden , hierbei muss es sich bei der Rückgabe um ein gültiges Zeitformat handeln
 (HH:MM oder HH:MM:SS )
 z.B TIME =[sunset()}
@@ -561,6 +618,49 @@ Umschaltung der Frontendsprache.
 Schaltet vor jedem Befehlsfeld ein Kommentarfeld frei.
 Diese kann fuer eigene Vermerke etc. genutzt werden.
 
+
+
+<strong>MSwitch_Delay_Count</strong>
+Beeinflusst das Verhalten des Echtzeitcounters bei gesetzten Delays.
+Der angegebene Wert entspricht der Aktualisierungsrate des entsprechenden Readings.
+Bei der Einstellung 0 wird kein Echtzeitcountdown gestartet.
+Diese Einstellung kann das System stark belasten und sollte daher mit Bedacht eingesetzt werden.
+
+Um systembedingte Lasten mit entsprechenden Zeitverschiebungen auszugleichen kann der Counter leicht schwanken.
+
+Die Standarteinstellung bei nicht gesetztem Attribut entspricht einer Aktualisierungsrate von 10 Sekunden.
+
+
+<strong>MSwitch_Comment_to_Room</strong>
+Bei Aktivierung werden Informationen des Comment-Attributes auch in der Raumansicht dargestellt.
+
+<strong>MSwitch_INIT</strong>
+Beeinflusst die Art der Datenspeicherung.
+save - alle relevanten Daten werden in der fhem.save abgelegt (empfohlen)
+cfg - alle Daten werden in der fhem.cfg abgelegt
+
+
+<strong>MSwitch_Format_Lastdelay</strong>
+Beeinflusst das Format der ausgegebenen Delaytimer.
+Folgende Ausdrücke sind verfügbar:
+
+HH - Stunden
+MM - Minuten
+SS - (Rest)Sekunden
+ss - Gesamtsekunden
+
+Die Standartformatierung bei nicht gesetztem Attribut entspricht HH:MM:SS
+
+Mögliche Formatierungen:
+HH MM SS
+ss
+HH:MM:SS
+
+Freitext wie z.B:
+Die Restzeit beträgt ss Sekunden 
+etc. pp.
+
+
 <strong>MSwitch_Read_Log</strong>
 Ermöglicht den Zugriff auf das Logfile als Trigger.
 
@@ -590,14 +690,20 @@ Erweiterte Optionen zur Fehlersuche
 4 - erweitertes Debug für Entwickler mit wechselnden Funktionen
 
 <strong>MSwitch_Expert</strong>
-erweiterter Modus
-In der Liste der möglichen Trigger erscheint das Selectfeld 'GLOBAL'.
-Dieses ermöglicht das Setzen eines Triggers auf alle Events und damit nicht nur auf einzelne Devices.
-In einem weiteren Feld kann eine weitere Selektion der triggernden Events erfolgen.
-Die Felder 'Repeats' und 'Repeatdelay in s' stehen zur Verfügung.
-Dies bewirkt eine n-fache Wiederholung des gesetzten Befehls mit x Sekunden Verzögerung.
-Das Auswahlfeld 'priority' erscheint bei jedem 'affectes device'.
-So kann die Reihenfolge der Befehlsabarbeitung beeinflusst werden.
+Expertenmodus
+
+bei aktivierem Attribut werden erweiterte Optionen des Devices freigeschaltet, die in einem
+Standartdevice eher selten benoetigt werden.
+
+Dazu gehoert:
+
+- Dynamische Setlisten ( ohne Attributaenderung)
+- GLOBALES triggern ( ermoeglicht Triggern in einem Mswitch auf mehrere Devices moeglich )
+- Befehlswiederholungen mit Intervallangabe
+- Ausfuehren von Befehlen in definierter Reihenfolge ( prioritaet )
+- mehr als 2 Befehlszweige , gesteuert ueber eine Eventbridge mit ID-zuordnung
+- integrierte Echtzeitcounter fuer Delays
+
 
 <strong>MSwitch_Delete_Delays</strong>
 Option '1' bewirkt das Löschen aller anstehende Delays (Verögerungen) bei dem Auftreten eines erneuten passenden Events.
@@ -749,7 +855,13 @@ Format:
 Event1->sekunden
 Event2->sekunden2
 
+Anstatt eines Wertes im Event koennen an letzter Stelle auch Wildcards genutzt werden, auch in Verknuepfung mit einer Bedingung:
+
+DEVICE:READING:.*->10   blockiert alle Events (DEVICE:READING:WERT) für 10 Sekunden
+DEVICE:READING:.*[*>30]->10  blockier alle Events (DEVICE:READING:WERT) , wenn der WERT > 30 ist fuer 10 Sekunden
+ 
 mehrere Angaben sind durch Newline zu trennen.
+
 
 <strong>MSwitch_Condition_Time</strong>
 In der Grundeinstellung '0' werden für das <u>zeitgesteuerte</u> Schalten keine definierten Conditionen im Feld 'Trigger condition' überprüft,
@@ -773,22 +885,60 @@ um 0 Uhr erfolgt immer ein Reset der Daten
 Einstellung manuell:
 Die Rückstellung auf 0 muss manuell erfolgen
 
-<strong>MSwitch_Inforoom</strong> Ab V5.5 nicht mehr verfuegbar
-Mit diesem Attribut wird die Raumansicht eines mit dem Attribut definierten Raumes verändert.
+Einstellung after_switch:
+Die Rückstellung auf 0 erfolgt NACH jedem Umschaltvorgang aber erst nach Abarbeitung der Befehlsketten.
+Somit stehen die Daten bei Ausführung zur Verfügung.
+d.H bei abarbeitung des ON-Zweiges ist die vorherige OFF-Zeit verfügbar ( und umgekehrt )
 
-Dadurch sollen die wichtigsten Informationen aller MSwitch-Devices auf eine Seite dargestellt werden.
-Zur Nutzung sollten alle MSwitch-Devices (zusätzlich) in einen Raum sortiert werden und dieser Raum im Attribut eingestellt werden. 
 
-Es werden folgende Informationen bereitgestellt:
 
-  - Infobutton zeigt den im Device gespeicherten Textes des Attributes 'comment'
-  - Device und Events, die das Device triggern
-  - Zeiten, zu denen verschiedene Zweige des Devices ausgeführt werden
-  - Devices, die durch das MSwitch Device geschaltet werden
-  - State des Devices
-	
-Wichtig: Eine Änderung dieses Attributes bewirkt immer eine Änderung dieses Attributes in allen MSwitch devices:
-Es muss nur in einem Device gesetzt oder gelöscht werden um alle Devices zu erfassen
+
+
+<strong>MSwitch_lastState</strong> 
+Speichert den Readingsinhalt von angegebenen Devices !!!Vor!!! Ausführung eines der zwei Hauptbefehlszweige des Mswitches ( on/off ).
+Mit dem Befehl  restore_lastStates cmd1(cmd2) können alle Devices mit einem Befehl wieder in dieses Zustand versetzt werden.
+
+
+Gespeichert werden diese Inhalte in Readings innerhalb des Mswitches nach folgendem Muster:
+
+lastState_DEVICENAME_READINGSNAME:X
+X steht für den Inhalt des Readings in entsprechendem Device.
+
+
+Format:
+
+x:devicename:devicereading:(optional mapping)
+
+Mehrere Geräte sind durch KOMMA zu trennen.
+
+x = Zweig vor dessen Ausführung gespeichert werden soll ( 1-on / 2-off)
+devicename = Name des Devices
+readingname = Reading das abgefragt werden soll
+
+optional mappinging:
+ - zur Erklätung
+ Die Wiederherstellung eines Zustandes wird nach folgendem Muster gesetzt:
+ set DEVICENAME lastState_DEVICENAME_READINGSNAME x;
+ 
+ Es kann aber vorkommen , das der Setbefehl so nicht möglich ist , da sich das Reading welches einen Zustand abbildet nicht über den gleichen Befehl setzen lässt.
+ In diesem Fall kann das optionale Mapping genutz werden.
+ 
+ Als Beispiel nenne ich das abzufragende Reading , welches einen Gerätestatus darstellt "all_on". Dieses kann den Status 0 oder 1 annehmen . 
+ Um dieses Zustand zu ändern werden aber die Befehle "set Device on oder off" benötigt.
+ 
+ somit muss ein mapping gesetzt werden nach folgendem Schema:
+ /Readingszustand->Befehl/Readingszustand1->Befehl1/
+
+ für obiges Beispiel bedeutes das:
+ /1->on/0->off/
+ 
+Eine weitere Besonderheit ist das Reading "state" . Falls dieses Reading abgeragt wird , wird state in der Befehlsausführung zur Wiederherstellung im Grunde einfach weggelassen .
+Aus "set DEVICENAME state on" wird "set DEVICENAME on".
+
+
+
+
+
 
 <strong>MSwitch_Startdelay</strong>
 Bestimmt die Verzögerungszeit des MSwitches nach FHEM-Start in Sekunden.
@@ -797,14 +947,24 @@ In diesem Zeitraum reagiert das Device nicht auf Events.
 Bei undefiniertem Attribut wird hier ein Wert von 10 Sekunden angenommen.
 
 <strong>MSwitch_Selftrigger_always</strong>
-Die Aktivierung dieses Attributes '1' bewirkt, dass alle SET Aktionen des Devices einen internen Event ohne Auswirkungen auf das FHEM-System auslösen,
+Die Aktivierung dieses Attributes '1' oder '2' bewirkt, dass alle SET Aktionen des Devices einen internen Event ohne Auswirkungen auf das FHEM-System auslösen,
 auf die das Device selber reagiert.
+
 Diese Option kann zusätzlich zu einem vorhandenen Trigger aktiviert werden.
 Auftretende auswertbare interne Events haben immer folgendes Format:
  - MSwitch_Self:aktion:wert
  - MSwitch_Self:pct:100
-Es werden nur interne Events für set-Aktionen ausgelöst, die im Attribut setlist hinterlegt sind.
+ 
+Es werden nur interne Events für set-Aktionen ausgelöst, die im Attribut 'setlist', oder
+in der Dynsetlist hinterlegt sind
+
 Der 'wait' Befehl/Attribut hat keine wirkung auf diese internen Events. 
+
+Einstellung 0 : keine Selbsttriggerung (Standart)
+Einstellung 1 : Selbsttriggerung aktiv , Ausloesebedingung in den Einstellungen Ausloesendes Geraet und/oder Zeit wird geprueft
+Einstellung 2 : Selbsttriggerung aktiv , Ausloesebedingung in den Einstellungen Ausloesendes Geraet und/oder Zeit wird ignoriert
+
+
 
 <strong>MSwitch_Eventhistory_to_Reading</strong>
 eingehende Events werden chronologisch als Reading gespeichert ( mit dem Anhang _hx ).<br>
@@ -863,16 +1023,23 @@ state:off würde zur Ausführung der Befehlszweige mit der ID 2 und 3 führen, i
 Mehrere Angaben sind jeweils in eine seperate Zeile zu schreiben , die letzte Angabe ist mit einem Zeilenumbruch zu beenden.
 
 <strong>MSwitch_Sequenz</strong>
-Eine Schaltsequenz kann durch ein oder mehrere durch '/' getrennte Suchmuster von eingehenden Events angegeben werden die Erkannt werden sollen.
+Eine Schaltsequenz kann durch ein oder mehrere durch ' /' (Leerzeichen beachten) getrennte Suchmuster von eingehenden Events angegeben werden die Erkannt werden sollen.
 Die Angabe muss folgende Syntax haben:
 
- - Device1:reading1:event1 Device1:reading1:event1-2 Device1:reading1:event1-3/..../....
+ - Device1:reading1:event1 Device1:reading1:event1-2 Device1:reading1:event1-3 /.... /....
 
 Beispiel: Dummy:state:on Dummy:state:off Dummy:state:on
 
 Erkennt das Device dieses Suchmuster in den Schaltvorgängen des Devices (Dummy), wird das Reading "SEQUENCE" auf "match" gesetzt,
 das Reading "SEQUENCE_NUMBER" auf die Nummer der gefundenen Sequenz, wenn es mehrere Suchmuster gibt.
 Beide Readings können in den "Conditions" eines Schaltbefehles abgefragt werden.
+
+
+Hierzu muss der gewaehlte Cmd-Zweig durch setzen eines Triggers ausgefuehrt werden .
+In diesem Fall kann der Zweig durch jedes Event angesprochen werden ( Trigger: .* ) , alternativ
+steht als Trigger der Ausdruck 'match-sequenz' bei der Triggerauswahl zur Verfuegung, sobald dieses Attribut gesetzt ist.
+
+
 
 <strong>MSwitch_Sequenz_time</strong>
 Maximalzeit in Sekunden, um eine Sequenz vollständig auszuführen.
@@ -910,8 +1077,58 @@ Beinhaltet eine kommagetrennte Liste von Events, die im Falle ihres Eingangs unb
 Wildcards wie '*' können angegeben werden.
 Empfohlene Einstellung: keine
 
+<strong>MSwitch_CMD_processing</strong>
 
-  
+dieses Attribut beeinflusst das Verhalten des Devices beim abarbeiten von Befehlen im Zusammenhang mit SetMagic ausdrücken. Hauptsächlich relevant bei der Ausführung von FreeCmds , die mehrere Befehle enthalten !
+
+block ( bisheriges verhalten ) :
+vor ausführung eines Befehls werden ALLE vorkommenden SetMagics entsprechend ausgewertet und gesetzt 
+
+line:
+Befehle werden vor ausführung in einzelne Zeilen getrennt . Jede Zeile wird vor Ausführung einzeln auf SetMagic getestet und entsprechend ersetzt.
+
+dieses Hat bei Freecmds gravierende auswirkungen:
+
+Linemode Freecmd:
+
+Wert 4 ist 1 :
+
+Befehlskette :
+set testdev Wert4 5;
+set $SELF Wert4 {[$SELF:Wert4] + 1};
+set $SELF Wert4 {[$SELF:Wert4] + 20};
+
+Ergebniss :
+set testdev Wert4 5;
+set $SELF Wert4 {[$SELF:Wert4] + 1};       Setmagic = 5
+set $SELF Wert4 {[$SELF:Wert4] + 20};     Setmagic = 6
+Ergebniss : 26
+
+
+Blockmode Freecmd:
+
+Wert 4 ist 1:
+
+Befehlskette :
+set testdev Wert4 5;
+set $SELF Wert4 {[$SELF:Wert4] + 1};
+set $SELF Wert4 {[$SELF:Wert4] + 20};
+
+Ergebniss :
+set testdev Wert4 5;
+set $SELF Wert4 {[$SELF:Wert4] + 1};       Setmagic = 1
+set $SELF Wert4 {[$SELF:Wert4] + 20};     Setmagic = 1
+Ergebniss : 21
+
+
+
+
+Dieser Mode sollte nur im Bedarfsfall gesetzt werden,
+wenn aufeinander aufbauende Befehlsketten in einem Freecmd bearbeitet werden
+Bei ausführung von Freecmds im Perlmode bleibt diese Einstellung unberücksichtigt und wird als Block bearbeitet.
+Hier kann bei entsprechendem Bedarf auf direkte Fhembefehle ( Readingsval etc. ) zurückgegriffen werden
+
+
 <strong>MSwitch_setList</strong>
 dieses kann zusätzlich zur Setlist oder alleinstehend belegt werden. Hier besteht die Möglichkeit eine setList dynamisch zu belegen.
 
@@ -996,13 +1213,11 @@ Diese Datei kann z.B genutz werden , um Sie über den Wizard wieder einzuspielen
 Öffnet ein Fenster mit einer formatierten Ansicht aller Einstellungen des Devices.
 Bei Supportanfragen sollte dieses immer mit geposted werden. 
 
-<strong>get DEVICE restore_MSwitch_Data this_device|all_devices</strong>
- - this_device
-Stellt die Daten des Devices aus der Backupdatei wieder her, sofern diese in der Backupdatei gefunden werden (gesucht wird hier nach dem Namen des Devices).
+<strong>get DEVICE restore_MSwitch_Data</strong>
 
- - all_devices
-Stellt die Daten aller MSwitch Devices wieder her, sofern diese in der Backupdatei vorhanden sind. Diese Aktion kann einige Zeit in Anspruch nehmen und wird daher im Hintergrund (nonblocking) ausgeführt.
-Nach Beendigung erfolgt eine Benachrichtigung.
+Stellt die Daten des Devices aus einem vorherigen 
+ - set DEVIVE backup_MSwitch - 
+wieder her, sofern diese in der Backupdatei gefunden werden (gesucht wird hier nach dem Namen des Devices).
 
 Die Devices sind nach einem Restore funktionsfähig.
 Empfohlen wird ein Neustart von FHEM.. 
@@ -1033,6 +1248,34 @@ Help Set
 Angebotene Set-Befehle sind unter Umständen von der Grundkonfiguration abhängig,
 d.H nicht in jedem Mode werden alle Befehle angeboten.
 <hr>
+
+
+<strong>set DEVICE restore_lastStates</strong>
+
+ - siehe ATTR MSwitch_lastState -
+
+<strong>set DEVICE Dynsetlist</strong>
+
+Ermoeglicht das dynamische Einfuegen von Readings.
+Das Format entspricht hierbe dem des Attributes setlist.
+
+Entsprechende Readings werden automatisch verfuegbar gemacht. 
+Bei jedem neuen setzen dieses Option werden alle angegebenen Readings geloescht und neu angelegt.
+
+<strong>set DEVICE Dynsetlist_clear</strong>
+
+Loescht den Eintrag Dynsetlist und entfernt alle dort vorhandenen Readins aus dem Device.
+
+<strong>set DEVICE Dynsetlist_add</strong>
+
+Fuegt bestehender Dynsetlist ein Reading hinzu.
+Bestehende Readings der Dynsetlist bleiben hiervon unberuehrt.
+
+<strong>set DEVICE Dynsetlist_delete</strong>
+
+Loescht ein Reading aus bestehender Dynsetlist..
+Weitere bestehende Readings der Dynsetlist bleiben hiervon unberuehrt
+
 <strong>set DEVICE wizard</strong>
 Schaltet das Device in den Wizardmode.
 In diesem Mode können at's, notifys undvorkonfigurierte Devices importiert werden.
@@ -1106,7 +1349,9 @@ Bei Angabe einer ID werden nur die Befehle mit der entsprechenden ID ausgeführt
 <strong>set DEVICE backup_MSwitch</strong>
 Erstellt eine Backup-Datei wahlweise dieses oder aller Mswitches.
 Diese Daten können im Bedarfsfall für einzelne oder gleichzeitig alle MSwitch Devices wieder zurückgespieltb werden.
-Die Dateien liegen im Verzeichniss /opt/fhem/backup/MSwitch. 
+In der Grundkonfiguration liegen die Daten im Verzeichniss /opt/fhem/restoreDir/MSwitch. 
+Sollte im globaldevice das ATTR 'backupdir' gesetzt sein, dann werden die Daten in entsprechendem 
+in diesem Verzeichniss gespeichert. 
 
 <strong>set DEVICE reset_cmd_count: 1|2</strong>
 Löscht das entsprechende EVT_CMD_COUNT - Reading; entspricht damit einer Rückstellung auf '0'. 
