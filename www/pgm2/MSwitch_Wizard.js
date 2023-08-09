@@ -13,7 +13,7 @@
       alert(meldung);
     }
  
-	var version = 'V6.2';
+	var version = 'V6.3';
 	var jump="nojump";
 	const Devices = [];
 	const WIZARDVARS = [];
@@ -41,7 +41,7 @@
 //var o =[];
 	var configstart = [
 	'#V Version',
-	'#VS V6.2',
+	'#VS V6.3',
 	'#S .First_init -> done',
 	'#S .Trigger_off -> no_trigger',
 	'#S .Trigger_cmd_off -> no_trigger',
@@ -50,7 +50,7 @@
 	'#S .Trigger_on -> no_trigger',
 	'#S .Trigger_cmd_on -> no_trigger',
 	'#S .Trigger_condition -> ',
-	'#S .V_Check -> V6.2',
+	'#S .V_Check -> V6.3',
 	'#S .Device_Events -> no_trigger',
 	'#S .Device_Affected -> no_device',
 	'#S .Trigger_time_1 -> ',
@@ -76,7 +76,7 @@
 
 	var configtemplate = [
 	'#V Version',
-	'#VS V6.0',
+	'#VS V6.3',
 	'#S .First_init -> done',
 	'#S .Trigger_off -> no_trigger',
 	'#S .Trigger_cmd_off -> no_trigger',
@@ -93,7 +93,7 @@
 	'#S .Trigger_time_3 -> ',
 	'#S .Trigger_time_4 -> ',
 	'#S .Trigger_time_5 -> ',
-	'#S .Device_Affected_Details -> '];
+	'#S .Device_Affected_Details_new -> '];
 
 	var emptydevice = [
 	'',
@@ -344,6 +344,9 @@ function reset() {
 	return;
 	}
 	
+	
+	
+	/*
 function XXXmakeconfig(){
 	if (document.getElementById('first').value == 'time'){
 		// ändere config für timeevent
@@ -389,6 +392,9 @@ function XXXmakeconfig(){
 	fillconfig('rawconfig')
 	return;
 } 
+
+
+*/
 
 function fillconfig(name){
 	
@@ -576,6 +582,23 @@ function devicelistmultiple(id,name){
 	return ret;	
 }
 
+
+
+
+function devicelistone(id,name){
+	ret="";
+	ret = '<select style="width: 50em;" size="10" id =\"'+id+'\" name=\"'+name+'\" onchange=\"javascript: takeselected(id,name)\">';
+	count =0;
+	for (i=count; i<len; i++)
+		{
+		ret +='<option value='+devices[i]+'>'+devices[i]+'</option>';
+		}
+	ret +='</select>';
+	return ret;	
+}
+
+
+
 /// #######################
 
 function takeselected(id,name){
@@ -735,24 +758,27 @@ atarray= name.split("\[TRENNER\]");
 function saveat(){
 	var cmdstring = document.getElementById('defcmd').value;
 	cmdstring = cmdstring.replace(/\n/g,'#[nl]');
-	cmdstring = cmdstring.replace(/:/g,'#[dp]');
-	cmdstring = cmdstring.replace(/;/g,'#[se]');
 	cmdstring = cmdstring.replace(/ /g,'#[sp]');
+	
+	/*cmdstring = cmdstring.replace(/:/g,'#[dp]');
+	cmdstring = cmdstring.replace(/;/g,'#[se]');
 	cmdstring = cmdstring.replace(/\t/g,'#[tab]');
 	cmdstring = cmdstring.replace(/\\/g,'#[bs]');
 	cmdstring = cmdstring.replace(/,/g,'#[ko]');
 	cmdstring = cmdstring.replace(/\|/g,'#[wa]');
 	cmdstring = cmdstring.replace(/\|/g,'#[wa]');
 	
+	*/
+	
 	configstart[12] ='#S .Device_Affected -> FreeCmd-AbsCmd1';
-    var newcmdline = '#S .Device_Affected_Details -> FreeCmd-AbsCmd1'+'#[NF]undefined#[NF]cmd#[NF]'+cmdstring+'#[NF]#[NF]delay1#[NF]delay1#[NF]00:00:00#[NF]00:00:00#[NF]#[NF]#[NF]undefined#[NF]undefined#[NF]1#[NF]0#[NF]#[NF]0#[NF]0#[NF]1#[NF]0';
+    var newcmdline = '#S .Device_Affected_Details_new -> FreeCmd-AbsCmd1'+'#[NF]undefined#[NF]cmd#[NF]'+cmdstring+'#[NF]#[NF]delay1#[NF]delay1#[NF]00:00:00#[NF]00:00:00#[NF]#[NF]#[NF]undefined#[NF]undefined#[NF]1#[NF]0#[NF]#[NF]0#[NF]0#[NF]1#[NF]0';
 
 	configstart[29]=newcmdline;
 	
 	if (document.getElementById('defflag').value == "*")
 	{
 		string = document.getElementById('deftspec').value;
-		string = string.replace(/:/gi,"#[dp]");
+		//string = string.replace(/:/gi,"#[dp]");
 		configstart[15] ='#S .Trigger_time_3 -> TIME='+ string;
 	}
 	
@@ -760,7 +786,7 @@ function saveat(){
 	{
 		string = document.getElementById('deftspec').value;
 		string = 'REPEAT='+string+'*00:01-23:59';
-		string = string.replace(/:/gi,"#[dp]");
+		//string = string.replace(/:/gi,"#[dp]");
 		configstart[15] ='#S .Trigger_time_3 ->'+ string;
 	}
 	
@@ -919,14 +945,22 @@ function savenot(){
 	//return;
 	// funktionsfähige ersetzung für detailübertragung
 	cmdstring = cmdstring.replace(/\n/g,'#[nl]');
+	cmdstring = cmdstring.replace(/ /g,'#[sp]');
+	
+	
+	
+	/*
 	cmdstring = cmdstring.replace(/:/g,'#[dp]');
 	cmdstring = cmdstring.replace(/;/g,'#[se]');
-	cmdstring = cmdstring.replace(/ /g,'#[sp]');
 	cmdstring = cmdstring.replace(/\t/g,'#[tab]');
 	cmdstring = cmdstring.replace(/\\/g,'#[bs]');
 	cmdstring = cmdstring.replace(/,/g,'#[ko]');
 	cmdstring = cmdstring.replace(/\|/g,'#[wa]');
 	cmdstring = cmdstring.replace(/\|/g,'#[wa]');
+	*/
+	
+	
+	
 	// hier notify to mswitch mappen
 	// EVENT - EVTPART3
 	// NAME
@@ -936,7 +970,7 @@ function savenot(){
 	
 	document.getElementById('notifytest').value=cmdstring;
 	configstart[12] ='#S .Device_Affected -> FreeCmd-AbsCmd1';
-    var newcmdline = '#S .Device_Affected_Details -> FreeCmd-AbsCmd1'+'#[NF]undefined#[NF]cmd#[NF]'+cmdstring+'#[NF]#[NF]delay1#[NF]delay1#[NF]00:00:00#[NF]00:00:00#[NF]#[NF]#[NF]undefined#[NF]undefined#[NF]1#[NF]0#[NF]#[NF]0#[NF]0#[NF]1#[NF]0';
+    var newcmdline = '#S .Device_Affected_Details_new -> FreeCmd-AbsCmd1'+'#[NF]undefined#[NF]cmd#[NF]'+cmdstring+'#[NF]#[NF]delay1#[NF]delay1#[NF]00:00:00#[NF]00:00:00#[NF]#[NF]#[NF]undefined#[NF]undefined#[NF]1#[NF]0#[NF]#[NF]0#[NF]0#[NF]1#[NF]0';
 	configstart[29]=newcmdline;
 	configstart[5] ='#S .Trigger_device -> '+ document.getElementById('trigdev').value;
 	
@@ -959,6 +993,8 @@ function savenot(){
 	fillconfig('rawconfig2');
 	// hexumwandlung
 	inhalt=document.getElementById('rawconfig2').value;
+	
+	
 	//alert(inhalt);
 	inhalthex= str2hex(inhalt);
 	document.getElementById('rawconfig2').value=inhalthex;
@@ -1320,6 +1356,10 @@ function schreibespeicher(aktline)
 // #################
 
 function saveempty(){
+	
+	
+	alert("saveempty");
+	
 	conf = document.getElementById('rawconfig10').value;
 	conf = conf.replace(/\n/g,'#[EOL]');
 	conf = conf.replace(/#\[REGEXN\]/g,'\\n');
@@ -1439,10 +1479,50 @@ function starttemplate(template){
 	}
 
 	if (nosave =="0"){
-		conf= str2hex(changevar(conf));
+		
+		
+		
+	/* 		
+	$test =~ s/#\[dp\]/:/g;
+	$test =~ s/#\[pt\]/./g;
+    $test =~ s/#\[ti\]/~/g;
+    $test =~ s/#\[se\]/;/g;
+    $test =~ s/#\[dp\]/:/g;
+    $test =~ s/\(DAYS\)/|/g;
+    $test =~ s/#\[ko\]/,/g;     #neu
+    $test =~ s/#\[bs\]/\\/g; 
+		
+		 */
+		
+/* 		
+ 	conf = conf.replace(/#\[nl\]/g,'\n');
+	
+	conf = conf.replace(/#\[tab\]/g,'\t'); */
+	conf = conf.replace(/#\[sp\]/g,' ');
+	conf = conf.replace(/#\[se\]/g,';');	
+	conf = conf.replace(/#\[dp\]/g,':');
+	conf = conf.replace(/#\[bs\]/g,'\\');
+	conf = conf.replace(/#\[ko\]/g,',');
+	conf = conf.replace(/#\[wa\]/g,'|');
+	conf = conf.replace(/#\[st\]/g,'\'');
+		 
+		
+		
+		
+		//alert("change");
+		
+		
+		
+		
 		document.getElementById('rawconfig10').value=conf;
+		conf= str2hex(changevar(conf));
 		var nm = devicename;
-		var def = nm+' saveconfig '+encodeURIComponent(conf);
+		var def = nm+' saveconfig '+conf;
+		
+		
+		//alert("save");
+		//return;
+		
 		location = location.pathname+'?detail='+devicename+'&cmd=set '+addcsrf(def);
 		}
 	}
@@ -1495,9 +1575,7 @@ else
 {
 return;
 }
-
 }
-
 
 
 if (cmdsatz[0] == "TEXT"){
@@ -1703,6 +1781,22 @@ if (cmdsatz[0] == "VARDEVICES"){
 } 
 
 
+if (cmdsatz[0] == "VARDEVICE"){
+	var testvar = cmdsatz[1].match(/^\$.*/);
+	if (testvar!=null && testvar.length!=0)
+	{
+		text = cmdsatz[2];
+		varname = cmdsatz[1];
+		setVARDEVICE(text,varname,newtemplate);
+		return "stop";
+	}
+		else{
+	alert("ERROR: Variablen müssen mit einem einleitenden $ deklariert werden .");
+	}
+} 
+
+
+
 var typ="";
 if (cmdsatz[0] == "ATTR")
 {
@@ -1804,6 +1898,24 @@ out+="<input id='newtemplate' type='text' value='"+newtemplate+"' "+style+">";
 document.getElementById('importTemplate1').innerHTML = out;
 return;
 }
+
+
+function setVARDEVICE(text,varname,newtemplate){
+var out ="";
+out+=text;
+out=changevar(out);
+out+="<br>&nbsp;<br>";
+selectlist = devicelistone('selectlist','name')
+out+=selectlist;
+out+="<br>&nbsp;<br><input id='input' type='text' value='"+PREASSIGMENT+"' size='100'>";
+out+="<br>&nbsp;<br><input type='button' value='weiter' onclick='javascript: setVARok(\""+varname+"\")'>";
+out+="<br>&nbsp;<br>&nbsp;<br>";
+out+="<input id='newtemplate' type='text' value='"+newtemplate+"' "+style+">";
+document.getElementById('importTemplate1').innerHTML = out;
+return;
+}
+
+
 
 
 // #################
@@ -2550,7 +2662,7 @@ function makedevicenew(configuration){
 
 	
 	newmasterline=newmasterline.substr(0,newmasterline.length - 5);
-	configuration[18] = "#S .Device_Affected_Details -> "+newmasterline;
+	configuration[18] = "#S .Device_Affected_Details_new -> "+newmasterline;
 	return configuration;
 }
 
@@ -2585,7 +2697,7 @@ function makedevice(configuration){
     }
 	
 	newmasterline=newmasterline.substr(0,newmasterline.length - 5);
-	configuration[18] = "#S .Device_Affected_Details -> "+newmasterline;
+	configuration[18] = "#S .Device_Affected_Details_new -> "+newmasterline;
 	return configuration;
 }
 

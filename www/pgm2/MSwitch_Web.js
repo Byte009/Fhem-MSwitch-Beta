@@ -18,7 +18,7 @@
 	// var templatesel ='" . $hash->{helper}{template} . "';
 // ###############################################
 
-	var version = '6.2';
+	var version = '6.62';
 	var info = '';
 	var debug ='off';
 	var datatarget ='undef';
@@ -125,24 +125,69 @@ $('#sel_attr'+devicename).change(function(){
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function teststart(){
 // alle startfunktionen ausführen 
+
+
+
+const shortarray1 = ['.Device_Affected_Details_new', '.sysconf', '.AttrList', '.Trigger_condition' , '.Device_Events'];
+for (const element of shortarray1) {
+  //alert(element);
+  
+  if ($('div[informid="'+devicename+'-'+element+'"]').length > 0) {
+	var disp = $('div[informid="'+devicename+'-'+element+'"]').html();
+	var res;
+	if(disp.length > 35)
+		{
+		res = disp.substring(0,35);
+		}
+	$('div[informid="'+devicename+'-'+element+'"]').html(res+'... (gekürzt)');
+	}
+ 
+}
+
+if ($('#disp').length > 0) {
+	var disp = $('#disp').html();
+	var res;
+	if(disp.length > 15){
+		res = disp.substring(0,15);
+		}
+	$('#disp').html(res+'... (gekürzt)');
+	}
+
+
+
+
+var confdevice = devicename+"-MSwitch_Configdevice";
+var confinhalt = $('div[informid="'+confdevice+'"]').html();
+
+if (confinhalt == "installed"){
+var cn ="<input onClick='javascript:openconf();' style='text-align: center; background-color: Transparent; border-color: green; font-size: 0.6em; height: 18px; width: 150px;' type='input' value='installed -> open device' />";
+//confinhalt = confinhalt+" "+cn;
+//$('div[informid="'+confdevice+'"]').html(cn);
+}
+
+if (confinhalt == "not installed"){
+var cn ="<input onClick='javascript:instconf();' style='text-align: center; background-color: Transparent; border-color: red; font-size: 0.6em; height: 18px; width: 150px;' type='input' value='not installed ( click to install )' />";
+//confinhalt = confinhalt+" "+cn;
+//$('div[informid="'+confdevice+'"]').html(cn);
+}
+
+confinhalt = confinhalt+" "+cn;
+$('div[informid="'+confdevice+'"]').html(cn);
+
+
+
+
+// eventmonitor init
+	$( "#log2" ).text( "" );
+	$( "#log1" ).text( "" );
+	$( "#log3" ).text( "" );
+	//var field = $('<br><select style="width: 30em;" size="5" id ="lf" multiple="multiple" name="lf" size="6"  onclick="javascript:transferevent()" ></select>');
+	//$(field).appendTo('#log2');
+	
+	events = new Array;
+	
 // funktion rename aktivieren
 if (debug == 'on'){ alert(devicename+' Debug MSwitchweb an') };
 
@@ -297,6 +342,12 @@ if (RENAME == 'on'){
 	varinf = varinf+'<td><small>enthält den eigenen Namen</td>';
 	varinf = varinf+'</tr>';
 	
+	varinf = varinf+'<tr>';
+	varinf = varinf+'<td><small>\$ARG </td>';
+	varinf = varinf+'<td><small>&nbsp;-&nbsp;</td>';
+	varinf = varinf+'<td><small>enthält ein uebergebenes Argument (ARG) aus Timern</td>';
+	varinf = varinf+'</tr>';
+	
 	varinf = varinf+'</table>';
 
 	varinf = varinf+'</td>';
@@ -411,27 +462,36 @@ if (RENAME == 'on'){
 
 // devhelp ersetzen
 
-r3 = $('<a href=\"javascript: reset(\'check\')\">Reset this device ('+devicename+')</a>&nbsp;&nbsp;<a href=\"javascript: fullhelp()\">Device specific help</a>');
-$( "[class=\"detLink devSpecHelp\"]" ).html(r3);
+
+$.each( $(".detLink"), function (test) {
+	var htmlString = $( this ).html();
+	if (htmlString == '<a href="#">Help for MSwitch</a>'){
+	$( this ).html( '<a href=\"javascript: fullhelp()\">Help for MSwitch</a>' );
+  }
+    if (htmlString == '<a href="#">Copy for forum.fhem.de</a>'){
+    $( this ).html( '<a href=\"javascript: forum()\">Copy for forum.fhem.de</a>' );
+  }
+});
 
 
+// &nbsp;<a href=\"javascript: raw()\">Raw definition</a>
+// <a href=\"javascript: reset(\'check\')\">Reset this device ('+devicename+')</a>&nbsp;&nbsp;
 
-var html = "<a href=\"javascript: raw()\">Raw definition</a>";
-$( "[class=\"detLink rawDef\"]" ).html(html);
-
-//$( "[class=\"detLink rawDef\"]" ).attr("id", "rawDef");
-//$('.klasse1')
-//$( "[class=\"detLink rawDef\"]" ).attr("id", "testfff");
-//$('#testfff').removeClass('detLink rawDef').addClass('xxx');
-//var test =  document.getElementById('testfff').innerHTML;
-//alert(test);
+var $el = $("#moreCmds");
+$el.empty();
+// dropdown neu anlegen
+$el.append($("<option></option>").attr("new-cmd", "...").text("..."));
+$el.append($("<option></option>").attr("new-cmd", "rawDef").text("Raw definition"));
+$el.append($("<option></option>").attr("new-cmd", "reset").text("Reset device"));
+$el.append($("<option></option>").attr("data-cmd", "style iconFor "+devicename).text("Select icon"));
+$el.append($("<option></option>").attr("data-cmd", "style showDSI "+devicename).text("Extend devStateIcon"));
+$el.append($("<option></option>").attr("data-cmd", "delete "+devicename).text("Delete "+devicename));
 
 
 // zufügen des hilfebereichs
 r4 = $('<br><div id="helptext">Hilfetext<\div>');
 $(r4).appendTo("#content");
 $("#helptext").css("display","none");
-
 
 
 // EXEC1   ##################################################
@@ -629,125 +689,7 @@ if (document.getElementById('trigcmdon'))
 		}
 	}
 
-// next   ##################################################
-	// eventmonitor
-	var o = new Object();
-	var atriwaaray = new Object();
-	var atriwaaray = { SCRIPTTRIGGERS };
 
-	// init reaktion auf Änderungen der INFORMID
-	$("body").on('DOMSubtreeModified', "div[informId|='"+devicename+"-EVTFULL']", function() {
-	
-	// abbruch wenn checkbox nicht aktiv
-	
-	var check = $("[name=eventmonitor]").prop("checked") ? "1":"0";
-	if (check == 0)
-		{
-		return;
-		}
-
-	// neustes event aus html extrahieren
-	var test = $( "div[informId|='"+devicename+"-EVTFULL']" ).text();
- 
-	// datum entfernen
-	test= test.substring(0, test.length - 19);
-	o[test] = test;
-
-	// löschen der anzeige
-	
-	$( "#log2" ).text( "" );
-	$( "#log1" ).text( "eingehende events:" );
-	$( "#log3" ).text( "" );
-	 
-	var field = $('<br><select style="width: 30em;" size="5" id ="lf" multiple="multiple" name="lf" size="6"  onchange="javascript:transferevent()" ></select>');
-	
-	$(field).appendTo('#log2');
-
-	// umwandlung des objekts in Standardarray
-	var a3 = Object.keys(o).map(function (k) { return o[k];})
- 
-	// array umdrehen
-	a3.reverse();
-	// aktualisierung der divx max 5
-	var i;
-	for (i = 0; i < 10; i++) 
-		{
-		if (a3[i])
-			{
-			var newselect = $('<option value="'+a3[i]+'">'+a3[i]+'</option>');
-			$(newselect).appendTo('#lf'); 
-			}
-		else{
-			break;
-		}			
-			
-		}  
-});
-
-// next   ##################################################
-	
-	
-	
-	/* 
-	
-	
-	
-	if (HASHINIT != 'define')
-	{
-		
-		for (i=0; i<auswfirst.options.length; i++)
-			{
-			var pos=auswfirst.options[i];
-				if(pos.selected)
-				{
-				globalaffected +=pos.value;
-				}
-			}
-		 var sel1 = document.getElementById('devices');
-			
-			if (UNLOCK == '1')
-			{
-				globallock =' this device is locked !';
-				["aw_dist1","aw_dist2", "aw_dist","aw_dev","aw_det","aw_trig","aw_md","aw_md20","aw_addevent"].forEach (lock,);
-				randomdev.forEach (lock);
-			}
-			
-			if (UNLOCK == '2')
-			{
-				globallock =' only trigger is changeable';
-				[ "aw_dist1","aw_dist2","aw_dist","aw_dev","aw_det","aw_md","aw_md20","aw_addevent"].forEach (lock,);
-				randomdev.forEach (lock);
-			}
-			
-		sel1.onchange = function() 
-		{
-			var actaffected;
-			var auswfirst=document.getElementById('devices');
-			for (i=0; i<auswfirst.options.length; i++)
-				{
-				var pos=auswfirst.options[i];
-				if(pos.selected)
-					{
-					actaffected +=pos.value;
-					}
-				}
-
-			if (actaffected != globalaffected)
-				{
-				globallock =' unsaved affected device';
-				[ "aw_dist1","aw_dist2","aw_dist","aw_det","aw_trig","aw_md","aw_md20","aw_addevent"].forEach (lock,);
-				randomdev.forEach (lock);
-				}
-			else
-				{
-				[ "aw_dist1","aw_dist2","aw_dist","aw_det","aw_trig","aw_md","aw_md20","aw_addevent"].forEach (unlock,);
-				randomdev.forEach (unlock);
-				}
-		}	 
-	} */
-	
-	
-	
 	// teste auch showids
     var cookie = getCookieValue("Mswitch_ids_"+devicename);
 	if (cookie == ""){
@@ -766,6 +708,26 @@ if (document.getElementById('trigcmdon'))
 return;
 } // ende startfunktionen
 
+
+
+function writeevent(line){
+	
+	encodedline = decodeURIComponent(line);
+	var check = $("[name=eventmonitor]").prop("checked") ? "1":"0";
+	if (check == 0)
+		{
+		return;
+		}
+	index = events.indexOf(encodedline);
+	if (index > -1)
+	{
+		return;
+	}
+	events.push(encodedline);
+	var newselect = $('<option value="'+encodedline+'">'+encodedline+'</option>');
+	$(newselect).appendTo('#lf'); 
+	return;
+}
 
 
 function writedebug(line){
@@ -787,6 +749,8 @@ function writedebug(line){
 function deletedistributor(line){
 	//alert(line);
 	if (debug == 'on'){ alert('deletedistributor') };
+	
+	document.getElementById('aw_dist1').style.display='none';
 	document.getElementById('line1-'+line).innerHTML = '';
 	document.getElementById('line2-'+line).innerHTML = '';
 	checkdistricode()
@@ -795,6 +759,9 @@ function deletedistributor(line){
 
 function adddistributor(){
 	if (debug == 'on'){ alert('adddistributor') };	//alert('line');
+	
+	document.getElementById('aw_dist1').style.display='none';
+	
 	var add = $( "#rawcode" ).html();
 	add = add.replace(/LINENUMBER/gi,DISTRIBUTLINES);
 	add = add.replace(/line1-/gi,"line1-"+DISTRIBUTLINES);
@@ -824,13 +791,16 @@ function savedistributor(){
 			aktid=  $("#ideventID"+i).val();
 			newidfile +=aktline+"=>cmd"+aktcmd+"[SP]ID[SP]"+aktid+"[NL]";		
 		}
-
-	FW_cmd(FW_root+'?cmd=set '+devicename+' setbridge '+newidfile+'&XHR=1');
-	[ "aw_md","aw_trig","aw_md20","aw_addevent","aw_dev"].forEach (unlock,);
+[ "aw_md","aw_trig","aw_md20","aw_addevent","aw_dev"].forEach (unlock,);
 	randomdev.forEach (unlock);
-	return;
-}
 
+	 var nm = $(t).attr("nm");
+	var def = nm + " setbridge "+newidfile;
+		
+		
+		location = location.pathname + "?detail=" + devicename + "&cmd=set " + addcsrf(def);
+	
+}
 
 
 function checkdistricode(){
@@ -889,32 +859,6 @@ $("#helptext").html(text);
 return;
 }
 
-
-
-/* 
-function hilfeconfig(field){
-	if (debug == 'on'){ alert('hilfe') };
-	var text = HELP;
-	text = text.replace(/#\[LINE\]/gi,"<br>");
-	text = text.replace(/#\[A\]/gi,"'");
-	text = text.replace(/#\[DA\]/gi,"\"");
-	var myRegEx = new RegExp('<strong>'+field+'</strong>(.*?)(<strong)');  
-	// <strong>MSwitch_Expert</strong>
-	//alert(myRegEx);
-	//alert(HELP);
-	treffer = text.match(myRegEx);
-	
-	if( treffer == null){
-	out = "dieser Hilfetext ist nicht vorhanden";
-	}else{
-	out = treffer[1];	
-	}
-	var textfinal ="<div style ='font-size: small;'>Hilfe "+field+":<br>"+ out +"</div>";
-	FW_okDialog(textfinal);
-	return;
-	
-	
-} */
 
 function hilfe(field){
 
@@ -1023,8 +967,6 @@ function changeinput(argument1,argument3,argument4,argument5){
 		return;
 	}
 	
-	
-	
 var test = document.getElementById(argument1).style.display;
 var test1 = document.getElementById(argument2).style.display;
 var oldval = document.getElementById(argument3).value;
@@ -1076,7 +1018,6 @@ function makewidget(copytofield,target,werte){
 	var datatarget =target;
 	return;
 }
-
 
 
 function textfield(copytofield,target)
@@ -1161,8 +1102,6 @@ function activate(state,target,options,copytofield){
 		return;
 		
 		}
-		
-		
 		
 	var optionarray = options.split(" ");
 	var werte = new Array();
@@ -1281,7 +1220,6 @@ function testcmd(field,cmdname,opt,eventfield){
 		} 
 	return;	
 	}
-	
 
 
 function closetrigger(){
@@ -1326,21 +1264,6 @@ if (debug == 'on'){ alert('rename') }
 	newname = document.getElementById('ren2_'+device).value;
 	if (devicename == device){return;}
 	if (newname == ''){return;}
-	
-	//alert(newname);
-	//alert(device);
-	//return;
-	
-	
-	//comand = 'rename'+devicename+newname;
-	
-	//cmd = comand;
-	
-	//window.location.href="/fhem?cmd=rename "+device+" "+newname+"&detail="+newname+""+CSRF;
-	
-	
-	//cmd ='set '+alldevices[i]+' '+'change_renamed'+' '+device+' '+newname 
-    //FW_cmd(FW_root+'?cmd='+encodeURIComponent(cmd)+'&XHR=1');
 	
 	conf=device+" "+newname;
 	var nm = $(t).attr("nm");
@@ -1428,8 +1351,7 @@ if(typeof type == 'undefined'){
 	{
 	sel = sel+varinf;
 	}
-
-
+	
 	FW_okDialog(sel,''); 
 	}	
 
@@ -1560,8 +1482,6 @@ function selectdevices(){
 }
 	
 	
-
-	
 	// geräteauswahl entfernen
 function deletedevices(){
 	
@@ -1583,7 +1503,6 @@ for (i = length-1; i >= 0; i--) {
   select.options[i] = null;
 }
 			
-	
 		var selectElement = document.getElementById('affected_third_devices');
 		for (var key in NEWLIST) 
 			{
@@ -1657,8 +1576,6 @@ function searchdevice(){
 	}
 	return;
 	}
-	
-	
 	
 	
 function searchtriggerdevice(){
@@ -1779,14 +1696,24 @@ if (debug == 'on'){ alert('clearlogwindow') };
      document.getElementById("log").value='';
 	 return;
 	 }
-// unbekannt	 
+// unbekannt	
+ 
 function savesys(conf){
 if (debug == 'on'){ alert('savesys') };
-	conf = conf.replace(/:/g,'#[dp]');
+
+
+
+	/* conf = conf.replace(/:/g,'#[dp]');
 	conf = conf.replace(/;/g,'#[se]');
 	conf = conf.replace(/ /g,'#[sp]');
 	conf = conf.replace(/'/g,'#[st]');
 	conf = conf.replace(/\t/g,'#[tab]');
+	 */
+	
+	conf=str2hex(conf);
+	//alert(conf);
+	
+	
 	var nm = $(t).attr("nm");
 	var  def = nm+" savesys "+encodeURIComponent(conf);
 	location = location.pathname+"?detail="+devicename+"&cmd=set "+addcsrf(def);
@@ -1878,8 +1805,17 @@ if (debug == 'on'){ alert('checkcondition') }
 		$( "#log2" ).text( "" );
 		$( "#log1" ).text( "eingehende events:" );
 		$( "#log3" ).text( "" );
-		var field = $('<br><select style="width: 30em;" size="5" id ="lf" multiple="multiple" name="lf" size="6"  ></select>');
+		var field = $('<br><select style="width: 30em;" size="5" id ="lf" multiple="multiple" name="lf" size="6"  onchange="javascript:transferevent()"></select>');
 		$(field).appendTo('#log2');
+		events = [];
+		return;
+		}
+		else{
+			
+		$( "#log2" ).text( "" );
+		$( "#log1" ).text( "" );
+		$( "#log3" ).text( "" );	
+			events = [];
 		return;
 		}
 	});
@@ -1895,7 +1831,6 @@ if (debug == 'on'){ alert('checkcondition') }
 	});
 	
 	
-
 // clickfunktions
 // modify trigger aw_save
 	$("#aw_md").click(function(){
@@ -1973,23 +1908,15 @@ if (debug == 'on'){ alert('checkcondition') }
 	devices = $("[name=affected_devices]").val();
 	
 	
-	//alert ("-"+devices+"-");
-	//return;
-	
-	
-	
+
 	var  def = nm+" devices "+devices+" ";
 	location = location.pathname+"?detail="+devicename+"&cmd=set "+addcsrf(def);
 	}); 
-	
-	
 	
 	// geräteauswahl speichern neu
 	$("#aw_new_dev").click(function(){
 	if (debug == 'on'){ alert('#aw_dev') };
 	var nm = $(t).attr("nm");
-	
-	
 	
 	var NEWLIST=[];
 	var ausw=document.getElementById('affected_third_devices');
@@ -2013,7 +1940,6 @@ if (debug == 'on'){ alert('checkcondition') }
 		NEWLIST="null";
 	}
 	
-
 	var  def = nm+" devices "+NEWLIST+" ";
 	location = location.pathname+"?detail="+devicename+"&cmd=set "+addcsrf(def);
 	}); 
@@ -2052,6 +1978,19 @@ if (debug == 'on'){ alert('checkcondition') }
 	$("#anzid").html(allcmds);
 	});
 	
+	// Helpauslöser
+	
+	$("#detLink select#moreCmds").change(function(){
+   //doDetCmd($(this).find("option:selected").attr("data-cmd"));
+   
+   var sel = $(this).find("option:selected").attr("new-cmd");
+   execbottomline(sel);
+   return;
+  });
+	
+	
+	
+
 //unbekannt	
 	$("#aw_addevent").click(function(){
 	if (debug == 'on'){ alert('#aw_addevent') };
@@ -2094,27 +2033,59 @@ if (debug == 'on'){ alert('checkcondition') }
 	if(timeonoffonly==""){timeonoffonly="NoTimer"};
 	
 	trigdevcond = $("[name=triggercondition]").val();
-	if(typeof(trigdevcond)=="undefined"){trigdevcond="NoCondition"};
-	if(trigdevcond==""){trigdevcond="NoCondition"};
+	if(typeof(trigdevcond)=="undefined")
+	{
+		//alert ("cond undef");
+		trigdevcond="NoCondition";
+}
+	if(trigdevcond=="")
+	{
+		//alert("cond leer");
+		trigdevcond="NoCondition";
+		}
 	
-	trigdevcond = trigdevcond.replace(/\\./g,'#[pt]');
-	trigdevcond = trigdevcond.replace(/:/g,'#[dp]');
+	
+	//trigdevcond= str2hex(trigdevcond);
+	
+	//alert(trivdevcondHEX);
+	
+	//trigdevcond = trigdevcond.replace(/\\./g,'#[pt]');
+	//trigdevcond = trigdevcond.replace(/:/g,'#[dp]');
 	trigdevcond= trigdevcond.replace(/~/g,'#[ti]');
 	trigdevcond = trigdevcond.replace(/ /g,'#[sp]');
 	
+	
 	trigwhite = $("[name=triggerwhitelist]").val();
-	var  def = nm+" set_trigger  "+trigdev+" "+timeon+" "+timeoff+" "+timeononly+" "+timeoffonly+" "+timeonoffonly+" "+trigdevcond+" "+trigwhite+" " ;
-	def = def.replace(/\n/g, '[NEXTTIMER]');
-	def = def.replace(/\u2424/g,'[NEXTTIMER]');
-	def =  encodeURIComponent(def);
+	
+	
+	var transfer = trigdev+" "+timeon+" "+timeoff+" "+timeononly+" "+timeoffonly+" "+timeonoffonly+" "+trigdevcond+" "+trigwhite+" " ;
+	transfer = transfer.replace(/\n/g, '[NEXTTIMER]');
+	transfer = transfer.replace(/\u2424/g,'[NEXTTIMER]');
+	
+	
+	
+	//alert(transfer);
+	transfer = str2hex(transfer);
+	
+	//var  def = nm+" set_trigger  "+trigdev+" "+timeon+" "+timeoff+" "+timeononly+" "+timeoffonly+" "+timeonoffonly+" "+trigdevcond+" "+trigwhite+" " ;
+	var  def = nm+" set_trigger  "+transfer ;
+
+
+//alert(def);
+//return;
+	//def =  encodeURIComponent(def);
 	location = location.pathname+"?detail="+devicename+"&cmd=set "+addcsrf(def);
 	});
 	
-$("#undo").click(function(){
-var nm = $(t).attr("nm");
-var  def = nm+" undo ";
-location = location.pathname+"?detail="+devicename+"&cmd=set "+addcsrf(def);
-});
+	
+	
+	
+	
+	$("#undo").click(function(){
+	var nm = $(t).attr("nm");
+	var  def = nm+" undo ";
+	location = location.pathname+"?detail="+devicename+"&cmd=set "+addcsrf(def);
+	});
 
 function checklines(name)
 {
@@ -2125,7 +2096,7 @@ function checklines(name)
 	while (pos !== -1) {
 	zeilen++;
 	pos = text.indexOf("\n", pos + 1);
- } 
+	} 
 	checkfield = name;
 	if (zeilen < 10){
 	zeilen = 10;
@@ -2148,18 +2119,11 @@ function readhelp()
 
 function raw()
 {
-  if( $("#rawDef").length > 0 ) {
-  $("#rawDef").remove(); 
-  return;
-}
+	if( $("#rawDef").length > 0 ) {
+	$("#rawDef").remove(); 
+	return;
+	}
 	
-	//alert("rawxx");
-	//$('body').addClass('js');
-	//  $('.animated').append(html);
-	//$('.menuScrollArea').append('<p>Test</p>');
-	//var $newdiv1 = $( "<div id='object1'>XXXXX</div>" );
-	// $( "body" ).append( $newdiv1);
-	//FW_cmd(FW_root+'?cmd=set '+devicename+' getraw&XHR=1');
 	FW_cmd(FW_root+'?cmd=set '+devicename+' getraw &XHR=1', function(data){raw1(data)});
 	return;
 }
@@ -2167,14 +2131,7 @@ function raw()
 
 function raw1(data)
 {
-	
-	//var html="<div id=\"rawDef\"><textarea id=\"td_rawDef\" rows=\"25\" cols=\"60\" style=\"width:99%; \">"+data+"</textarea><button style=\"display: none;\">Execute commands</button> Dump \"Probably associated with\" too <input type=\"checkbox\"><br><br></div></div>";
-    //$('.animated').append(html);
-	//alert(data);
-	//'<button>Execute commands</button>'+
-    //   ' Dump "Probably associated with" too <input type="checkbox">'+
-	//textAreaStyle ="";
-	
+
 	var textAreaStyle = typeof AddCodeMirror == 'function'?'opacity:0':'';
 	 $("#content").append('<div id="rawDef">'+
           '<textarea id="td_rawDef" rows="25" cols="60" style="width:99%; '+
@@ -2183,16 +2140,353 @@ function raw1(data)
 	
 	data='defmod '+devicename+' MSwitch HEX '+data;
 	document.getElementById('td_rawDef').value=data;
-	
-	
-/* 	var einzufuegendesObjekt = document.createElement("a");
-einzufuegendesObjekt.href = "http://www.html-seminar.de";
-einzufuegendesObjekt.innerHTML = "Tutorial für HTML, CSS und JavaScript";
-einzufuegendesObjekt.style.backgroundColor = "#FFFF00";
-document.body.appendChild(einzufuegendesObjekt);
- */
 
     $('html, body').animate({ scrollTop: $("#rawDef").offset().top}, 100);
-	
 	return;
 }
+
+
+function showedit(data)
+{
+	//alert(data);
+	field=data+"-EDIT";
+	field1=data+"-PLAIN";
+	field2=data+"-BUTTON";
+	field3=data+"-SAVE";
+
+	if( $("#"+field3).val() =="empty" ) {
+	inhalt = generatesaved(data);
+	$("#"+field3).val(inhalt);
+	}
+
+	$("[name="+field+"]").css("display","");
+	$("[name="+field1+"]").css("display","none");
+	
+	newname  = $("#"+field2).attr('text1');
+	//alert(newname);
+	document.getElementById(field2).value=newname;
+	
+	check = "javascript: hideedit(\""+data+"\") ";
+	$("[name="+field2+"]").attr('onClick', check);
+	field10=data+"-SAVE-BUTTON";
+	$("#"+field10).css("display","none");
+	return;
+
+}
+
+function hideedit(data)
+{
+	
+	field=data+"-EDIT";
+	field1=data+"-PLAIN";
+	field2=data+"-BUTTON";
+	field3=data+"_plain1";
+	field6=data+"_plain2";
+
+	$("[name="+field+"]").css("display","none");
+	$("[name="+field1+"]").css("display","block");
+
+	newname  = $("#"+field2).attr('text2');
+	document.getElementById(field2).value=newname;
+	
+	check = "javascript: showedit(\""+data+"\") ";
+	$("[name="+field2+"]").attr('onClick', check);
+	field4=data+"_on";
+	inhalt1 = "CMD1: "+$('#'+field4+'').val();
+	field5="cmdonopt"+data+"1";
+    inhalt2 = $('#'+field5+'').val();
+	newinhalt = inhalt1+" "+inhalt2;
+	field4=data+"_off";
+	inhalt1 = "CMD2: "+$('#'+field4+'').val();
+	field5="cmdoffopt"+data+"1";
+    inhalt2 = $('#'+field5+'').val();
+	newinhalt1 = inhalt1+" "+inhalt2;
+	
+	
+devicetypetest = $("[name=devicename"+data+"]").val();
+let result = devicetypetest.match(/FreeCmd-AbsCmd.*/ig);
+
+if( result == null ) 
+	{	
+		$("#"+field3+"").text(newinhalt);
+		$("#"+field6+"").text(newinhalt1);
+	}
+	else
+	{
+		cmdonopt=$("[name=cmdonopt"+data+"]").val();	
+		cmdoffopt=$("[name=cmdoffopt"+data+"]").val();
+		textbreak = $("#"+field3+"").attr('cut');
+
+		if ( cmdonopt.length > textbreak)
+		{
+			$("#"+field3+"").text(""+$("#"+field3+"").attr('text'));
+		}
+		else{
+			$("#"+field3+"").text("CMD1: cmd "+cmdonopt);
+		}
+		
+		if ( cmdoffopt.length > textbreak)
+		{
+			$("#"+field6+"").text(""+$("#"+field3+"").attr('text'));
+		}
+		else{
+			$("#"+field6+"").text("CMD2: cmd "+cmdoffopt);
+		}
+	}
+	
+	var inhalt = generatesaved(data);
+	var testfeld=data+"-SAVE";
+	var testinhalt =$("#"+testfeld).val();
+//testinhalt = testinhalt.replace(/[^0-9a-zA-Z]/g, "");
+//FW_okDialog(testinhalt+'<br>&nbsp;<br>'+inhalt);
+	if( testinhalt != inhalt ) {
+	field10=data+"-SAVE-BUTTON";
+	$("#"+field10).css("display","block");
+	}
+return;
+}
+
+
+function instconf()
+{
+//alert("conf");
+
+	var nm = devicename;
+	var def = nm+' createconf ';
+	location = location.pathname+'?detail='+devicename+'&cmd=set '+addcsrf(def);
+	return;
+
+
+
+return;
+
+}
+
+
+
+function openconf()
+{
+	//alert(CONFIGD);
+	
+	var nm = CONFIGD;
+	
+	
+	var co = location.pathname+'?detail='+nm;
+	
+
+//alert(co);
+
+window.open(co);
+  
+return;
+
+
+
+}
+
+
+
+function Fullinf(data)
+{
+condon=$("#conditionon"+data+"").val();
+condoff=$("#conditionoff"+data+"").val();
+cmd1=$("#"+data+"_plain1").text();
+cmd2=$("#"+data+"_plain2").text();
+onatdelay1=$("[name=onatdelay"+data+"] option:selected").text();
+onatdelay2=$("#timeseton"+data).val();
+offatdelay1=$("[name=offatdelay"+data+"] option:selected").text();
+offatdelay2=$("#timesetoff"+data).val();
+repeatcount=$("[name=repeatcount"+data+"]").val();
+repeattime=$("[name=repeattime"+data+"]").val();
+
+devicetypetest = $("[name=devicename"+data+"]").val();
+let result = devicetypetest.match(/FreeCmd-AbsCmd.*/ig);
+
+if( result == null ) 
+	{	
+condon=$("#conditionon"+data+"").val();
+condoff=$("#conditionoff"+data+"").val();
+	}
+	else
+	{
+		condon=$("[name=cmdonopt"+data+"]").val();	
+		condoff=$("[name=cmdoffopt"+data+"]").val();
+	}
+
+text="<table width='100%' border='0'>";
+text="<tr>";
+text+="<td>Cmd1:&nbsp;</td>";
+text+="<td>"+cmd1+"</td>";
+text+="</tr>"
+text+="<td>Cmd2:&nbsp;</td>";
+text+="<td>"+cmd2+"</td>";
+text+="</tr>"
+text+="<td>Condition1:&nbsp;</td>";
+text+="<td>"+condon+"</td>";
+text+="</tr>";
+text+="<td>Condition2:&nbsp;</td>";
+text+="<td>"+condoff+"</td>";
+text+="</tr>";
+text+="<td>delay1:&nbsp;</td>";
+text+="<td>"+onatdelay1+" "+onatdelay2+"</td>";
+text+="</tr>";
+text+="<td>delay2:&nbsp;</td>";
+text+="<td>"+offatdelay1+" "+offatdelay2+"</td>";
+text+="</tr>";
+text+="<td>repeats:&nbsp;</td>";
+text+="<td>"+repeatcount+"</td>";
+text+="</tr>";
+text+="<td>repeats sec:&nbsp;</td>";
+text+="<td>"+repeattime+"</td>";
+text+="</tr>";
+text+="</table>";
+FW_okDialog(text);
+return;	
+}
+
+function generatesaved(data)
+{
+	
+devicetypetest = $("[name=devicename"+data+"]").val();
+let result = devicetypetest.match(/FreeCmd-AbsCmd.*/ig);
+if( result == null ) 
+	{
+	condon=$("#conditionon"+data+"").val();
+	condoff=$("#conditionoff"+data+"").val();
+	cmd1=$("#"+data+"_plain1").text();
+	cmd2=$("#"+data+"_plain2").text();
+	showreihe=$("[name=showreihe"+data+"] option:selected").text();
+	idreihe=$("[name=idreihe"+data+"] option:selected").text();
+	prioreihe=$("[name=reihe"+data+"] option:selected").text();
+	onatdelay1=$("[name=onatdelay"+data+"] option:selected").text();
+	onatdelay2=$("#timeseton"+data).val();
+	offatdelay1=$("[name=offatdelay"+data+"] option:selected").text();
+	offatdelay2=$("#timesetoff"+data).val();
+	repeatcount=$("[name=repeatcount"+data+"]").val();
+	repeattime=$("[name=repeattime"+data+"]").val();
+	//cmdonopt=$("[name=cmdonopt"+data+"]").text();
+	data1 = "ID:"+idreihe+"_Anzeige:"+showreihe+"_Prio"+prioreihe+"_"+condon+condoff+cmd1+cmd2+onatdelay1+offatdelay1+onatdelay2+offatdelay2+repeatcount+repeattime;
+	}
+	else
+	{
+	cmdonopt=$("[name=cmdonopt"+data+"]").val();
+	cmdoffopt=$("[name=cmdoffopt"+data+"]").val();
+	showreihe=$("[name=showreihe"+data+"] option:selected").text();
+	idreihe=$("[name=idreihe"+data+"] option:selected").text();
+	prioreihe=$("[name=reihe"+data+"] option:selected").text();
+	onatdelay1=$("[name=onatdelay"+data+"] option:selected").text();
+	onatdelay2=$("#timeseton"+data).val();
+	offatdelay1=$("[name=offatdelay"+data+"] option:selected").text();
+	offatdelay2=$("#timesetoff"+data).val();
+	repeatcount=$("[name=repeatcount"+data+"]").val();
+	repeattime=$("[name=repeattime"+data+"]").val();
+	data1 = "ID:"+idreihe+"_Anzeige:"+showreihe+"_Prio"+prioreihe+"_"+cmdonopt+cmdoffopt+onatdelay1+offatdelay1+onatdelay2+offatdelay2+repeatcount+repeattime;
+	}
+	data1 = data1.replace(/[^0-9a-zA-Z]/g, "");
+return data1;
+}
+
+
+function testfeld(data)
+{
+	alert($("[name=cmdonopt"+data+"]").val());	
+	$("[name=cmdonopt"+data+"]").val("changed");
+	
+return;	
+}
+
+
+function editall()
+{
+ $.each( $("[name$='-BUTTON']"), function (key) {
+  var feld = this.id;
+  feld = feld.replace(/-BUTTON/g, "");
+  showedit(feld);
+  return;
+  
+});
+return;
+}
+
+function closeall()
+{
+ $.each( $("[name$='-BUTTON']"), function (key) {
+  var feld = this.id;
+  var tfeld = feld.replace(/-BUTTON/g, "");
+  var field1=tfeld+"-PLAIN";
+  var css =$("[name="+field1+"]").css('display');
+  if (css == 'none'){
+  hideedit(tfeld);
+  }
+  return;
+});
+return;
+}
+
+
+function forum()
+{
+	cmd ='get '+devicename+' support_info ';
+	FW_cmd(FW_root+'?cmd='+encodeURIComponent(cmd)+'&XHR=1');
+	return;
+}
+
+
+function execbottomline(data)
+{
+ if (data == 'rawDef'){
+	 raw();
+	$('#moreCmds option').removeAttr('selected');
+ }
+  if (data == 'reset'){
+	 reset('check')
+	$('#moreCmds option').removeAttr('selected');
+ }
+}
+
+
+
+function str2hex(arg){
+
+	var result = "";
+    for (i=0; i<arg.length; i++) {
+        hex = arg.charCodeAt(i).toString(16);
+        result += ("0"+hex).slice(-2)+" ";
+    }
+	
+/* 	
+2021.10.23 17:32:50 0:ä Ã¤ -> c3 a4 
+2021.10.23 17:32:50 0:ö Ã¤ -> c3 b6 
+2021.10.23 17:32:50 0:ü Ã¤ -> c3 bc 
+2021.10.24 06:03:46 0:Ä Ã„ -> c3 84   c4
+2021.10.24 06:03:46 0:Ö Ã– -> c3 96   d6
+2021.10.24 06:03:46 0:Ü Ãœ -> c3 9c   dc
+2021.10.24 06:03:46 0:ß ÃŸ -> c3 9f    df*/   
+
+	result = result.replace(/e4/g,'c3 a4');
+	result = result.replace(/f6/g,'c3 b6');
+	result = result.replace(/fc/g,'c3 bc');
+	result = result.replace(/c4/g,'c3 84');
+	result = result.replace(/d6/g,'c3 96');
+	result = result.replace(/dc/g,'c3 9c');
+	result = result.replace(/df/g,'c3 9f');
+	
+	
+	result = result.replace(/ /g,'');
+
+return result;
+}
+
+
+function hext2str(arg){
+	
+	var j;
+    var hexes = arg.match(/.{1,2}/g) || [];
+    var result = "";
+    for(j = 0; j<hexes.length; j++) {
+        result += String.fromCharCode(parseInt(hexes[j], 16));
+    }
+	return result;
+}
+
+
