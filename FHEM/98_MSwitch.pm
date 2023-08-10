@@ -79,7 +79,7 @@ my $backupfilen= "restoreDir";
 my $restoredirn= "restoreDir"; 
 
 my $support      = "Support Mail: Byte009\@web.de";
-my $autoupdate   = 'off';                                 # off/on
+my $autoupdate   = 'on';                                 # off/on
 my $version      = '7.5';                               # version
 my $wizard       = 'on';                                 # on/off   - not in use
 my $importnotify = 'on';                                 # on/off   - not in use
