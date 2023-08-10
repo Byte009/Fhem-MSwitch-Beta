@@ -1011,17 +1011,41 @@ function startimportpreconf(){
 
 function startimportpreconf1(data){
 	preconf = data;
+	
 	preconfparts = preconf.split("#-NEXT-");
+	
+	
+	
+	
 	var anzahl = preconfparts.length;
 	var count =0;
 	for (i=count; i<anzahl; i++)
 		{
+			
+		//alert(i);	
+			
 		treffer = preconfparts[i].match(/#NAME.(.*?)(#\[NEWL\])/);
 		help = preconfparts[i].match(/#HELP.(.*?)(#\[NEWL\])/);
+		//alert(treffer);
+		
+		
+		if (treffer == null) { 
+		
+	
+		continue;
+		}
+		
 		preconfparts[i] = (preconfparts[i].split(treffer[0]).join(''));
+		
+		
 		preconfparts[i] = (preconfparts[i].split(help[0]).join(''));
+		
+		
 		preconfparts[i] = preconfparts[i].replace(/#\[NEWL\]/gi,"\n");
+		
+		
 		preconfpartsname.push(treffer[1]);
+		
 		preconfpartshelp.push(help[1]); 
 		}
 
