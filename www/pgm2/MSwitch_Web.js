@@ -1710,12 +1710,25 @@ if (debug == 'on'){ alert('savesys') };
 	conf = conf.replace(/\t/g,'#[tab]');
 	 */
 	
-	conf=str2hex(conf);
+	
+	conf = conf.replace(/&nbsp;/g,'&#160')
+	
 	//alert(conf);
+	
+	//return;
+	conf=str2hex(conf);
+	
+	
+	
+	//
 	
 	
 	var nm = $(t).attr("nm");
 	var  def = nm+" savesys "+encodeURIComponent(conf);
+	
+	
+	var  def = nm+" savesys "+conf;
+	
 	location = location.pathname+"?detail="+devicename+"&cmd=set "+addcsrf(def);
 	}
 
