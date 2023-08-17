@@ -2360,6 +2360,11 @@ sub MSwitch_Set_ChangeRenamed($@) {
     my $changestring = $args[0] . "#" . $args[1];
     my $oldname      = $args[0];
     my $newname      = $args[1];
+	
+	my @found_devices = devspec2array("TYPE=MSwitch:FILTER=.msconfig=1");
+	
+	if $found_devices[0] eq $name;
+	
     ($oldname) =~ s/(.|\n)/sprintf("%02lx ", ord $1)/eg;
     $oldname =~ s/ //g;
     ($newname) =~ s/(.|\n)/sprintf("%02lx ", ord $1)/eg;
@@ -2370,12 +2375,13 @@ sub MSwitch_Set_ChangeRenamed($@) {
 
     MSwitch_restore_this( $hash, 'configfile' );
 
-    my @found_devices = devspec2array("TYPE=MSwitch:FILTER=.msconfig=1");
-    if ( @found_devices > 0 ) {
+
+
+   if ( @found_devices > 0 ) {
         FW_directNotify(
             "FILTER=$found_devices[0]",
             "#FHEMWEB:WEB",
-            "information('Device \"$name\" angepasst ($args[0]->$args[1])...')",
+            "information('Device $name angepasst')",
             ""
         );
     }
@@ -3297,6 +3303,10 @@ sub MSwitch_Set($@) {
         return $ret;
     }
 	
+	if ( $cmd eq 'deletefiles' ) {
+       my $ret = MSwitch_Set_deletefiles( $hash, $name, $cmd, @args );
+        return $ret;
+    }
 	
 	
 	
@@ -3368,6 +3378,12 @@ sub MSwitch_Set($@) {
         my $ret = MSwitch_fullrestorelocal( $hash, $args[0] );
         return $ret;
     }
+	
+	   if ( $cmd eq 'uploadlocal' ) {
+        my $ret = MSwitch_uploadlocal( $hash, @args);
+        return $ret;
+	   }
+	
     if ( $cmd eq 'getbackup' ) {
         my $ret = MSwitch_Get_Backup($hash);
         return $ret;
@@ -13785,12 +13801,11 @@ sub MSwitch_checktrigger_new(@) {
 
 ################
 
-    if ( $eventcopy =~ m/^$triggerfield/ ) {
+    if ( $eventcopy =~ m/^$triggerfield/ ) 
+	{
         $answer = "wahr";
-		
-	MSwitch_LOG( $ownName, 6, "-> checktrigger answer = wahr  L:" . __LINE__ );	
-	MSwitch_LOG( $ownName, 6, "-> event: $eventcopy - triggerfeld: $triggerfield  L:" . __LINE__ );		
-		
+		MSwitch_LOG( $ownName, 6, "-> checktrigger answer = wahr  L:" . __LINE__ );	
+		MSwitch_LOG( $ownName, 6, "-> event: $eventcopy - triggerfeld: $triggerfield  L:" . __LINE__ );			
     }
 
     if (   $zweig eq 'on'
@@ -13826,229 +13841,10 @@ sub MSwitch_VersionUpdate($) {
     my $Name    = $hash->{NAME};
     my $message = "";
     $message .= "MSwitch-Strukturupdate -> Autoupdate fuer MSwitch_Device $Name  \n";
-
-
-
-
-
-    # $message.="     -> Backup wird angelegt \n";
-	
-	
-	# my $pfad =  AttrVal( 'global', 'backupdir', $restoredirn ) ;
-# $pfad.="/MSwitch/";
-
-# if(-d $pfad) {  
-               # # nichtvorhanden  
-        # }  
-        # else {  
-             # mkdir($pfad ,0777);
-        # }
-	
-	# open( BACKUPDATEI, ">" . $pfad . "MSwitch_Save.txt" );
-	
-	
-	
-    # mkdir($backupfile,0777);
-    # $backupfile = "backup/MSwitch/Versionsupdate/";
-    # mkdir($backupfile,0777);
-
-    # my $oldversion=ReadingsVal( $Name, '.V_Check', 'V0.0' );
-    # my $testreading = $hash->{READINGS};
-    # my @areadings   = ( keys %{$testreading} );
-
-    # open( BACKUPDATEI, ">".$backupfile.$Name.".".$oldversion.".conf" );
-    # print BACKUPDATEI "#N -> $Name\n";
-	
-    # foreach my $key (@areadings) {
-    # next if $key eq "last_exec_cmd";
-
-    # my $tmp = ReadingsVal( $Name, $key, 'undef' );
-    # print BACKUPDATEI "#S $key -> $tmp\n";
-    # }
-    # #my %keys;
-    # foreach my $attrdevice ( keys %{ $attr{$Name} } )
-    # {
-    # my $inhalt = "#A $attrdevice -> " . AttrVal( $Name, $attrdevice, '' );
-    # $inhalt =~ s/\n/#[nla]/g;
-    # print BACKUPDATEI $inhalt . "\n";
-    # }
-    # close(BACKUPDATEI);
-
-
-
-
-
-
-
-
-# if (1 == 2){
-# my $triggerchange=ReadingsVal( $Name, 'Trigger_device', 'changed' );
-# if ($triggerchange ne "changed")
-# {
-# readingsSingleUpdate( $hash, ".Trigger_device", $triggerchange, 0 ) ;.Device_Events
-# $message.="     -> Readingaenderung Trigger_device-> .Trigger_device -> Trigger: $triggerchange \n";
-# $message.="     -> Reading -> Trigger_device bleibt erhalten (Downgrade moeglich) \n";
-# }
-
-    #my $oldtimer = ReadingsVal( $Name, '.Trigger_time', 'undef' );
-
-    # if ( $oldtimer ne "undef" )
-    # {
-    # $oldtimer =~ s/^\s+//;
-    # $oldtimer =~ s/#\[dp\]/:/g;
-    # $oldtimer =~ s/~offonly/~/ig;
-    # $oldtimer =~ s/~ononly/~/ig;
-    # $oldtimer =~ s/~off/~/ig;
-    # $oldtimer =~ s/^on//ig;
-    # $oldtimer =~ s/~onoffonly/~/ig;
-
-    # # aufteilung in einzeltimer
-    # ################################################
-    # $oldtimer =~ s/\$SELF/$Name/g;
-    # my @timer = split /~/, $oldtimer;
-    # $timer[0] = '' if ( !defined $timer[0] );    #on
-    # $timer[0] = '' if ( $timer[0] eq "on");    #on
-    # $timer[1] = '' if ( !defined $timer[1] );    #off
-    # $timer[2] = '' if ( !defined $timer[2] );    #cmd1
-    # $timer[3] = '' if ( !defined $timer[3] );    #cmd2
-    # $timer[4] = '' if ( !defined $timer[4] );    #cmd1+2
-
-    # my $count=0;
-    # my $write =0;
-    # NEXTTIMER: foreach my $option (@timer)
-    # {
-    # $count++;
-    # next NEXTTIMER if $option eq "";
-
-    # my $key = '\]\[';
-    # $option =~ s/$key/ /ig;
-    # $key = '\[';
-    # $option =~ s/$key//ig;
-    # $key = '\]';
-    # $option =~ s/$key//ig;
-
-    # my @einzeltimer = (split(" ",$option));
-
-# my $final="";
-# foreach my $einzelt (@einzeltimer) #starte timerline
-# {
-# $einzelt =~ s/ //ig;
-# next if $einzelt eq "";
-# next if length($einzelt) < 5;
-# my @einzelparts =  split /\|/,$einzelt;
-# my $partnumber = 0;
-# my $newfirst="";
-# my $newdays="";
-# my $weekend="";
-# my $newid="";
-# foreach my $part (@einzelparts)  #starte einzeltimer
-# {
-# $partnumber++;
-# if ($partnumber ==1) #eigentliche timerangabe
-# {
-# if ( $part =~m/\?(.*)(-)([0-9]{2}:[0-9]{2})(\|[0-9]{0,7})?(.*)?/ )
-# {
-# $newfirst="RANDOM=".$part;
-# $newfirst =~ s/\?//ig;
-# # suche naxh random
-# }
-# elsif ($part =~m/(.*?)([0-9]{2}):([0-9]{2})\*([0-9]{2}:[0-9]{2})-([0-9]{2}:[0-9]{2})/)
-# {
-# # suche naxh repeat
-# #00:05*04:30-05:30
-# $newfirst = "REPEAT=$part";
-# }
-# else
-# {
-# # firstpart = TIMER
-# $newfirst = "TIME=$part";
-# }
-# next;
-# }
-
-    # if ( $part =~m/ID.*$/ )
-    # {
-    # # found ID
-    # my @id=split //,$part;
-    # shift (@id);
-    # shift (@id);
-    # $newid = join ",",@id;
-    # $newid = "ID=".$newid;
-    # }
-
-    # if ( $part =~m/^[1-7]{1,7}$/ )
-    # {
-    # # found days
-    # my @days=split //,$part;
-    # $newdays = join ",",@days;
-    # $newdays = "WDAY=".$newdays;
-    # }
-
-    # if ( $part =~m/^!\$we/ )
-    # {
-    # # found weekend
-    # $weekend = "WEEKEND=0";
-    # }
-
-    # if ( $part =~m/^\$we/ )
-    # {
-    # # found weekend
-    # $weekend = "WEEKEND=1";
-    # }
-    # } # ende einzelparts
-
-    # $final.= join("|",$newfirst,$newdays,$weekend,$newid);
-    # $final =~ s/\|\|\|/|/ig;
-    # $final =~ s/\|\|/|/ig;
-    # $final =~ s/\|.\|/|/ig;
-    # $final =~ s/\|$//ig;
-    # $final.="[NEXTTIMER]";
-    # } # ende timerline
-
-    # $final = substr( $final,0,(length($final)-11));
-    # next if length($final) <5;
-    # $write++;
-    # readingsSingleUpdate( $hash, ".Trigger_time_$count", $final, 0 );
-    # $message.="     -> NewtimerReading ($count): $final \n";
-    # }
-
-    # readingsSingleUpdate( $hash, ".V_Check", $vupdate, 0 );
-    # MSwitch_Createtimer($hash);
-
-# if ($write >0)
-# {
-# $message.="     -> Oldtimer: $oldtimer \n";
-# $message.="     -> Timerdaten des Devices $Name wurden an Strukturversion $vupdate anepasst. \n";
-# $message.="     -> Reading -> .Trigger_time bleibt erhalten (Downgrade moeglich)\n";
-# }
-# else
-# {
-# $message.="     -> Fehler in Formatierung gefunden (evt. ueberfluessige Leerzeichen): [$oldtimer] \n";
-# $message.="     -> keine Timer-Anpassung notwendig, ein Formatierungsfehler behoben\n";
-# $message.="     -> Reading -> .Trigger_time bleibt erhalten (Downgrade moeglich)\n";
-# }
-# }
-# else
-# {
-# $message.="     -> keine Timer-Anpassung notwendig\n";
-# readingsSingleUpdate( $hash, ".V_Check", $vupdate, 0 );
-# }
-
-    # $message.="     -> nicht benoetigte Readings werden geloescht \n";
-    # fhem("deletereading $Name Trigger_device");
-    # fhem("deletereading $Name .Trigger_time");
-    #}
-
-
-
-
-   my $test = ReadingsVal( $Name, '.Device_Affected_Details', 'no_device' );
-
+	my $test = ReadingsVal( $Name, '.Device_Affected_Details', 'no_device' );
 
 	if ($test ne "no_device"){
-		
 	$message.="     -> Anpassung der .Device_Affected_Details_new fuer $Name \n";
-		
 		
 	$test =~ s/#\[dp\]/:/g;
 	$test =~ s/#\[pt\]/./g;
@@ -14059,24 +13855,15 @@ sub MSwitch_VersionUpdate($) {
     $test =~ s/#\[ko\]/,/g;     #neu
     $test =~ s/#\[bs\]/\\/g;    #neu
 		
-		
-		delete $data{MSwitch}{$Name}{Device_Affected_Details};
-		readingsSingleUpdate( $hash, ".Device_Affected_Details_new", MSwitch_Hex($test), 1 );
-		
-		
-		
-		
-		fhem("deletereading $Name .Device_Affected_Details");
+	delete $data{MSwitch}{$Name}{Device_Affected_Details};
+	readingsSingleUpdate( $hash, ".Device_Affected_Details_new", MSwitch_Hex($test), 1 );	
+	fhem("deletereading $Name .Device_Affected_Details");
 	}
 
+	my $test1 = ReadingsVal( $Name, '.sysconf', 'no_device' );
 
-   my $test1 = ReadingsVal( $Name, '.sysconf', 'no_device' );
-
-if ($test1 ne "no_device"){
-	
-	
+	if ($test1 ne "no_device"){
 	$message.="     -> Anpassung der .sysconf fuer $Name \n";
-	
 	    $test1 =~ s/#\[tr\]/[tr]/g;
         $test1 =~ s/#\[wa\]/|/g;
         $test1 =~ s/#\[sp\]/ /g;
@@ -14090,10 +13877,8 @@ if ($test1 ne "no_device"){
         $test1 =~ s/\[tr\]/#[tr]/g;
 
 	readingsSingleUpdate( $hash, ".sysconf", MSwitch_Hex($test1), 1 );
-	#fhem("deletereading $Name .Device_Affected_Details");
+	fhem("deletereading $Name .Device_Affected_Details");
 }
-
-
 
 
     my $triggercondition = ReadingsVal( $Name, '.Trigger_condition', '' );
@@ -14115,18 +13900,8 @@ if ($test1 ne "no_device"){
 	readingsSingleUpdate( $hash, ".Device_Events", "no_trigger", 0 );
 	
 	MSwitch_LOG( $Name, 0,$message );
- 
     return;
-
 }
-
-
-
-
-#########################################
-
-
-
 
 ########################################
 sub MSwitch_restore_this($$) {
@@ -14137,35 +13912,22 @@ sub MSwitch_restore_this($$) {
     my $Zeilen  = ("");
     my $aktname = $hash->{NAME};
    
-
 	my $pfad =  AttrVal( 'global', 'backupdir', $restoredirn ) ;
 	$pfad.="/MSwitch/";
 	my $ret = "MSwitch $Name restored.\nPlease refresh device.";
-
-
-
 	$Zeilen = $data{MSwitch}{$Name}{backupdatei};
-
-
-
 
  if ( $arg eq "configdevice" ) 
  {
-	 #$Name="MSwitch_Config";
-	 $aktname = "MSwitch_Config";
-	 
-	 
-	  #my $error = AnalyzeCommand( $hash, "delete " . $aktname );
-      my $error1 = AnalyzeCommand( $hash, "define " . $aktname . " mswitch" );
-
-            if ( defined($error1) ) {
+	$aktname = "MSwitch_Config";
+    my $error1 = AnalyzeCommand( $hash, "define " . $aktname . " mswitch" );
+    if ( defined($error1) ) {
                 my $encoded = urlEncode($error1);
                 FW_directNotify( "FILTER=$Name", "#FHEMWEB:WEB",
                     "information('!!! Fehler aufgetreten: $encoded')", "" );
                 
-            }
-	 
-	 
+        }
+
 	 
 	if ( open( HELP, "<./$conffile" ) ) 
 	{
@@ -14175,19 +13937,13 @@ sub MSwitch_restore_this($$) {
     close(HELP);
 	}
 	$ret = "MSwitch_Configdefice $Name wurde installiert.";
- }
-
-
-
+	}
 
 
     if ( $arg eq "configfile" ) {
         $Zeilen = $data{MSwitch}{$Name}{backupdatei};
         $data{MSwitch}{$Name}{backupdatei} = "";
     }
-
-
-	
 
     if ( $arg eq "backupfile" ) {
         open( BACKUPDATEI,
@@ -14199,12 +13955,7 @@ sub MSwitch_restore_this($$) {
         close(BACKUPDATEI);
     }
 
-
-
-
-	 $Zeilen=MSwitch_Asc($Zeilen);
-	
-	
+	$Zeilen=MSwitch_Asc($Zeilen);
     my $backupdatei = $Zeilen;
     my @found = split( /\n/, $backupdatei );
 
@@ -14224,11 +13975,6 @@ sub MSwitch_restore_this($$) {
 
         if ( $_ =~ m/#S (.*?) -> (.*)/ )    # setreading
         {
-
-
-
-
-
             next if $1 eq "last_exec_cmd";
             next if $1 eq "EVTPART1";
             next if $1 eq "EVTPART2";
@@ -14239,11 +13985,6 @@ sub MSwitch_restore_this($$) {
             next if $1 eq "Next_Timer";
             next if $1 eq "last_event";
 
-
-
-#MSwitch_LOG( $Name, 0,"---->   -$1- " );
-
-
             if ( $2 eq 'undef' || $2 eq '' || $2 eq ' ' ) 
 			{
             }
@@ -14252,19 +13993,11 @@ sub MSwitch_restore_this($$) {
                 my $reading = $1;
                 $Zeilen1 =~ s/#\[nl\]/\n/g;
 				
-				
-			
-				
-				
-				
 				if ($reading eq ".Device_Affected_Details_new" || $reading eq ".sysconf" || $reading eq ".Trigger_condition")
 				{
 					$Zeilen1=MSwitch_Hex($Zeilen1);
 				}
-				
-				
-				
-				
+
                 my $cs = "setreading $aktname $reading $Zeilen1";
                 my $errors = AnalyzeCommandChain( undef, $cs );
                 if ( defined($errors) ) {
@@ -14278,9 +14011,7 @@ sub MSwitch_restore_this($$) {
         }
     }
 
-		delete $data{MSwitch}{$Name}{Device_Affected_Details};
-
-
+	delete $data{MSwitch}{$Name}{Device_Affected_Details};
 
     if ( $arg eq "configfile" ) {
         return;
@@ -14289,12 +14020,8 @@ sub MSwitch_restore_this($$) {
 	if ( $arg eq "configdevice" ) {
         return;
     }
-
-
-
+	
     MSwitch_LoadHelper($hash);
-	
-	
     return $ret;
 }
 
@@ -14324,9 +14051,6 @@ sub MSwitch_backup_this($$) {
         $modus = "getraw";
     }
 
-
-
-
     my %keys;
     my $INFO = "";
     my $BD   = "#T -> Einzelrestore\n";
@@ -14345,7 +14069,6 @@ sub MSwitch_backup_this($$) {
         next if $key eq "Next_Timer";
         next if $key eq "last_ID";
 		
-		
         my $tmp = ReadingsVal( $Name, $key, 'undef' );
 		
 		if (
@@ -14354,16 +14077,12 @@ sub MSwitch_backup_this($$) {
 				$key eq ".Trigger_condition"
 				)
 				{
-					$tmp=MSwitch_Asc($tmp);
-					
+					$tmp=MSwitch_Asc($tmp);	
 				}
 		
         $tmp =~ s/\n/#[nl]/g;
         $BD .= "#S $key -> $tmp\n";
     }
-
-
-
 
     if ( $modus ne "undo" and $modus ne "getraw" and $modus ne "cleanup" )
 	{
@@ -14374,34 +14093,18 @@ sub MSwitch_backup_this($$) {
             $inhalt =~ s/\n/#[nl]/g;
             $BD .= $inhalt . "\n";
         }
-        #($BD) =~ s/(.|\n)/sprintf("%02lx ", ord $1)/eg;
-        #$BD =~ s/ //g;
+
 		$BD = MSwitch_Hex($BD);	
     }
-
-
-
 
     if ( $modus eq "rename" ) 
 	{
         return $BD;
     }
 
-
-
 #############
     # modus getconfig
     if ( $modus eq "config" ) {
-
-        # my $ret = asyncOutput( $hash->{CL},
-# "<html><center> Bei Supportanfragen bitte untenstehene Datei anhängen, das erleichtert Anfragen erheblich.<br>&nbsp;<br><textarea name=\"edit1\" id=\"edit1\" rows=\""
-              # . "30\" cols=\"200\" STYLE=\"font-family:Arial;font-size:9pt;\">"
-              # . $BD
-              # . "</textarea><br></html>" );
-			  
-			  
-			  
-			  
 			asyncOutput( $hash->{CL},
 			"<html><center>Configfile kann über den Wizard eingespielt werden.<br>"
 			."<input type=\"button\" value=\"Copy to Clipboard\" "
@@ -14416,16 +14119,7 @@ sub MSwitch_backup_this($$) {
           . $BD
           . "</textarea><br></html>" );
     return;
-			  
-			  
-			  
-			  
-	
     }
-
-
-
-
 
     if ( $modus eq "undo" ) 
 	{
@@ -14583,19 +14277,16 @@ sub MSwitch_FullBackup(@) {
             my $tmp = ReadingsVal( $testdevice, $key, 'undef' );
            
 
-if (
+			if (
 				$key eq ".Device_Affected_Details_new" ||
 				$key eq ".sysconf"||
 				$key eq ".Trigger_condition"
 				)
 				{
-					$tmp=MSwitch_Asc($tmp);
-					
+					$tmp=MSwitch_Asc($tmp);	
 				}
 
-
-
-		   $tmp =~ s/\n/#[nl]/g;
+			$tmp =~ s/\n/#[nl]/g;
             $BD .= "#S $key -> $tmp\n";
         }
 
@@ -14614,10 +14305,6 @@ if (
             );
         }
     }
-
- #   ($BD) =~ s/(.|\n)/sprintf("%02lx ", ord $1)/eg;
-  #  $BD =~ s/ //g;
-
 
 $BD = MSwitch_Hex($BD);
 
@@ -14683,9 +14370,8 @@ sub MSwitch_Get_Backup_inhalt(@) {
     my $string = $arg1;
     my $Zeilen = "";
 	
-	
 	my $pfad =  AttrVal( 'global', 'backupdir', $restoredirn ) ;
-$pfad.="/MSwitch/";
+	$pfad.="/MSwitch/";
     open( BACKUPDATEI, "<" . $pfad . $string )
       || return "no Backupfile found!";
     while (<BACKUPDATEI>) {
@@ -14698,7 +14384,7 @@ $pfad.="/MSwitch/";
 ####################################################
 
 sub MSwitch_fullrestorelocal(@) {
-    my ( $hash, $arg1 ) = @_;
+    my ( $hash, $arg1  ) = @_;
     my $Name   = $hash->{NAME};
     my $string = $arg1;
 
@@ -14723,6 +14409,63 @@ sub MSwitch_fullrestorelocal(@) {
 }
 
 ##############################################################################
+
+
+
+
+
+
+sub MSwitch_uploadlocal(@) 
+{
+    my ( $hash, @args  ) = @_;
+	
+	
+    my $Name   = $hash->{NAME};
+    my $string = $args[0];
+	my $filename = $args[1];
+	
+	
+	MSwitch_LOG( $Name, 0, "string  ->$string " );
+	MSwitch_LOG( $Name, 0, "filename  ->$filename " );
+	MSwitch_LOG( $Name, 0, "-------------------------------" );
+
+    if ( $string eq "makefile" ) {
+        FW_directNotify( "FILTER=$Name", "#FHEMWEB:WEB", "information(' ')",
+            "" );
+        FW_directNotify(
+            "FILTER=$Name",                                   "#FHEMWEB:WEB",
+            "information('Datei $filename wird auf Server angelegt.')", ""
+        );
+		
+		my $pfad =  AttrVal( 'global', 'backupdir', $restoredirn ) ;
+		$pfad.="/MSwitch/";
+        open( BACKUPDATEI, ">" . $pfad . $filename );
+        print BACKUPDATEI $data{MSwitch}{localbackup};
+        close(BACKUPDATEI);
+        $data{MSwitch}{localbackup} = "";
+        return;
+    }
+    $data{MSwitch}{localbackup} .= $string;
+    return;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 sub MSwitch_fullrestore(@) {
     my ( $hash, $arg1 ,$arg2) = @_;
@@ -14829,7 +14572,6 @@ sub MSwitch_fullrestore(@) {
             }
             push( @devicenames, $aktname );
         }
-
     }
 
     my $devnames = join( '|', @devicenames );
@@ -14855,7 +14597,6 @@ sub MSwitch_fullrestore(@) {
         InternalTimer( $timecond, "MSwitch_fullrestore_end", $hash );
         return;
     }
-
 }
 
 ###############################
@@ -14878,8 +14619,7 @@ sub MSwitch_fullrestore1($) {
     $notif   = " - Importiere Daten fuer $aktnametorestore";
     $encoded = urlEncode($notif);
 
-    FW_directNotify( "FILTER=$Name", "#FHEMWEB:WEB", "information('$encoded')",
-        "" );
+    FW_directNotify( "FILTER=$Name", "#FHEMWEB:WEB", "information('$encoded')","" );
 
     if ( @devices > 0 ) {
         $devnames = join( '|', @devices );
@@ -14895,8 +14635,6 @@ sub MSwitch_fullrestore1($) {
             $Zeilen =~ s/#\[nl\]/\n/g;
             $aktname = $Zeilen;
 			delete $data{MSwitch}{$aktname}{Device_Affected_Details};
-			
-			
         }
 
         if ( $aktnametorestore ne $aktname ) {
@@ -14938,7 +14676,6 @@ sub MSwitch_fullrestore1($) {
                 my $reading = $1;
                 $Zeilen1 =~ s/#\[nl\]/\n/g;
 				
-				
 				if (
 				$reading eq ".Device_Affected_Details_new" ||
 				$reading eq ".sysconf"||
@@ -14946,10 +14683,8 @@ sub MSwitch_fullrestore1($) {
 				)
 				{
 					$Zeilen1=MSwitch_Hex($Zeilen1);
-					
 				}
-				
-				
+	
                 my $cs = "setreading $aktname $reading $Zeilen1";
                 my $errors = AnalyzeCommandChain( undef, $cs );
                 if ( defined($errors) ) {
@@ -14972,22 +14707,16 @@ sub MSwitch_fullrestore1($) {
         InternalTimer( $timecond, "MSwitch_fullrestore1", $hash );
     }
     else {
-
         my $timecond = gettimeofday() + 0.1;
         InternalTimer( $timecond, "MSwitch_fullrestore_end", $hash );
-
     }
-	
-
     return;
 }
 
 ################################
 sub MSwitch_fullrestore_end($) {
-
     my ($hash) = @_;
     my $Name = $hash->{NAME};
-
     my $devnames   = $data{MSwitch}{$Name}{backupdeviceskompl};
     my @devices    = split( /\|/, $devnames );
     my $anzdevices = @devices;
@@ -15049,26 +14778,15 @@ sub MSwitch_Getsupport($) {
     my ($hash) = @_;
     my $Name   = $hash->{NAME};
     my $out    = '';
-    $out .= "Modulversion: $version\n";
-    $out .= "Datenstruktur: $vupdate\n";
-
     my $startmessage = $data{MSwitch}{startmessage};
-   #$startmessage =~ s/</\\</g;
-   # $startmessage =~ s/>/\\>/g;
-   # $startmessage =~ s/'/\\'/g;
-    #$startmessage =~ s/\n/\\n/g;
-
+	
+	$out .= "Modulversion: $version\n";
+    $out .= "Datenstruktur: $vupdate\n";
     $out .= "\n----- Systemstart -----\n";
     $out .= $startmessage;
 
     $out .= "\n----- Devicename -----\n";
     $out .= "$Name\n";
-	
-	
-	
-#$out="";
-	
-	
 	
     $out .= "\n----- Attribute -----\n";
     my %keys;
@@ -15076,18 +14794,10 @@ sub MSwitch_Getsupport($) {
     foreach my $attrdevice ( keys %{ $attr{$Name} } )    #geht
     {
         my $tmp = AttrVal( $Name, $attrdevice, '' );
-       # $tmp =~ s/</\\</g;
-       # $tmp =~ s/>/\\>/g;
-        #$tmp =~ s/'/\\'/g;
-       # $tmp =~ s/\n/#[nl]/g;
         $out .= "Attribut $attrdevice: " . $tmp . "\n";
     }
 	
-	
-#$out="";	
-	
-	
-	
+
     $out .= "\n----- Trigger -----\n";
 	
     $out .= "Trigger device:  ";
@@ -15104,7 +14814,6 @@ sub MSwitch_Getsupport($) {
     $out .= "Trigger condition: ";
     $tmp = ReadingsVal( $Name, '.Trigger_condition', 'undef' );
 	
-	#MSwitch_LOG( $Name, 0,"dets $Name tcond -> $tmp" );
 	$tmp = MSwitch_Asc($tmp) if $tmp ne "undef";
 	$tmp = "keine Triggercondition definiert " if $tmp eq "undef";
     $out .= "$tmp\n";
@@ -15138,28 +14847,14 @@ sub MSwitch_Getsupport($) {
     $out .= "\n----- Bridge Details -----\n";
     $tmp = ReadingsVal( $Name, '.Distributor', 'undef' );
 	$tmp = "keine Bridge definiert " if $tmp eq "undef";
-	
     $tmp =~ s/\n/#[nl]/g;
 
     $out .= "$tmp\n";
 
-
-#$out="";
-
-
-
     my %savedetails = MSwitch_makeCmdHash($Name);
     $out .= "\n----- Device Actions -----\n";
-	###  my @affecteddevices = split( /#\[ND\]/,ReadingsVal( $Name, '.Device_Affected_Details', 'no_device' ) );
-
 	my @affecteddevices =MSwitch_Load_Details($hash);
-
-$out .= "keine Deviceactions definiert " if @affecteddevices < 1;
- #MSwitch_LOG( $Name, 0,"affecteddevices -@affecteddevices-" );
-
- #$out = "";
-
-
+	$out .= "keine Deviceactions definiert " if @affecteddevices < 1;
     foreach (@affecteddevices) {
         my @devicesplit = split( /#\[NF\]/, $_ );
 		
@@ -15167,10 +14862,8 @@ $out .= "keine Deviceactions definiert " if @affecteddevices < 1;
         $devicesplit[5] =~ s/'/\\'/g;
         $devicesplit[1] =~ s/'/\\'/g;
         $devicesplit[3] =~ s/'/\\'/g;
-		
         $out .= "\nDevice: " . $devicesplit[0] . "\n";
 		$out .= "--------------------------------\n";
-		
 		$out .= "cmd1:\n " . $devicesplit[1] . " " . $devicesplit[3] . "\n";
 		$out .= "cmd2:\n " . $devicesplit[2] . " " . $devicesplit[4] . "\n";
         $out .= "cmd1 delay: " . $devicesplit[7] . "\n";
@@ -15202,45 +14895,15 @@ $out .= "keine Deviceactions definiert " if @affecteddevices < 1;
 	   
 	$out =~ s/-AbsCmd2//g;
 	$out =~ s/-AbsCmd1//g;
-	   
-	   
-	   
-#$out="";	   
-	   
-	   
-	   
-	 #$out .= "\n\nConfig\n";
-	 
-	 $out .= "--------------------------------\n\n";
-	 $out .=  MSwitch_backup_this( $hash, "cleanup" );
 
-
-
-	
-	
-	#$out =~ s/[^\\*\^\$\|&+-?!{}\s%A-Za-z0-9#\.\-_\t\n<>'"\/;=();:öÖäÄüÜ,\]\[]/XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX/g;
-	
-	
-	
+	$out .= "--------------------------------\n\n";
+	$out .=  MSwitch_backup_this( $hash, "cleanup" );
 	$out =~ s/\n/[NEWLINWE]/g;
 	$out =~ s/\\/&#92;/g;
 	$out =~ s/\[NEWLINWE\]/\\n/g;
-	
-	
-	
-	
 	$out =~ s/'/&#39;/g;
 	$out =~ s/"/&#34;/g;
 	$out =~ s/\//&#47/g;
-
-
-#border-color: red;
-
-
-
-
-#."style=\'text-align: center; background-color: Transparent;  font-size: 0.6em; height: 18px; width: #150px;\' "
-
 
     asyncOutput( $hash->{CL},
 			"<html><center>Bei Supportanfragen bitte untenstehene Datei anhängen.<br>"
@@ -15276,76 +14939,35 @@ sub MSwitch_Sysextension($) {
     my ($hash) = @_;
     my $Name   = $hash->{NAME};
     my $count  = 30;
-   my $out = MSwitch_Asc(ReadingsVal( $Name, '.sysconf', '' ));
+	my $out = MSwitch_Asc(ReadingsVal( $Name, '.sysconf', '' ));
 
-	# my $out = ReadingsVal( $Name,'.sysconf', 'undef' );
-	 
-	 
-	 
-    # $out =~ s/#\[sp\]/ /g;
-    # $out =~ s/#\[nl\]/\\n/g;
-    # $out =~ s/#\[se\]/;/g;
-    # $out =~ s/#\[dp\]/:/g;
-    # $out =~ s/#\[st\]/\\'/g;
-    # $out =~ s/#\[dst\]/\"/g;
-    # $out =~ s/#\[tab\]/    /g;
-    # $out =~ s/#\[ko\]/,/g;
-    # $out =~ s/#\[wa\]/|/g;
-    # $out =~ s/#\\]/\\\\/g;
-    # $out =~ s/</&lt;/g;
-    # $out =~ s/>/&gt;/g;
-	
-	#$out =~ s/\\/XXXXX/g;
-	#$out =~ s/"/XXXXX/g;
-	
-	
-	#$out =~ s/\t/    /g;
-    
-
-    #my $client_hash = $hash->{CL};
-	
-	#
-	#
-	
-#	$out =~ tr//#/cd;
-	
-	#\&nbsp;
-	
-#$out =~ s/\&/&amp/g;
-	
 #	$out =~ s/[^\\*\^\$\|&+-?!{}\s%A-Za-z0-9#\.\-_\t\n<>'"\/;=();:öÖäÄüÜ,\]\[]/XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX/g;
 	
-	
-	
-
-$out =~ s/\n/[NEWLINWE]/g;
+	$out =~ s/\n/[NEWLINWE]/g;
 	$out =~ s/\\/&#92;/g;
 	$out =~ s/\[NEWLINWE\]/\\n/g;
-	
 	$out =~ s/'/&#39;/g;
 	$out =~ s/"/&#34;/g;
 	$out =~ s/\//&#47/g;
-	
-	
-	
-	
-	#MSwitch_LOG( $Name, 0, "    "  );
-	#MSwitch_LOG( $Name, 0, "$out"  );
-	#MSwitch_LOG( $Name, 0, "      ");
-
-	#$out = "123456789";
-	
-	#$out = urlEncode($out);
-	
-    asyncOutput( $hash->{CL},
-            ""
+    $out =~ s/&#160/&#38;nbsp;/g;
+  
+  
+	asyncOutput( $hash->{CL},
+			"<html><center>Code (Html/Javascript) wird unmittelbar unter DeviceOverview eingebettet<br>"
+			."<input type=\"button\" value=\"Copy to Clipboard\" "
+			."style=\"text-align: center; background-color: Transparent;  font-size: 0.6em; height: 18px; width: #150px;\" "
+			."onclick=\" javascript:"
+			."var t = document.getElementById(\\\'sys\\\');"
+			."t.select();"
+			."document.execCommand(\\\'copy\\\');"
+			."\">"
 			
-	#	."<script type=\"text/javascript\">alert(\"test\")</script>"
-          . "<html><center>Code (Html/Javascript) wird unmittelbar unter DeviceOverview eingebettet<br><textarea name=\"sys\" id=\"sys\" rows=\""
-          . $count
-          . "\" cols=\"220\" STYLE=\"font-family:Arial;font-size:9pt;\">"
+			."&nbsp;<input type=\"button\" style=\"text-align: center; background-color: Transparent;  font-size: 0.6em; height: 18px; width: #150px;\" value=\"save changes\" onclick=\" javascript: savesys(document.querySelector(\\\'#sys\\\').value) \">"
+			
+			."<textarea name=\"sys\" id=\"sys\" rows=\""
+          . "$count\" cols=\"220\" STYLE=\"font-family:Arial;font-size:9pt;\">"
           . $out
-          . "</textarea><br><input type=\"button\" value=\"save changes\" onclick=\" javascript: savesys(document.querySelector(\\\'#sys\\\').value) \"></html>"
+          . "</textarea><br></html>"
     );
     return;
 }
@@ -15354,22 +14976,8 @@ $out =~ s/\n/[NEWLINWE]/g;
 sub MSwitch_savesys($$) {
     my ( $hash, $cont ) = @_;
     my $name = $hash->{NAME};
-   # $cont = urlDecode($cont);
-	
-	
-     # $cont =~ s/\n/#[nl]/g;
-     # $cont =~ s/\t/    /g;
-     # $cont =~ s/ /#[sp]/g;
-     # $cont =~ s/\\/#[bs]/g;
-     # $cont =~ s/,/#[ko]/g;
-     # $cont =~ s/^#\[/#[eo]/g;
-     # $cont =~ s/^#\]/#[ec]/g;
-    # $cont =~ s/\|/#[wa]/g;
-	
     if ( !defined $cont ) { $cont = ""; }
-
     if ( $cont ne '' ) {
-		
 		# daten kommen bereits hexcodiert
         readingsSingleUpdate( $hash, '.sysconf',$cont, 0 );
     }
@@ -16858,10 +16466,8 @@ sub MSwitch_reloadreadings($$) {
     #################
     my $devhash     = $defs{$arg1};           #name des devices
     my $testreading = $devhash->{READINGS};
-    my @areadings =
-      ( keys %{$testreading} );    # enthält alle readings des devices
+    my @areadings =( keys %{$testreading} );    # enthält alle readings des devices
     my $readings = join( "[|]", sort @areadings );
-
     #####################
     return $readings;
 }
@@ -16974,10 +16580,6 @@ sub MSwitch_PerformHttpRequest($$) {
                     my @mapset = split( /->/, $mapping );
                     my $org    = $mapset[0];
                     my $ers    = $mapset[1];
-
-                    ##### MSwitch_LOG $name, 6, "$org newSign -$ers-";
-
-                    #$arg =~ s/$org/$ers/g if (defined $ers);
 
                     if ( defined $ers ) {
                         $arg =~ s/$org/$ers/g;
@@ -17164,7 +16766,6 @@ sub MSwitch_Countdown_new(@) {
 
     if ( $fulltime > 0 ) {
         $hash->{helper}{countdownstatus} = "aktiv";
-
         # starte neuen timer nach $jump sekunden
         my $istzeit  = gettimeofday();
         my $diff     = $istzeit - $oldtime;
@@ -17241,14 +16842,8 @@ sub MSwitch_assoziation($){
 	my $trigger 			= ReadingsVal( $Name, '.Trigger_device', 'undef' );
 	my $triggercond 		= ReadingsVal( $Name, '.Trigger_condition', 'undef' );
 	$triggercond = MSwitch_Asc($triggercond);
-	
 	my $triggerwhitelist 	= ReadingsVal( $Name, '.Trigger_Whitelist', 'undef' );
-	
-	
-###	my @affecteddevices = split( /#\[ND\]/, ReadingsVal( $Name, '.Device_Affected_Details', 'no_device' ) );
-	
 	my @affecteddevices =  MSwitch_Load_Details($hash);
-	
 	my $conditions;
 	my $assos;
 	MSwitch_LOG( $Name, 6, "--- Execute sub MSwitch_assoziation --- L:" . __LINE__ );
@@ -17276,7 +16871,6 @@ sub MSwitch_assoziation($){
 		$assos.=$trigger." ";
 	}
 	
-
 	foreach (@affecteddevices) 
 	{
         my @devicesplit = split( /#\[NF\]/, $_ );
@@ -17317,7 +16911,6 @@ sub MSwitch_assoziation($){
 			}
 	}
 
-
 	if ($conditions ne "")
 	{
 		$conditions =~ s/#\[dp\]/:/g;
@@ -17331,8 +16924,6 @@ sub MSwitch_assoziation($){
 					$conditions =~ s/$3:$4/CHANGED/g;
 				}
 	}
-
-
 	delete $hash->{DEF};
 	$assos =~ s/$Name //g;
 	chop($assos);
@@ -17345,6 +16936,37 @@ sub MSwitch_assoziation($){
 	}
 
 ########################
+
+
+
+sub MSwitch_Set_deletefiles($@)
+{
+	my ( $hash, $name, $cmd, $arg1 ) = @_;
+
+
+my @entris = split (/,/,$arg1);
+
+my $pfad =  AttrVal( 'global', 'backupdir', $restoredirn ) ;
+$pfad.="/MSwitch/";
+
+opendir(DIR, $pfad);
+
+
+foreach (@entris){
+my $delete = $pfad.'/'.$_;
+unlink($delete);
+	}
+
+
+closedir(DIR);
+
+return;
+
+}
+
+
+########################
+
 
 sub MSwitch_Set_extractbackup($@){
 	my ( $hash, $name, $cmd, $arg1 ) = @_;
@@ -17421,6 +17043,9 @@ sub MSwitch_Set_extractbackup1($@){
 
 
 	
+	
+	
+	
 sub MSwitch_Hex($){
 	my ($savedetaills) = @_;
 	($savedetaills) =~ s/(.|\n)/sprintf("%02lx", ord $1)/eg;
@@ -17428,16 +17053,14 @@ sub MSwitch_Hex($){
 }
  
 
+
+
 sub MSwitch_Asc($){
 	my ($org)=@_;
 	
 	if ( $org =~ m/[G-Zg-z]/ ) {
-		
 		return $org; 
-		
 	}
-	
-	
 	
 	my (@test) = $org =~ m/(\w{2})/g;
     my $savedetails ="";
@@ -17447,6 +17070,9 @@ sub MSwitch_Asc($){
     }
 	return $savedetails;
 }
+
+
+
 
 sub MSwitch_Save_Details($$){
 my ($hash,$savedetails)=@_;
@@ -17470,17 +17096,12 @@ if (exists $data{MSwitch}{$Name}{Device_Affected_Details} )
 	}
 else 
 	{
-		
 	my $data = 	MSwitch_Asc($test);
 	$data{MSwitch}{$Name}{Device_Affected_Details}=$data;
 	my @testidsdev = split( /#\[ND\]/, $data  );
-	
-	
 	return @testidsdev;
 	}
-
 return;
 }
 
 1;
-
