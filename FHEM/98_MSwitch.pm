@@ -2363,7 +2363,7 @@ sub MSwitch_Set_ChangeRenamed($@) {
 	
 	my @found_devices = devspec2array("TYPE=MSwitch:FILTER=.msconfig=1");
 	
-	if $found_devices[0] eq $name;
+	return if $found_devices[0] eq $name;
 	
     ($oldname) =~ s/(.|\n)/sprintf("%02lx ", ord $1)/eg;
     $oldname =~ s/ //g;
