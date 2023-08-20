@@ -2694,7 +2694,14 @@ sub MSwitch_Set_SetTrigger($@) {
 
 	readingsSingleUpdate( $hash, ".Trigger_device", $args[0], 0 );
     my $oldtrigger = ReadingsVal( $name, '.Trigger_device', '' );
-    if ( $args[6] eq 'NoCondition' ) { $args[6] = ""; }
+	
+	
+	#MSwitch_LOG( $name, 6,"arg6 :   $args[6]".__LINE__);
+	
+	
+    #if ( $args[6] eq 'NoCondition' ) { $args[6] = "no_condition"; }
+	
+	
     # bulk
     MSwitch_LOG( $name, 6,"settrigger".__LINE__);
 	readingsBeginUpdate($hash);
@@ -13929,16 +13936,16 @@ sub MSwitch_VersionUpdate($) {
 
 #########################################
 
-	my $test2 = ReadingsVal( $Name, '.Trigger_condition', 'no_device' );
+	my $test2 = ReadingsVal( $Name, '.Trigger_condition', '' );
 	if ($test2 ne "no_device"){
 	$message.="     -> Anpassung der .Trigger_condition fuer $Name \n";
 	   
-			$test2 =~ s/#\[sp\]/ /g;				
-			$test2 =~ s/#\[dp\]/:/g;
-            $test2 =~ s/#\[pt\]/./g;
-            $test2 =~ s/#\[ti\]/~/g;
-            $test2 =~ s/#\[sp\]/ /g;
-			$test2 =~ s/#\[pt\]/./g;				
+			#$test2 =~ s/#\[sp\]/ /g;				
+			#$test2 =~ s/#\[dp\]/:/g;
+            #$test2 =~ s/#\[pt\]/./g;
+            #$test2 =~ s/#\[ti\]/~/g;
+            #$test2 =~ s/#\[sp\]/ /g;
+			#$test2 =~ s/#\[pt\]/./g;				
 	readingsSingleUpdate( $hash, ".Trigger_condition", MSwitch_Hex($test2), 1 ); 
 	
 }
