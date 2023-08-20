@@ -131,6 +131,7 @@ function teststart(){
 
 
 const shortarray1 = ['.Device_Affected_Details_new', '.sysconf', '.AttrList', '.Trigger_condition' , '.Device_Events'];
+
 for (const element of shortarray1) {
   //alert(element);
   
@@ -140,8 +141,14 @@ for (const element of shortarray1) {
 	if(disp.length > 35)
 		{
 		res = disp.substring(0,35);
+		$('div[informid="'+devicename+'-'+element+'"]').html(res+'... (gekürzt)');
 		}
-	$('div[informid="'+devicename+'-'+element+'"]').html(res+'... (gekürzt)');
+		/* else
+		{
+			res = disp;
+			$('div[informid="'+devicename+'-'+element+'"]').html(res);
+		} */
+	
 	}
  
 }
