@@ -1773,15 +1773,24 @@ if (debug == 'on'){ alert('checkcondition') }
 		FW_okDialog(textfinal);
 		return;
 		}
+
+	 
+	//selected = selected.replace(/\./g,'#[pt]'); // !!!
+	//selected = selected.replace(/:/g,'#[dp]');
+	//selected= selected.replace(/~/g,'#[ti]');
+	//event = event.replace(/~/g,'#[ti]');
+	
+	
 	selected = selected.replace(/\|/g,'(DAYS)'); // !!!
-	selected = selected.replace(/\./g,'#[pt]'); // !!!
-	selected = selected.replace(/:/g,'#[dp]');
-	selected= selected.replace(/~/g,'#[ti]');
 	selected = selected.replace(/ /g,'#[sp]');
-	event = event.replace(/~/g,'#[ti]');
 	event = event.replace(/ /g,'#[sp]');
-	cmd ='get '+devicename+' checkcondition '+selected+'|'+event;
-	FW_cmd(FW_root+'?cmd='+encodeURIComponent(cmd)+'&XHR=1', function(resp){FW_okDialog(resp);});
+	  
+	transfer = selected+'|'+event;
+	transfer= str2hex(transfer);
+	
+	cmd ='get '+devicename+' checkcondition '+transfer;
+
+	FW_cmd(FW_root+'?cmd='+cmd+'&XHR=1', function(resp){FW_okDialog(resp);});
 	}
 	
 	
@@ -2064,7 +2073,7 @@ if (debug == 'on'){ alert('checkcondition') }
 	
 	//trigdevcond = trigdevcond.replace(/\\./g,'#[pt]');
 	//trigdevcond = trigdevcond.replace(/:/g,'#[dp]');
-	trigdevcond= trigdevcond.replace(/~/g,'#[ti]');
+	//trigdevcond= trigdevcond.replace(/~/g,'#[ti]');
 	trigdevcond = trigdevcond.replace(/ /g,'#[sp]');
 	
 	
