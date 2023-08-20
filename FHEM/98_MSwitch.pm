@@ -13881,10 +13881,7 @@ sub MSwitch_VersionUpdate($) {
     my $message = "";
     $message .= "MSwitch-Strukturupdate -> Autoupdate fuer MSwitch_Device $Name  \n";
 	
-	
-	
 
-	
 	
 	my $test = ReadingsVal( $Name, '.Device_Affected_Details', 'no_device' );
 
@@ -13964,6 +13961,18 @@ sub MSwitch_VersionUpdate($) {
 		
 	$message.="     -> Loesche .Device_Events fuer $Name \n";
 	readingsSingleUpdate( $hash, ".Device_Events", "no_trigger", 0 );
+	
+	
+	my @found_devices = devspec2array("TYPE=MSwitch:FILTER=.msconfig=1");
+        # ##############
+         if ( @found_devices > 0){
+	
+		fhem("delete TYPE=MSwitch:FILTER=.msconfig=1");
+		$message.="     -> Loesche Configdevice  $found_devices[0]\n";
+		 }
+	
+	
+	
 	
 	MSwitch_LOG( $Name, 0,$message );
     return;
