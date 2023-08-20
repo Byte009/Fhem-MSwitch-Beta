@@ -697,7 +697,7 @@ sub MSwitch_Shutdown_HEX($) {
     my $hex = MSwitch_backup_this( $hash, 'cleanup' );
 	
 	
-	MSwitch_LOG( $Name, 0,"AktDef > $Name   \n 700");
+	#MSwitch_LOG( $Name, 0,"AktDef > $Name   \n 700");
     $hash->{DEF} = 'HEX ' . $hex;
     MSwitch_LOG( $Name, 1, "final Cleanup for $Name" );
     if ( AttrVal( 'global', 'autosave', '1' ) eq "1" ) {
@@ -769,7 +769,6 @@ sub MSwitch_Copy ($) {
     my $errors      = AnalyzeCommandChain( undef, $cs );
     if ( defined($errors) ) {
          MSwitch_LOG( $new_name, 0, "ERROR $cs" );
-		# MSwitch_LOG( $new_name, 0, "ERROR $cs" );
     }
     foreach my $key (@areadings) {
         my $tmp = ReadingsVal( $old_name, $key, 'undef' );
@@ -1107,10 +1106,7 @@ sub MSwitch_LoadHelper($) {
         readingsBulkUpdate( $hash, ".V_Check", $vupdate );
         if ( defined $ctrigg && $ctrigg ne '' ) {	
             readingsBulkUpdate( $hash, ".Device_Events", $ctrigg );
-			
-			
-			
-			MSwitch_LOG( $Name, 0,"AktDef > $Name   \n ctrigg->$ctrigg   \n $cdev->$cdev \n");
+#			MSwitch_LOG( $Name, 0,"AktDef > $Name   \n ctrigg->$ctrigg   \n $cdev->$cdev \n");
             $hash->{DEF} = $cdev;
         }
         else {
@@ -1260,13 +1256,11 @@ sub MSwitch_Define($$) {
     #$hash->{Version_autoupdate}            = $autoupdate;
 	
 	
-		$hash->{MSwitch_Modulversion}         = $version;
-        $hash->{MSwitch_Datenstruktur} = $vupdate;
-        $hash->{MSwitch_Autoupdate}    = $autoupdate;
+	$hash->{MSwitch_Modulversion}         = $version;
+    $hash->{MSwitch_Datenstruktur} = $vupdate;
+    $hash->{MSwitch_Autoupdate}    = $autoupdate;
         #$hash->{MODEL}                 = $startmode . " " . $version;
-		
-		
-	
+
     $hash->{MODEL}                         = $startmode . " " . $version;
     #$hash->{Support}                       = $support;
     $hash->{MSwitch_Init}                          = 'fhem.save';
@@ -1612,16 +1606,23 @@ sub MSwitch_Get($$@) {
     }
 ####################
     if ( $opt eq 'checkcondition' ) {
+
+		$args[0]=MSwitch_Asc($args[0]);
+
         my ( $condstring, $eventstring ) = split( /\|/, $args[0] );
-        $condstring =~ s/#\[dp\]/:/g;
-        $condstring =~ s/#\[pt\]/./g;
-        $condstring =~ s/#\[ti\]/~/g;
-        $condstring =~ s/#\[sp\]/ /g;
-        $eventstring =~ s/#\[dp\]/:/g;
-        $eventstring =~ s/#\[pt\]/./g;
-        $eventstring =~ s/#\[ti\]/~/g;
-        $eventstring =~ s/#\[sp\]/ /g;
-        $condstring =~ s/\(DAYS\)/|/g;
+		
+		
+# $condstring =~ s/#\[dp\]/:/g;
+# $condstring =~ s/#\[pt\]/./g;
+# $condstring =~ s/#\[ti\]/~/g;
+# $eventstring =~ s/#\[dp\]/:/g;
+# $eventstring =~ s/#\[pt\]/./g;
+# $eventstring =~ s/#\[ti\]/~/g;
+
+
+    $eventstring =~ s/#\[sp\]/ /g;
+	$condstring =~ s/#\[sp\]/ /g;
+    $condstring =~ s/\(DAYS\)/|/g;
 
         my @eventteile = split( /:/, $eventstring );
 
@@ -4732,7 +4733,7 @@ sub MSwitch_Attr(@) {
         $hash->{MODEL} = 'Dummy' . " " . $version;
 		
 		
-		MSwitch_LOG( $name, 0,"AktDef > $name  4716");
+		#MSwitch_LOG( $name, 0,"AktDef > $name  4716");
         $hash->{DEF}   = $name;
 
         #$hash->{NOTIFYDEV} = 'no_trigger';
@@ -5318,9 +5319,9 @@ sub MSwitch_Notify($$) {
     my $triggeroff       = ReadingsVal( $ownName, '.Trigger_off',       '' );
     my $triggercmdon     = ReadingsVal( $ownName, '.Trigger_cmd_on',    '' );
     my $triggercmdoff    = ReadingsVal( $ownName, '.Trigger_cmd_off',   '' );
-    my $triggercondition = ReadingsVal( $ownName, '.Trigger_condition', '' );
+    #my $triggercondition = ReadingsVal( $ownName, '.Trigger_condition', '' );
 	
-	$triggercondition = MSwitch_Asc($triggercondition);
+	my $triggercondition = MSwitch_Load_Tcond($own_hash);
 	
 	 
 
@@ -9223,17 +9224,35 @@ MS-NAMESATZ
     }
 
     # ende kommandofelder
+	
+	
+	
+	
 ####################
-    my $triggercondition = ReadingsVal( $Name, '.Trigger_condition', '' );
-		$triggercondition = MSwitch_Asc($triggercondition);
-	
-	
-    $triggercondition =~ s/~/ /g;
 
-    #$triggercondition =~ s/#\[dp\]/:/g;
-    #$triggercondition =~ s/#\[pt\]/./g;
-    $triggercondition =~ s/#\[ti\]/~/g;
-    $triggercondition =~ s/#\[sp\]/ /g;
+
+
+
+
+    #my $triggercondition = ReadingsVal( $Name, '.Trigger_condition', '' );
+	
+	
+	
+	my $triggercondition = MSwitch_Load_Tcond($hash);
+	
+	
+	# optimieren für html darstellung
+	
+	$triggercondition =~ s/#\[sp\]/ /g;
+	$triggercondition =~ s/\(DAYS\)/|/g;
+    $triggercondition =~ s/~/&#126/g;
+	$triggercondition =~ s/\\/&#92;/g;
+	$triggercondition =~ s/'/&#39;/g;
+	$triggercondition =~ s/"/&#34;/g;
+	$triggercondition =~ s/\//&#47/g;
+    $triggercondition =~ s/&#160/&#38;nbsp;/g;
+	
+
 
     my $timeon = ReadingsVal( $Name, '.Trigger_time_1', '' );
     $timeon =~ s/#\[dp\]/:/g;
@@ -10930,7 +10949,7 @@ my $hash         = $modules{MSwitch}{defptr}{$Name};
       $_ =~ s/#\[nl\]/\n/g;
  #       $_ =~ s/#\[se\]/;/g;
  #       $_ =~ s/#\[dp\]/:/g;
- #       $_ =~ s/\(DAYS\)/|/g;
+        $_ =~ s/\(DAYS\)/|/g;
 #        $_ =~ s/#\[ko\]/,/g;     #neu
  #       $_ =~ s/#\[bs\]/\\/g;    #neu
 
@@ -11891,10 +11910,18 @@ sub MSwitch_Exec_Notif($$$$$) {
 sub MSwitch_checkcondition($$$) {
 
     my ( $condition, $name, $event ) = @_;
+	
+	
+	
+	
+	
+	
     my $conditionorg = $condition;
     my $hash         = $modules{MSwitch}{defptr}{$name};
     my $futurelevel  = AttrVal( $name, 'MSwitch_Futurelevel', '0' );
     my $answer;
+
+
 
     # abbruch bei leerer condition
     if ( !defined($condition) ) { return 'true'; }
@@ -13200,12 +13227,17 @@ sub MSwitch_Execute_Timer($) {
     $hash->{helper}{evtparts}{evtpart1} = $Name;
     $hash->{helper}{evtparts}{evtpart2} = "execute_timer_P" . $param;
     $hash->{helper}{evtparts}{evtpart3} = $extime;
-    if ( AttrVal( $Name, 'MSwitch_Condition_Time', "0" ) eq '1' ) {
-        my $triggercondition = ReadingsVal( $Name, '.Trigger_condition', '' );
-			$triggercondition = MSwitch_Asc($triggercondition);
+    if ( AttrVal( $Name, 'MSwitch_Condition_Time', "0" ) eq '1' )
+	{
+        #my $triggercondition = ReadingsVal( $Name, '.Trigger_condition', '' );
+		my $triggercondition = MSwitch_Load_Tcond($hash);
+		
+		
+		
+			#$triggercondition = MSwitch_Asc($triggercondition);
        # $triggercondition =~ s/#\[dp\]/:/g;
        # $triggercondition =~ s/#\[pt\]/./g;
-        $triggercondition =~ s/#\[ti\]/~/g;
+       # $triggercondition =~ s/#\[ti\]/~/g;
        # $triggercondition =~ s/#\[sp\]/ /g;
         if ( $triggercondition ne '' ) {
 
@@ -13841,6 +13873,12 @@ sub MSwitch_VersionUpdate($) {
     my $Name    = $hash->{NAME};
     my $message = "";
     $message .= "MSwitch-Strukturupdate -> Autoupdate fuer MSwitch_Device $Name  \n";
+	
+	
+	
+
+	
+	
 	my $test = ReadingsVal( $Name, '.Device_Affected_Details', 'no_device' );
 
 	if ($test ne "no_device"){
@@ -13881,11 +13919,32 @@ sub MSwitch_VersionUpdate($) {
 }
 
 
-    my $triggercondition = ReadingsVal( $Name, '.Trigger_condition', '' );
+    # my $triggercondition = ReadingsVal( $Name, '.Trigger_condition', '' );
+	# $message.="     -> Anpassung der .Trigger_condition fuer $Name \n";
+    # $triggercondition =~ s/#\[dp\]/:/g;
+    # $triggercondition =~ s/#\[pt\]/./g;
+	# readingsSingleUpdate( $hash, ".Trigger_condition", MSwitch_Hex($triggercondition), 1 );
+
+ 
+
+#########################################
+
+	my $test2 = ReadingsVal( $Name, '.Trigger_condition', 'no_device' );
+	if ($test2 ne "no_device"){
 	$message.="     -> Anpassung der .Trigger_condition fuer $Name \n";
-    $triggercondition =~ s/#\[dp\]/:/g;
-    $triggercondition =~ s/#\[pt\]/./g;
-	readingsSingleUpdate( $hash, ".Trigger_condition", MSwitch_Hex($triggercondition), 1 );
+	   
+			$test2 =~ s/#\[sp\]/ /g;				
+			$test2 =~ s/#\[dp\]/:/g;
+            $test2 =~ s/#\[pt\]/./g;
+            $test2 =~ s/#\[ti\]/~/g;
+            $test2 =~ s/#\[sp\]/ /g;
+			$test2 =~ s/#\[pt\]/./g;				
+	readingsSingleUpdate( $hash, ".Trigger_condition", MSwitch_Hex($test2), 1 ); 
+	
+}
+
+
+
 
 	$message.="     -> Loesche DEF fuer $Name \n";
 	delete $hash->{DEF};
@@ -14425,9 +14484,9 @@ sub MSwitch_uploadlocal(@)
 	my $filename = $args[1];
 	
 	
-	MSwitch_LOG( $Name, 0, "string  ->$string " );
+	##MSwitch_LOG( $Name, 0, "string  ->$string " );
 	MSwitch_LOG( $Name, 0, "filename  ->$filename " );
-	MSwitch_LOG( $Name, 0, "-------------------------------" );
+	#MSwitch_LOG( $Name, 0, "-------------------------------" );
 
     if ( $string eq "makefile" ) {
         FW_directNotify( "FILTER=$Name", "#FHEMWEB:WEB", "information(' ')",
@@ -14814,7 +14873,13 @@ sub MSwitch_Getsupport($) {
     $out .= "Trigger condition: ";
     $tmp = ReadingsVal( $Name, '.Trigger_condition', 'undef' );
 	
-	$tmp = MSwitch_Asc($tmp) if $tmp ne "undef";
+	
+	$tmp = MSwitch_Load_Tcond($hash);
+	
+	
+	
+	
+	
 	$tmp = "keine Triggercondition definiert " if $tmp eq "undef";
     $out .= "$tmp\n";
 	
@@ -14882,14 +14947,14 @@ sub MSwitch_Getsupport($) {
 	
 	# nur noch für triggercondition
 	
-	$out =~ s/#\[dp\]/:/g;
-	$out =~ s/#\[pt\]/./g;
-	$out =~ s/#\[ti\]/~/g;
-	$out =~ s/#\[se\]/;/g;
-	$out =~ s/#\[dp\]/:/g;
+	#$out =~ s/#\[dp\]/:/g;
+	#$out =~ s/#\[pt\]/./g;
+	#$out =~ s/#\[ti\]/~/g;
+	#$out =~ s/#\[se\]/;/g;
+	#$out =~ s/#\[dp\]/:/g;
 	$out =~ s/\(DAYS\)/|/g;
-	$out =~ s/#\[ko\]/,/g;     #neu
-	$out =~ s/#\[bs\]/\\/g;    #neu
+	#$out =~ s/#\[ko\]/,/g;     #neu
+	#$out =~ s/#\[bs\]/\\/g;    #neu
 	   
 	# entfernt speicherdaten
 	   
@@ -16840,8 +16905,12 @@ sub MSwitch_assoziation($){
 	my ( $hash ) = @_;
 	my $Name     			= $hash->{NAME};
 	my $trigger 			= ReadingsVal( $Name, '.Trigger_device', 'undef' );
-	my $triggercond 		= ReadingsVal( $Name, '.Trigger_condition', 'undef' );
-	$triggercond = MSwitch_Asc($triggercond);
+	#my $triggercond 		= ReadingsVal( $Name, '.Trigger_condition', 'undef' );
+	
+	my $triggercond = MSwitch_Load_Tcond($hash);
+
+	#$triggercond = MSwitch_Asc($triggercond);
+	
 	my $triggerwhitelist 	= ReadingsVal( $Name, '.Trigger_Whitelist', 'undef' );
 	my @affecteddevices =  MSwitch_Load_Details($hash);
 	my $conditions;
@@ -17081,7 +17150,6 @@ return;
 }
 
 
-
 sub MSwitch_Load_Details($){
 my ($hash)=@_;
 my $Name     			= $hash->{NAME};
@@ -17103,5 +17171,35 @@ else
 	}
 return;
 }
+
+
+
+#my $triggercondition = MSwitch_Load_Tcond($hash);
+
+
+sub MSwitch_Load_Tcond($){
+my ($hash)=@_;
+my $Name     			= $hash->{NAME};
+my $test = ReadingsVal( $Name, '.Trigger_condition', 'no_device' );
+
+	my $data = 	MSwitch_Asc($test);
+	
+	#$tmp = ReadingsVal( $Name, '.Trigger_condition', 'undef' );
+	
+	# $data =~ s/\\/&#92;/g;
+	# $data =~ s/'/&#39;/g;
+	# $data =~ s/"/&#34;/g;
+	# $data =~ s/\//&#47/g;
+    # $data =~ s/&#160/&#38;nbsp;/g;
+	
+	
+#	$out =~ s/[^\\*\^\$\|&+-?!{}\s%A-Za-z0-9#\.\-_\t\n<>'"\/;=();:öÖäÄüÜ,\]\[]/XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX/g;
+	
+
+return $data;
+}
+
+
+
 
 1;
