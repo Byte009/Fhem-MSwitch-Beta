@@ -13937,12 +13937,15 @@ sub MSwitch_VersionUpdate($) {
 	if ($test2 ne "no_device"){
 	$message.="     -> Anpassung der .Trigger_condition fuer $Name \n";
 	   
-			#$test2 =~ s/#\[sp\]/ /g;				
-			#$test2 =~ s/#\[dp\]/:/g;
-            #$test2 =~ s/#\[pt\]/./g;
-            #$test2 =~ s/#\[ti\]/~/g;
+	   
+			$test2 =~ s/#\[sp\]/ /g;				
+			$test2 =~ s/#\[dp\]/:/g; 
+            $test2 =~ s/#\[pt\]/./g;
+            $test2 =~ s/#\[ti\]/~/g;
             #$test2 =~ s/#\[sp\]/ /g;
-			#$test2 =~ s/#\[pt\]/./g;				
+			$test2 =~ s/#\[pt\]/./g;
+
+			
 	readingsSingleUpdate( $hash, ".Trigger_condition", MSwitch_Hex($test2), 1 ); 
 	
 }
