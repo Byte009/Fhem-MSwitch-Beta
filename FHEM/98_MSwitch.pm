@@ -11238,7 +11238,7 @@ sub MSwitch_Exec_Notif($$$$$) {
 						if ( $devicedetails{ $device . '_repeatcount' } =~ m/[a-zA-Z]/s )
 							{
 								
-								MSwitch_LOG( $name, 0,"$name -> falsche Repeatcondition ".$devicedetails{ $device . '_repeatcount' } );
+								MSwitch_LOG( $name, 0,"Device $name -> Fehler in der Repeatangabe ".$devicedetails{ $device . '_repeatcount' } );
 								
 								$devicedetails{ $device . '_repeatcount' } = 0;
 							}
@@ -12977,7 +12977,21 @@ sub MSwitch_Execute_Timer($) {
 
     MSwitch_LOG( $Name, 6,"---- ausführung Timer $timecond, $param L:" . __LINE__ );
 
-    my @arg = split( /-/, $hash->{helper}{timer}{ $timecond . "-" . $param } );
+my @arg ;
+
+		if (!defined $hash->{helper}{timer}{ $timecond . "-" . $param })
+		{
+			
+		MSwitch_LOG( $Name, 0,"$Name -> evtl error in exec timer" . __LINE__ );	
+		}
+		else
+		{
+			
+			@arg = split( /-/, $hash->{helper}{timer}{ $timecond . "-" . $param } );
+		}
+
+
+   
 
     MSwitch_LOG( $Name, 6,"-> ausführung Timer arg $arg[2] L:" . __LINE__ ) if (defined $arg[2]);
     $hash->{helper}{timerarag} = $arg[2];
@@ -13178,16 +13192,20 @@ sub MSwitch_Execute_Timer($) {
 		my @aktset   = split( /-/, $nexttimer[0] );
 		my $select = $aktset[0]."-".$aktset[1];
 
-
+my @arg;
 
 
 		if (!defined $hash->{helper}{timer}{ $select } )
 		{
 			
-		MSwitch_LOG( $Name, 6,"$Name -> evtl error in exec timer" . __LINE__ );	
+		MSwitch_LOG( $Name, 0,"$Name -> evtl error in exec timer" . __LINE__ );	
+		}
+		else{
+			
+			@arg = split( /-/, $hash->{helper}{timer}{ $select } );
 		}
 
-			my @arg = split( /-/, $hash->{helper}{timer}{ $select } );
+			
 			
 			
 			if (!defined $arg[2])
