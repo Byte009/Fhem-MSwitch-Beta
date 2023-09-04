@@ -11221,7 +11221,7 @@ sub MSwitch_Exec_Notif($$$$$) {
                         $devicedetails{ $device . '_repeatcount' } = $setmagic;
                     }
 
-                    $x = 0;
+                     $x = 0;
                     while ( $devicedetails{ $device . '_repeattime' } =~ m/\[(.*)\:(.*)\]/ )
                     {
                         $x++;               # exit
@@ -12977,21 +12977,17 @@ sub MSwitch_Execute_Timer($) {
 
     MSwitch_LOG( $Name, 6,"---- ausführung Timer $timecond, $param L:" . __LINE__ );
 
-my @arg ;
+	my @arg ;
 
 		if (!defined $hash->{helper}{timer}{ $timecond . "-" . $param })
 		{
 			
-		MSwitch_LOG( $Name, 0,"$Name -> evtl error in exec timer" . __LINE__ );	
+		#MSwitch_LOG( $Name, 0,"$Name -> evtl error in exec timer" . __LINE__ );	
 		}
 		else
 		{
-			
 			@arg = split( /-/, $hash->{helper}{timer}{ $timecond . "-" . $param } );
 		}
-
-
-   
 
     MSwitch_LOG( $Name, 6,"-> ausführung Timer arg $arg[2] L:" . __LINE__ ) if (defined $arg[2]);
     $hash->{helper}{timerarag} = $arg[2];
