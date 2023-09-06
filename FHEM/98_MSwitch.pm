@@ -14363,7 +14363,7 @@ sub MSwitch_fullrestore(@) {
 
 
 #MSwitch_LOG( "test", 0,"ALL MSHEX ".__LINE__ );
-$Zeilen=MSwitch_Hex($Zeilen);
+$Zeilen=MSwitch_Asc($Zeilen);
 
 #my @output = ();
 #	while ($Zeilen =~ /(.{2})/g) {
@@ -16876,7 +16876,7 @@ sub MSwitch_Set_extractbackup($@){
 	#MSwitch_LOG( "test", 0,"ALL MSHEX ".__LINE__ );
 
 	
-	$Zeilen=MSwitch_Hex($Zeilen);
+	$Zeilen=MSwitch_Asc($Zeilen);
 	
 	#my @output = ();
 	#while ($Zeilen =~ /(.{2})/g) {
