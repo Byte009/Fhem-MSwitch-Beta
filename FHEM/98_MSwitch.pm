@@ -2447,6 +2447,7 @@ sub MSwitch_Set_Undo($) {
                 $Zeilen1 =~ s/#\[nl\]/\n/g;
 				if ($reading eq ".Device_Affected_Details_new" || $reading eq ".sysconf" || $reading eq ".Trigger_condition")
 				{
+					#MSwitch_LOG( "test", 0,"ALL MSHEX ".__LINE__ );
 					$Zeilen1=MSwitch_Hex($Zeilen1);
 				}
                 my $cs = "setreading $aktname $reading $Zeilen1";
@@ -2611,6 +2612,7 @@ sub MSwitch_Set_SetTrigger($@) {
     my ( $hash, $name, $cmd, $trig ) = @_;
 	my @args = split (/ /,MSwitch_Asc($trig));
 	if ( $args[6] eq 'NoCondition' ) { $args[6] = ""; }
+	#MSwitch_LOG( "test", 0,"ALL MSHEX ".__LINE__ );
 	$args[6]=MSwitch_Hex($args[6]);
 
     MSwitch_Make_Undo($hash);
@@ -11711,7 +11713,7 @@ next;
                         }
                         else 
 						{
-						MSwitch_LOG( $name, 6,"\n! CommandAnswer $name $device $errors: $@ " . __LINE__ ."\n");	
+						MSwitch_LOG( $name, 6,"\n! CommandAnswer $name $device $errors " . __LINE__ ."\n");	
 						if ($errors eq "Executing the update the background.")
 							{
 							asyncOutput( $hash->{CL},"<html><center><br>Update laeuft im Hintergrund<br>Modul wird in 10 Sekunden neu geladen,Fhemneustart wird empfohlen.</html>");
@@ -13732,6 +13734,7 @@ sub MSwitch_VersionUpdate($) {
 		
 	delete $data{MSwitch}{$Name}{Device_Affected_Details};
 	delete $data{MSwitch}{$Name}{TCond};
+	#MSwitch_LOG( "test", 0,"ALL MSHEX ".__LINE__ );
 	readingsSingleUpdate( $hash, ".Device_Affected_Details_new", MSwitch_Hex($test), 1 );	
 	fhem("deletereading $Name .Device_Affected_Details");
 	}
@@ -13751,7 +13754,7 @@ sub MSwitch_VersionUpdate($) {
         $test1 =~ s/#\[tab\]/    /g;
         $test1 =~ s/#\[ko\]/,/g;
         $test1 =~ s/\[tr\]/#[tr]/g;
-
+#MSwitch_LOG( "test", 0,"ALL MSHEX ".__LINE__ );
 	readingsSingleUpdate( $hash, ".sysconf", MSwitch_Hex($test1), 1 );
 	fhem("deletereading $Name .Device_Affected_Details");
 }
@@ -13766,6 +13769,7 @@ sub MSwitch_VersionUpdate($) {
     $test2 =~ s/#\[pt\]/./g;
     $test2 =~ s/#\[ti\]/~/g;
 	$test2 =~ s/#\[pt\]/./g;	
+	#MSwitch_LOG( "test", 0,"ALL MSHEX ".__LINE__ );
 	readingsSingleUpdate( $hash, ".Trigger_condition", MSwitch_Hex($test2), 1 ); 
 	
 	}
@@ -13882,6 +13886,7 @@ sub MSwitch_restore_this($$) {
 				
 				if ($reading eq ".Device_Affected_Details_new" || $reading eq ".sysconf" || $reading eq ".Trigger_condition")
 				{
+					#MSwitch_LOG( "test", 0,"ALL MSHEX ".__LINE__ );
 					$Zeilen1=MSwitch_Hex($Zeilen1);
 				}
 
@@ -13981,7 +13986,7 @@ sub MSwitch_backup_this($$) {
             $inhalt =~ s/\n/#[nl]/g;
             $BD .= $inhalt . "\n";
         }
-
+#MSwitch_LOG( "test", 0,"ALL MSHEX ".__LINE__ );
 		$BD = MSwitch_Hex($BD);	
     }
 
@@ -14193,7 +14198,7 @@ sub MSwitch_FullBackup(@) {
             );
         }
     }
-
+#MSwitch_LOG( "test", 0,"ALL MSHEX ".__LINE__ );
 $BD = MSwitch_Hex($BD);
 
 my $pfad =  AttrVal( 'global', 'backupdir', $restoredirn ) ;
@@ -14211,10 +14216,10 @@ if(-d $pfad) {
         open( BACKUPDATEI, ">" . $pfad . "MSwitch_Save.txt" );
 		print BACKUPDATEI "$BD";
         close(BACKUPDATEI);
-        MSwitch_LOG( $Name, 1,
-                "$Name delayed Shutdown: "
-              . $pfad
-              . "MSwitch_Save.txt wurde geschrieben" );
+      
+	  
+	  
+	  
         return;
     }
     else {
@@ -14355,7 +14360,33 @@ sub MSwitch_fullrestore(@) {
     close(BACKUPDATEI);
 }
 
-    ($Zeilen) =~ s/([a-fA-F0-9]{2})?/chr(hex $1)/eg;
+
+
+#MSwitch_LOG( "test", 0,"ALL MSHEX ".__LINE__ );
+$Zeilen=MSwitch_Hex($Zeilen);
+
+#my @output = ();
+#	while ($Zeilen =~ /(.{2})/g) {
+	#  push @output, $1;
+	#}
+	#my $newstring;
+	#foreach (@output) {
+	#	$newstring.=chr(hex $_)	
+	#}
+	#$Zeilen = $newstring;
+    #($Zeilen) =~ s/([a-fA-F0-9]{2})?/chr(hex $1)/eg;
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
     $data{MSwitch}{$Name}{backupdatei} = $Zeilen;
     my @found = split( /\n/, $Zeilen );
 
@@ -14559,6 +14590,8 @@ sub MSwitch_fullrestore1($) {
 				$reading eq ".Trigger_condition"
 				)
 				{
+					
+					#MSwitch_LOG( "test", 0,"ALL MSHEX ".__LINE__ );
 					$Zeilen1=MSwitch_Hex($Zeilen1);
 				}
 
@@ -16838,7 +16871,26 @@ sub MSwitch_Set_extractbackup($@){
         $Zeilen = $Zeilen . $_;
     }
     close(BACKUPDATEI);
-    ($Zeilen) =~ s/([a-fA-F0-9]{2})?/chr(hex $1)/eg;
+	
+	
+	#MSwitch_LOG( "test", 0,"ALL MSHEX ".__LINE__ );
+
+	
+	$Zeilen=MSwitch_Hex($Zeilen);
+	
+	#my @output = ();
+	#while ($Zeilen =~ /(.{2})/g) {
+	#  push @output, $1;
+	#}
+	#my $newstring;
+	#foreach (@output) {
+	#	$newstring.=chr(hex $_)	
+	#}
+	#$Zeilen = $newstring;
+    #($Zeilen) =~ s/([a-fA-F0-9]{2})?/chr(hex $1)/eg;
+	
+	
+	
 	
 	my @found = split( /\n/, $Zeilen );
 	my $names;
@@ -16900,19 +16952,60 @@ sub MSwitch_Hex($){
 	my ($savedetaills) = @_;
 	($savedetaills) =~ s/(.|\n)/sprintf("%02lx", ord $1)/eg;
 	return $savedetaills;
+	
+	
+	
+	
+	
+	# MSwitch_LOG( "test", 0,"$savedetaills\n\n\n\n\n" );
+	
+	# my @output = ();
+	# while ($savedetaills =~ /(.{2})/g) {
+	  # push @output, $1;
+	# }
+	# my $newstring;
+	
+	
+	
+	 
+	
+	# foreach (@output) {
+		# next if $_ eq " ";
+		# next if length($_) != 2;
+		
+		
+		 
+		
+		
+		
+		# $newstring.=chr(hex $_)	
+	# }
+	# $savedetaills = $newstring;
+	
+	
+	# return $savedetaills;
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
  
 ######################################################
 sub MSwitch_Asc($){
 	my ($org)=@_;
 	
-	if ( $org =~ m/[G-Zg-z]/ ) {
-		return $org; 
-	}
+	 if ( $org =~ m/[G-Zg-z]/ ) {
+		 return $org; 
+	 }
 	
 	my (@test) = $org =~ m/(\w{2})/g;
     my $savedetails ="";
-	my $Name = "test";
+	#my $Name = "test";
     foreach (@test) {
         $savedetails  .=  chr( hex $_ );
     }
