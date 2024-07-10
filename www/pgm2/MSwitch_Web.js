@@ -2524,10 +2524,16 @@ function closeall()
 {
  $.each( $("[name$='-BUTTON']"), function (key) {
   var feld = this.id;
-  var tfeld = feld.replace(/-BUTTON/g, "");
+  feldx = feld.replace(/\./,'\\.');
+  //alert(feld);
+  var tfeld = feldx.replace(/-BUTTON/g, "");
   var field1=tfeld+"-PLAIN";
   var css =$("[name="+field1+"]").css('display');
+  
   if (css == 'none'){
+	  
+	  tfeld = tfeld.replace(/\\\./,'.');
+	 // alert(tfeld);
   hideedit(tfeld);
   }
   return;
